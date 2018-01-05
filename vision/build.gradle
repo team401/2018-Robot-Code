@@ -1,0 +1,30 @@
+apply plugin: 'jaci.gradle.EmbeddedTools'
+
+def JETSON_IP = "10.4.1.3"
+def JETSON_USER = "ubuntu"
+def JETSON_PASS = "ubuntu"
+
+deploy {
+    targets {
+        target("jetson") {
+            addresses << JETSON_IP
+            user = JETSON_USER
+            password = JETSON_PASS
+            directory = "/home/ubuntu/vision2018"
+
+        }
+    }
+    artifacts {
+        //TODO get predeploy and postdeploy working
+        javaArtifact("vision2018") {
+            targets << "jetson"
+        }
+    }
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest {
+        attributes 'Main-Class': "org.team401.vision2018.VisionKt"
+    }
+}
