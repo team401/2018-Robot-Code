@@ -11,12 +11,12 @@ deploy {
             user = JETSON_USER
             password = JETSON_PASS
             directory = "/home/ubuntu/vision2018"
-
         }
     }
     artifacts {
-        //TODO get predeploy and postdeploy working
         javaArtifact("vision2018") {
+            predeploy << { execute '/home/ubuntu/vision2018/stop.sh'}
+            postdeploy << { if (project.hasProperty('deployDebug') && deployDebug) { execute '/home/ubuntu/vision2018/debug.sh'} else { execute '/home/ubuntu/vision2018/start.sh'} }
             targets << "jetson"
         }
     }
