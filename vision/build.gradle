@@ -1,23 +1,29 @@
 apply plugin: 'jaci.gradle.EmbeddedTools'
 
-def JETSON_IP = "10.4.1.3"
-def JETSON_USER = "ubuntu"
-def JETSON_PASS = "ubuntu"
+def PI_IP = "10.42.0.187"
+def PI_USER = "pi"
+def PI_PASS = "raspberry"
+
+dependencies {
+    compile group: "org.team401", name: "snakeeyes", version: "1.0"
+    compile fileTree(dir: 'libs', include: '**/*.jar')
+}
 
 deploy {
     targets {
-        target("jetson") {
-            addresses << JETSON_IP
-            user = JETSON_USER
-            password = JETSON_PASS
-            directory = "/home/ubuntu/vision2018"
+        target("pi") {
+            addresses << PI_IP
+            user = PI_USER
+            password = PI_PASS
+            directory = "/home/pi/vision2018"
         }
     }
     artifacts {
         javaArtifact("vision2018") {
-            predeploy << { execute '/home/ubuntu/vision2018/stop.sh'}
-            postdeploy << { if (project.hasProperty('deployDebug') && deployDebug) { execute '/home/ubuntu/vision2018/debug.sh'} else { execute '/home/ubuntu/vision2018/start.sh'} }
-            targets << "jetson"
+            predeploy << { execute '/home/pi/vision2018/stop.sh'}
+            postdeploy << { if (project.hasProperty('deployDebug') && deployDebug) { execute '/home/pi/vision2018/debug.sh'} else { execute '/home/pi/vision2018/start.sh'} }
+            targets << "pi"
+            jar = "jar"
         }
     }
 }
