@@ -26,14 +26,14 @@ fun main(args: Array<String>) {
     val topView = Camera()
     val frontView = Camera()
 
-    topView.open("TOP_PATH")        //TODO add correct paths (/dev/v4l/by-id/...)
-    frontView.open("FRONT_PATH")
+    topView.open("/dev/v4l/by-path/platform-70090000.xusb-usb-0:1:1.0-video-index0")
+    frontView.open("/dev/v4l/by-path/platform-70090000.xusb-usb-0:3.1:1.0-video-index0")
 
     Cameras.add(topView)
     Cameras.add(frontView)
     Cameras.start()
 
-    val view = PipView(CameraView(topView), CameraView(frontView), PipView.Position.TOP_CENTER)
+    val view = PipView(CameraView(topView), CameraView(frontView), PipView.Position.BOTTOM_CENTER, .5)
     val server = MjpegServer(1180, view)
     server.start()
 }
