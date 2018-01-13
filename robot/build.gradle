@@ -1,6 +1,6 @@
 apply plugin: "jaci.openrio.gradle.GradleRIO"
 
-def SNAKESKIN_VERSION = "1.2"
+def SNAKESKIN_VERSION = "1.2.1"
 def SNAKESKIN_MAIN = "org.snakeskin.Robot"
 
 def TEAM_NUMBER = 401
@@ -15,17 +15,21 @@ deploy {
         artifact("robot2018", jaci.openrio.gradle.frc.FRCJavaArtifact) {
             targets << "rio"
             debug = project.hasProperty("deployDebug") && deployDebug
+            jar = "jar"
         }
     }
 }
 
 dependencies {
     compile wpilib()
-    compile ctre()
+    //compile ctre()
 
     compile group: "org.snakeskin", name: "SnakeSkin-Core", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-FRC", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-CTRE", version: SNAKESKIN_VERSION
+
+    compile   fileTree(dir: 'libs', include: '**/*.jar')
+    nativeLib fileTree(dir: 'libs', include: '**/*.so')
 }
 
 jar {
