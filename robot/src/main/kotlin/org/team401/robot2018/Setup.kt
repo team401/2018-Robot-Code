@@ -1,7 +1,9 @@
 package org.team401.robot2018
 
+import org.snakeskin.auto.TempAutoManager
 import org.snakeskin.dsl.*
 import org.snakeskin.registry.*
+import org.team401.robot2018.subsystems.DrivetrainSubsystem
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -17,6 +19,21 @@ import org.snakeskin.registry.*
  */
 
 @Setup fun setup() {
-    Subsystems.add() //TODO Add subsystems
-    Controllers.add() //TODO Add controllers
+    Subsystems.add(DrivetrainSubsystem)
+    Controllers.add()
+
+
+    TempAutoManager.auto = autoLoop {
+        entry {
+
+        }
+
+        action(10) {
+
+        }
+
+        exit {
+
+        }
+    }
 }
