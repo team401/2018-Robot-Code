@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
+import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
@@ -65,6 +66,10 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
                 Drivetrain.stop()
             }
         }
+    }
+
+    on (Events.TELEOP_ENABLED) {
+        driveMachine.setState(DriveStates.OPEN_LOOP)
     }
 }
 
