@@ -4,20 +4,26 @@ def JETSON_IP = "10.4.1.3"
 def JETSON_USER = "ubuntu"
 def JETSON_PASS = "ubuntu"
 
+dependencies {
+    compile group: "org.team401", name: "snakeeyes", version: "1.0"
+    compile fileTree(dir: 'libs', include: '**/*.jar')
+}
+
 deploy {
     targets {
         target("jetson") {
             addresses << JETSON_IP
             user = JETSON_USER
             password = JETSON_PASS
-            directory = "/home/ubuntu/vision2018"
+            directory = "/home/$JETSON_USER/vision2018"
         }
     }
     artifacts {
         javaArtifact("vision2018") {
-            predeploy << { execute '/home/ubuntu/vision2018/stop.sh'}
-            postdeploy << { if (project.hasProperty('deployDebug') && deployDebug) { execute '/home/ubuntu/vision2018/debug.sh'} else { execute '/home/ubuntu/vision2018/start.sh'} }
+            predeploy << { execute "/home/$JETSON_USER/vision2018/stop.sh"}
+            postdeploy << { if (project.hasProperty('deployDebug') && deployDebug) { execute "/home/$JETSON_USER/vision2018/debug.sh"} else { execute "/home/$JETSON_USER/vision2018/start.sh"} }
             targets << "jetson"
+            jar = "jar"
         }
     }
 }
