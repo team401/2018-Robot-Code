@@ -1,6 +1,7 @@
 package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.Solenoid
@@ -49,15 +50,24 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 
     setup {
+        left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
+        right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
+
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
         Drivetrain.setCurrentLimit(Constants.DrivetrainParameters.CURRENT_LIMIT)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
+
+        println("----------SETUP DONE----------")
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         state(DriveStates.OPEN_LOOP) {
+            entry {
+                Drivetrain.zero()
+            }
             action {
                 Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })
+                println(left.master.getSelectedSensorVelocity(0))
             }
         }
 

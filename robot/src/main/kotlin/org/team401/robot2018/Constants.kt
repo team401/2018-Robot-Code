@@ -32,13 +32,13 @@ object Constants {
         const val WHEEL_RADIUS = 2.0
         const val WHEELBASE = 0.0
 
-        const val INVERT_LEFT = false
+        const val INVERT_LEFT = true
         const val INVERT_RIGHT = false
         const val INVERT_SHIFTER = false
 
         const val CURRENT_LIMIT = 30
 
-        const val CLOSED_LOOP_RAMP = .25
+        const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
     }
 }
