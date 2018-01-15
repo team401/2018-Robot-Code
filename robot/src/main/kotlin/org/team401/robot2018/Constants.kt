@@ -41,4 +41,20 @@ object Constants {
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
     }
+
+    object MotionProfileParameters {
+        const val TICKS_PER_REV = 4096.0
+
+        const val SLOT_IDX = 0
+        const val PID_IDX = 0
+
+        const val TIMEOUT = 10
+
+        const val BASE_PERIOD = 0
+
+        const val NEUTRAL_DEADBAND = 0.01
+
+        const val MIN_POINTS = 5
+
+    }
 }
