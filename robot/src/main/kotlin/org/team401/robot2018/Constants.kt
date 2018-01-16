@@ -57,4 +57,13 @@ object Constants {
         const val MIN_POINTS = 5
 
     }
+
+    object ElevatorParameters {
+        const val HOMING_RATE = -.1
+    }
+
+    object IntakeParameters {
+        const val INTAKE_RATE = .5
+        const val REVERSE_RATE = -.5
+    }
 }
