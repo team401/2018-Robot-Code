@@ -22,14 +22,11 @@ deploy {
 
 dependencies {
     compile wpilib()
-    //compile ctre()
+    compile ctre()
 
     compile group: "org.snakeskin", name: "SnakeSkin-Core", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-FRC", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-CTRE", version: SNAKESKIN_VERSION
-
-    compile   fileTree(dir: 'libs', include: '**/*.jar')
-    nativeLib fileTree(dir: 'libs', include: '**/*.so')
 }
 
 jar {

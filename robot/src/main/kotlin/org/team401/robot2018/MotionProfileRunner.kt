@@ -3,6 +3,7 @@ package org.team401.robot2018
 import com.ctre.phoenix.motion.MotionProfileStatus
 import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motion.TrajectoryPoint
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import org.snakeskin.factory.ExecutorFactory
 import java.io.File
@@ -22,21 +23,24 @@ import java.util.concurrent.TimeUnit
  * @version 1/13/18
  */
 
-class MotionProfileRunner(val left: IMotorControllerEnhanced, val right: IMotorControllerEnhanced, leftFile: String, rightFile: String) {
-    private val leftStatus = MotionProfileStatus()
-    private val rightStatus = MotionProfileStatus()
+class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: String, val pushRate: Long = 5L) {
+    private enum class State {
+        WAIT,
+        CHECK_ENABLE,
+        CHECK_HOLD,
+        DONE
+    }
 
-    private val leftPoints = arrayListOf<TrajectoryPoint>()
-    private val rightPoints = arrayListOf<TrajectoryPoint>()
+    private val status = MotionProfileStatus()
 
-    private var leftSetValue = SetValueMotionProfile.Disable
-    private var rightSetValue = SetValueMotionProfile.Disable
+    private val points = arrayListOf<TrajectoryPoint>()
 
-    private var state = 0
+    private var setValue = SetValueMotionProfile.Disable
+
+    private var state = State.CHECK_ENABLE
 
     val executor = ExecutorFactory.getExecutor("")
-    private var leftFuture: ScheduledFuture<*>? = null
-    private var rightFuture: ScheduledFuture<*>? = null
+    private var future: ScheduledFuture<*>? = null
 
     private fun genPoint(line: String, index: Int, max: Int): TrajectoryPoint {
         val point = TrajectoryPoint()
@@ -44,10 +48,13 @@ class MotionProfileRunner(val left: IMotorControllerEnhanced, val right: IMotorC
 
         val position = split[0].toDouble()
         val velocity = split[1].toDouble()
+        val duration = split[2].toInt()
+
+        val timeDur = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms.valueOf(duration)
 
         point.position = position * Constants.MotionProfileParameters.TICKS_PER_REV
         point.velocity = velocity * Constants.MotionProfileParameters.TICKS_PER_REV / 600.0
-        point.timeDur = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms
+        point.timeDur = timeDur
         point.zeroPos = (index == 0)
         point.isLastPoint = (index == max)
 
@@ -59,68 +66,66 @@ class MotionProfileRunner(val left: IMotorControllerEnhanced, val right: IMotorC
     }
 
     private fun fill() {
-        leftPoints.forEach {
-            left.pushMotionProfileTrajectory(it)
-        }
-
-        rightPoints.forEach {
-            right.pushMotionProfileTrajectory(it)
+        points.forEach {
+            controller.pushMotionProfileTrajectory(it)
         }
     }
 
     init {
-        val leftLines = File(leftFile).readLines()
-        leftLines.forEachIndexed {
+        val lines = File(fileName).readLines()
+        lines.forEachIndexed {
             i, line ->
-            val point = genPoint(line, i, leftLines.lastIndex)
-            leftPoints.add(point)
-        }
-        val rightLines = File(rightFile).readLines()
-        rightLines.forEachIndexed {
-            i, line ->
-            val point = genPoint(line, i, rightLines.lastIndex)
-            rightPoints.add(point)
+            val point = genPoint(line, i, lines.lastIndex)
+            points.add(point)
         }
     }
 
     fun reset() {
-        leftPoints.clear()
-        rightPoints.clear()
-        state = 0
+        state = State.WAIT
 
-        leftSetValue = SetValueMotionProfile.Disable
-        rightSetValue = SetValueMotionProfile.Disable
-        left.clearMotionProfileTrajectories()
-        right.clearMotionProfileTrajectories()
+        setValue = SetValueMotionProfile.Disable
+        controller.clearMotionProfileTrajectories()
+        controller.clearMotionProfileHasUnderrun(10)
     }
 
     fun start() {
-        leftFuture = executor.scheduleAtFixedRate({left.processMotionProfileBuffer()}, 0, 5, TimeUnit.MILLISECONDS)
-        rightFuture = executor.scheduleAtFixedRate({right.processMotionProfileBuffer()}, 0, 5, TimeUnit.MILLISECONDS)
+        future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
+        setValue = SetValueMotionProfile.Disable
+        controller.changeMotionControlFramePeriod(0)
+
         fill()
+        state = State.CHECK_ENABLE
     }
 
     fun tick() {
-        left.getMotionProfileStatus(leftStatus)
-        right.getMotionProfileStatus(rightStatus)
+        controller.getMotionProfileStatus(status)
 
         when (state) {
-            0 -> {
-
+            State.WAIT -> {
+                throw RuntimeException("'start()' was not called before calling 'tick()'")
             }
 
-            1 -> {
-
+            State.CHECK_ENABLE -> {
+                if (status.btmBufferCnt > Constants.MotionProfileParameters.MIN_POINTS) {
+                    setValue = SetValueMotionProfile.Enable
+                    state = State.CHECK_HOLD
+                }
             }
 
-            2 -> {
-
+            State.CHECK_HOLD -> {
+                if (status.activePointValid && status.isLast) {
+                    setValue = SetValueMotionProfile.Hold
+                    state = State.DONE
+                }
             }
+
+            State.DONE -> {}
         }
+
+        controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
     }
 
     fun stop() {
-        leftFuture?.cancel(false)
-        rightFuture?.cancel(false)
+        future?.cancel(false)
     }
 }
