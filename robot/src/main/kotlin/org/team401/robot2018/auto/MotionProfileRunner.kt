@@ -1,4 +1,4 @@
-package org.team401.robot2018
+package org.team401.robot2018.auto
 
 import com.ctre.phoenix.motion.MotionProfileStatus
 import com.ctre.phoenix.motion.SetValueMotionProfile
@@ -6,6 +6,7 @@ import com.ctre.phoenix.motion.TrajectoryPoint
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import org.snakeskin.factory.ExecutorFactory
+import org.team401.robot2018.Constants
 import java.io.File
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit
  * @version 1/13/18
  */
 
-class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: String, val pushRate: Long = 5L) {
+class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep {
     private enum class State {
         WAIT,
         CHECK_ENABLE,
@@ -31,7 +32,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
         DONE
     }
 
-    private val status = MotionProfileStatus()
+    val status = MotionProfileStatus()
 
     private val points = arrayListOf<TrajectoryPoint>()
 
@@ -39,7 +40,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
 
     private var state = State.CHECK_ENABLE
 
-    val executor = ExecutorFactory.getExecutor("")
+    private val executor = ExecutorFactory.getExecutor("")
     private var future: ScheduledFuture<*>? = null
 
     private fun genPoint(line: String, index: Int, max: Int): TrajectoryPoint {
@@ -71,7 +72,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
         }
     }
 
-    init {
+    fun load(fileName: String) {
         val lines = File(fileName).readLines()
         lines.forEachIndexed {
             i, line ->
@@ -80,7 +81,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
         }
     }
 
-    fun reset() {
+    override fun reset() {
         state = State.WAIT
 
         setValue = SetValueMotionProfile.Disable
@@ -88,7 +89,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
         controller.clearMotionProfileHasUnderrun(10)
     }
 
-    fun start() {
+    override fun start() {
         future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
         setValue = SetValueMotionProfile.Disable
         controller.changeMotionControlFramePeriod(0)
@@ -97,7 +98,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
         state = State.CHECK_ENABLE
     }
 
-    fun tick() {
+    override fun tick() {
         controller.getMotionProfileStatus(status)
 
         when (state) {
@@ -125,7 +126,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, fileName: St
         controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
     }
 
-    fun stop() {
+    override fun stop() {
         future?.cancel(false)
     }
 }

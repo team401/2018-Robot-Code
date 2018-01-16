@@ -10,8 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.auto.TempAutoManager
 import org.snakeskin.dsl.*
 import org.snakeskin.registry.*
-import org.team401.robot2018.subsystems.Drivetrain
-import org.team401.robot2018.subsystems.DrivetrainSubsystem
+import org.team401.robot2018.subsystems.*
 import java.io.File
 
 /*
@@ -28,8 +27,8 @@ import java.io.File
  */
 
 @Setup fun setup() {
-    Subsystems.add(DrivetrainSubsystem)
-    Controllers.add(LeftStick, RightStick)
+    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Controllers.add(LeftStick, RightStick, MasherBox)
 
     TempAutoManager.auto = autoLoop {}
 }
