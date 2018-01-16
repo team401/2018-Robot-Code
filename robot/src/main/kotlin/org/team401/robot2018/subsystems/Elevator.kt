@@ -24,6 +24,12 @@ object ElevatorStates {
     const val HOMING = "homing"
 }
 
+val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
+object ElevatorShifterStates {
+    const val RUN = "high"
+    const val CLIMB = "low"
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         state(ElevatorStates.SIGNAL_CONTROL) {
@@ -65,6 +71,26 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         default {
             action {
                 //TODO gearbox.stop()
+            }
+        }
+    }
+
+    val elevatorShifterMachine = stateMachine(ELEVATOR_SHIFTER_MACHINE) {
+        state(ElevatorShifterStates.RUN) {
+            entry {
+                //TODO shift high
+            }
+        }
+
+        state(ElevatorShifterStates.CLIMB) {
+            entry {
+                //TODO shift low
+            }
+        }
+
+        default {
+            entry {
+                //TODO shifter.set(false)
             }
         }
     }
