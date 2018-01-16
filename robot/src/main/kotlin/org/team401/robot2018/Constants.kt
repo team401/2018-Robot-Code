@@ -22,10 +22,19 @@ object Constants {
         const val DRIVE_RIGHT_MIDF_CAN = 8
         const val DRIVE_RIGHT_MIDR_CAN = 9
         const val DRIVE_RIGHT_REAR_CAN = 10
+
+        const val ELEVATOR_MASTER_CAN = 0
+        const val ELEVATOR_SLAVE_1_CAN = 0
+        const val ELEVATOR_SLAVE_2_CAN = 0
+        const val ELEVATOR_SLAVE_3_CAN = 0
+
+        const val INTAKE_LEFT_PWM = 0
+        const val INTAKE_RIGHT_PWM = 0
     }
 
     object Pneumatics {
         const val SHIFTER_SOLENOID = 7
+        const val ELEVATOR_SHIFTER_SOLENOID = 0
     }
 
     object DrivetrainParameters {
@@ -60,6 +69,8 @@ object Constants {
 
     object ElevatorParameters {
         const val HOMING_RATE = -.1
+
+        const val MANUAL_RATE = 512.0
     }
 
     object IntakeParameters {

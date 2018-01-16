@@ -1,6 +1,7 @@
 package org.team401.robot2018
 
 import org.snakeskin.logic.LockingDelegate
+import org.snakeskin.publish.Publisher
 
 /*
  * 2018-Robot-Code - Created on 1/16/18
@@ -16,5 +17,5 @@ import org.snakeskin.logic.LockingDelegate
  */
 
 object Signals {
-    var elevatorPosition by LockingDelegate(0.0)
+    var elevatorPosition by Publisher(0.0)
 }
