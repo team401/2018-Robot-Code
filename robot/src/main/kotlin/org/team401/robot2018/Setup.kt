@@ -1,7 +1,18 @@
 package org.team401.robot2018
 
+import com.ctre.phoenix.motion.MotionProfileStatus
+import com.ctre.phoenix.motion.SetValueMotionProfile
+import com.ctre.phoenix.motion.TrajectoryPoint
+import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import org.snakeskin.auto.TempAutoManager
 import org.snakeskin.dsl.*
 import org.snakeskin.registry.*
+import org.team401.robot2018.subsystems.Drivetrain
+import org.team401.robot2018.subsystems.DrivetrainSubsystem
+import java.io.File
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -17,6 +28,8 @@ import org.snakeskin.registry.*
  */
 
 @Setup fun setup() {
-    Subsystems.add() //TODO Add subsystems
-    Controllers.add() //TODO Add controllers
+    Subsystems.add(DrivetrainSubsystem)
+    Controllers.add(LeftStick, RightStick)
+
+    TempAutoManager.auto = autoLoop {}
 }
