@@ -64,6 +64,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
     val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
 
+    setup {
+        gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS, Constants.ElevatorParameters.CURRENT_LIMIT_PEAK, Constants.ElevatorParameters.CURRENT_LIMIT_TIMEOUT)
+    }
+
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
         //Constants for setting solenoid polarity
         val locked = false

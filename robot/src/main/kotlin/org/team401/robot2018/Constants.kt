@@ -47,14 +47,16 @@ object Constants {
     }
 
     object DrivetrainParameters {
-        const val WHEEL_RADIUS = 2.0
-        const val WHEELBASE = 0.0
+        const val WHEEL_RADIUS = 2.0 //in
+        const val WHEELBASE = 0.0 //in
 
         const val INVERT_LEFT = true
         const val INVERT_RIGHT = false
         const val INVERT_SHIFTER = false
 
-        const val CURRENT_LIMIT = 30
+        const val CURRENT_LIMIT_CONTINUOUS = 30 //A
+        const val CURRENT_LIMIT_PEAK = 40 //A
+        const val CURRENT_LIMIT_TIMEOUT = 100 //ms
 
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
@@ -82,6 +84,10 @@ object Constants {
         const val HOMING_RATE = -.1
 
         const val MANUAL_RATE = 512.0
+
+        const val CURRENT_LIMIT_CONTINUOUS = 30 //A
+        const val CURRENT_LIMIT_PEAK = 40 //A
+        const val CURRENT_LIMIT_TIMEOUT = 100 //ms
     }
 
     object IntakeParameters {
