@@ -23,6 +23,13 @@ import org.team401.robot2018.Signals
  * @version 1/15/18
  */
 
+val ELEVATOR_DEPLOY_MACHINE = "elevator_deploy"
+object ElevatorDeployStates {
+    const val STOWED = "stowed"
+    const val DEPLOY = "deploy"
+    const val DEPLOYED = "deployed"
+}
+
 val ELEVATOR_MACHINE = "elevator"
 object ElevatorStates {
     const val SIGNAL_CONTROL = "signal"
@@ -39,11 +46,10 @@ object ElevatorShifterStates {
     const val HOLD_CARRIAGE = "hold_carriage"
 }
 
-val ELEVATOR_DEPLOY_MACHINE = "elevator_deploy"
-object ElevatorDeployStates {
-    const val STOWED = "stowed"
-    const val DEPLOY = "deploy"
-    const val DEPLOYED = "deployed"
+val ELEVATOR_RATCHET_MACHINE = "elevator_ratchet"
+object ElevatorRatchetStates {
+    const val LOCKED = "locked"
+    const val UNLOCKED = "unlocked"
 }
 
 val ElevatorSubsystem: Subsystem = buildSubsystem {
@@ -56,6 +62,39 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val shifter = Solenoid(Constants.Pneumatics.ELEVATOR_SHIFTER_SOLENOID)
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
+    val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
+
+    val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
+        //Constants for setting solenoid polarity
+        val locked = false
+        val unlocked = true
+
+        state(ElevatorDeployStates.STOWED) {
+            entry {
+                deployer.set(locked)
+            }
+        }
+
+        state(ElevatorDeployStates.DEPLOY) {
+            timeout(Constants.ElevatorParameters.DEPLOY_TIMER, ElevatorDeployStates.DEPLOYED)
+
+            entry {
+                deployer.set(unlocked)
+            }
+        }
+
+        state(ElevatorDeployStates.DEPLOYED) {
+            entry {
+                deployer.set(locked)
+            }
+        }
+
+        default {
+            entry {
+                deployer.set(false)
+            }
+        }
+    }
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         /**
@@ -66,18 +105,24 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.SIGNAL_CONTROL) {
+            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
+
             action {
                 toSignal()
             }
         }
 
         state(ElevatorStates.OPEN_LOOP_CONTROL) {
+            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
+
             action {
                 gearbox.set(ControlMode.PercentOutput, MasherBox.readAxis { PITCH_BLUE })
             }
         }
 
         state(ElevatorStates.MANUAL_ADJUSTMENT) {
+            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED}
+
             var adjustment: Double
             action {
                 adjustment = Constants.ElevatorParameters.MANUAL_RATE * MasherBox.readAxis { PITCH_BLUE }
@@ -97,6 +142,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.HOMING) {
+            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
+
             //We can't find the method to zero talon position on limit trigger
             //So our solution for now is to run this loop really fast and do it
             //ourselves.  We need to look into this issue
@@ -153,34 +200,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
+    val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
         //Constants for setting solenoid polarity
-        val locked = false
-        val unlocked = true
+        val locked = true
+        val unlocked = false
 
-        state(ElevatorDeployStates.STOWED) {
+        state(ElevatorRatchetStates.LOCKED) {
             entry {
-                deployer.set(locked)
+                ratchet.set(locked)
             }
         }
 
-        state(ElevatorDeployStates.DEPLOY) {
-            timeout(Constants.ElevatorParameters.DEPLOY_TIMER, ElevatorDeployStates.DEPLOYED)
-
+        state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                deployer.set(unlocked)
-            }
-        }
-
-        state(ElevatorDeployStates.DEPLOYED) {
-            entry {
-                deployer.set(locked)
-            }
-        }
-
-        default {
-            entry {
-                deployer.set(false)
+                ratchet.set(unlocked)
             }
         }
     }
