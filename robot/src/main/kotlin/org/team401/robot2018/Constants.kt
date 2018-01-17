@@ -81,13 +81,15 @@ object Constants {
     object ElevatorParameters {
         const val DEPLOY_TIMER = 5000L //ms
 
-        const val HOMING_RATE = -.1
+        const val HOMING_RATE = -.1 //percent vbus
 
-        const val MANUAL_RATE = 512.0
+        const val MANUAL_RATE = 512.0 //ticks / 20 ms
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
         const val CURRENT_LIMIT_PEAK = 40 //A
         const val CURRENT_LIMIT_TIMEOUT = 100 //ms
+
+        const val MAX_FORWARD_TICKS = 40960 //ticks
     }
 
     object IntakeParameters {

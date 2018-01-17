@@ -1,6 +1,8 @@
 package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource
 import com.ctre.phoenix.motorcontrol.SensorCollection
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.Solenoid
@@ -9,6 +11,7 @@ import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
 import org.team401.robot2018.MasherBox
 import org.team401.robot2018.Signals
+import org.team401.robot2018.configZeroPosOnReverseLimit
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -66,6 +69,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     setup {
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS, Constants.ElevatorParameters.CURRENT_LIMIT_PEAK, Constants.ElevatorParameters.CURRENT_LIMIT_TIMEOUT)
+        master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
+        master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_FORWARD_TICKS, 10)
+        master.configForwardSoftLimitEnable(true, 10)
     }
 
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
@@ -148,21 +154,23 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.HOMING) {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
-            //We can't find the method to zero talon position on limit trigger
-            //So our solution for now is to run this loop really fast and do it
-            //ourselves.  We need to look into this issue
-            //TODO
+            entry {
+                master.configZeroPosOnReverseLimit(true)
+            }
 
             var sensorData: SensorCollection
-            action(5) {
-                sensorData = master.sensorCollection //Grab the sensor data
-                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Slowly move the elevator down
-                if (sensorData.isRevLimitSwitchClosed) { //If the limit is triggered
-                    gearbox.stop() //Stop the gearbox
-                    gearbox.setPosition(0) //Zero the sensor
-                    Signals.elevatorPosition = 0.0 //Zero the control signal
-                    setState(ElevatorStates.SIGNAL_CONTROL) //Kick into positional control
+            action {
+                sensorData = master.sensorCollection
+                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE)
+                if (sensorData.isRevLimitSwitchClosed) {
+                    gearbox.stop()
+                    Signals.elevatorPosition = 0.0
+                    setState(ElevatorStates.SIGNAL_CONTROL)
                 }
+            }
+
+            exit {
+                master.configZeroPosOnReverseLimit(false)
             }
         }
 
