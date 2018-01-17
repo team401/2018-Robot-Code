@@ -39,6 +39,13 @@ object ElevatorShifterStates {
     const val HOLD_CARRIAGE = "hold_carriage"
 }
 
+val ELEVATOR_DEPLOY_MACHINE = "elevator_deploy"
+object ElevatorDeployStates {
+    const val STOWED = "stowed"
+    const val DEPLOY = "deploy"
+    const val DEPLOYED = "deployed"
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
     val slave1 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
@@ -48,6 +55,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val gearbox = Gearbox(master, slave1, slave2, slave3)
 
     val shifter = Solenoid(Constants.Pneumatics.ELEVATOR_SHIFTER_SOLENOID)
+    val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         /**
@@ -141,6 +149,38 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         default {
             entry {
                 shifter.set(false)
+            }
+        }
+    }
+
+    val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
+        //Constants for setting solenoid polarity
+        val locked = false
+        val unlocked = true
+
+        state(ElevatorDeployStates.STOWED) {
+            entry {
+                deployer.set(locked)
+            }
+        }
+
+        state(ElevatorDeployStates.DEPLOY) {
+            timeout(Constants.ElevatorParameters.DEPLOY_TIMER, ElevatorDeployStates.DEPLOYED)
+
+            entry {
+                deployer.set(unlocked)
+            }
+        }
+
+        state(ElevatorDeployStates.DEPLOYED) {
+            entry {
+                deployer.set(locked)
+            }
+        }
+
+        default {
+            entry {
+                deployer.set(false)
             }
         }
     }

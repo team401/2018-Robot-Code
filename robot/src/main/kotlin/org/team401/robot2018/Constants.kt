@@ -29,12 +29,20 @@ object Constants {
         const val ELEVATOR_SLAVE_3_CAN = 0
 
         const val INTAKE_LEFT_PWM = 0
-        const val INTAKE_RIGHT_PWM = 0
+        const val INTAKE_RIGHT_PWM = 1
+        const val INTAKE_FOLDING_CAN = 0
     }
 
+    //PCM 0
     object Pneumatics {
+        const val PCM_ID = 0
+
         const val SHIFTER_SOLENOID = 7
+
         const val ELEVATOR_SHIFTER_SOLENOID = 0
+        const val ELEVATOR_DEPLOY_SOLENOID = 0
+
+        const val RUNGS_DEPLOY_SOLENOID = 0
     }
 
     object DrivetrainParameters {
@@ -68,6 +76,8 @@ object Constants {
     }
 
     object ElevatorParameters {
+        const val DEPLOY_TIMER = 5000L //ms
+
         const val HOMING_RATE = -.1
 
         const val MANUAL_RATE = 512.0
@@ -76,5 +86,13 @@ object Constants {
     object IntakeParameters {
         const val INTAKE_RATE = .5
         const val REVERSE_RATE = -.5
+
+        const val STOWED_POS = 0.0
+        const val INTAKE_POS = 0.0
+        const val GRAB_POS = 0.0
+    }
+
+    object RungsParameters {
+        const val DEPLOY_TIMER = 5000L //ms
     }
 }
