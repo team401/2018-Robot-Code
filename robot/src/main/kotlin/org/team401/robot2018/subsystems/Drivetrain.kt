@@ -54,7 +54,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
-        Drivetrain.setCurrentLimit(Constants.DrivetrainParameters.CURRENT_LIMIT)
+        Drivetrain.setCurrentLimit(Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS, Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK, Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
 
         println("----------SETUP DONE----------")
