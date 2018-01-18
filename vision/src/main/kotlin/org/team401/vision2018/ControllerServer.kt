@@ -39,7 +39,7 @@ class ControllerServer(val view: View, val width: Int, val height: Int, val fram
         const val STOPPED_WORD = "STOPPED"
     }
 
-    private fun createFilename(epoch: Long, matchNo: Int) = "$matchNo-${Date(epoch)}.avi"
+    private fun createFilename(epoch: Long, matchNo: String) = "$matchNo-${Date(epoch)}.avi"
 
     var recording by LockingDelegate(false); private set
 
@@ -56,27 +56,29 @@ class ControllerServer(val view: View, val width: Int, val height: Int, val fram
                 if (recv.startsWith(START_WORD)) {
                     val split = recv.split(",")
 
+                    var epoch: Long
+                    var matchNo: String
+
                     if (split.size >= 3) {
                         try {
-                            val epoch = split[1].toLong()
-                            val matchNo = split[2].toInt()
-
-                            val filename = createFilename(epoch, matchNo)
-
-                            recorder = VideoRecorder(view, filename, width, height, framerate)
-                            recorder?.start()
-                            socket.send(STARTED_WORD)
-                            recording = true
-                            println("Started recording '$filename'")
+                            epoch = split[1].toLong()
+                            matchNo = split[2]
                         } catch (e: Exception) {
-                            System.err.println("Controller: Malformed START arguments [$recv]")
-                            e.printStackTrace()
-                            socket.send(INVALID_WORD)
+                            epoch = System.currentTimeMillis()
+                            matchNo = "ERR"
                         }
                     } else {
-                        System.err.println("Controller: Malformed START command [$recv]")
-                        socket.send(INVALID_WORD)
+                        epoch = System.currentTimeMillis()
+                        matchNo = "NONE"
                     }
+
+                    val filename = createFilename(epoch, matchNo)
+
+                    recorder = VideoRecorder(view, filename, width, height, framerate)
+                    recorder?.start()
+                    socket.send(STARTED_WORD)
+                    recording = true
+                    println("Started recording '$filename'")
                 } else if (recv.startsWith(STOP_WORD)) {
                     recorder?.stop()
                     socket.send(STOPPED_WORD)
