@@ -45,6 +45,6 @@ fun main(args: Array<String>) {
     sideBySide.putView(topView, 0, 0)
     sideBySide.putView(frontView, 0, 1)
 
-    val recorder = VideoRecorder(sideBySide, "test.avi", 640 * sideBySide.cols, 480 * sideBySide.rows)
-    recorder.start()
+    val controller = ControllerServer(sideBySide, 640 * sideBySide.cols, 480 * sideBySide.rows)
+    controller.start()
 }
