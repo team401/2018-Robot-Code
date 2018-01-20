@@ -45,6 +45,6 @@ fun main(args: Array<String>) {
     sideBySide.putView(topView, 0, 0)
     sideBySide.putView(frontView, 0, 1)
 
-    val controller = ControllerServer(sideBySide, 640 * sideBySide.cols, 480 * sideBySide.rows)
+    val controller = ControllerServer(sideBySide, 640 * sideBySide.cols, 480 * sideBySide.rows, "/media/2018REC")
     controller.start()
 }
