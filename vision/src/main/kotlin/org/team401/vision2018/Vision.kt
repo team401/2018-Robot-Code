@@ -5,6 +5,7 @@ import org.team401.snakeeyes.Cameras
 import org.team401.snakeeyes.camera.Camera
 import org.team401.snakeeyes.service.MjpegServer
 import org.team401.snakeeyes.view.CameraView
+import org.team401.snakeeyes.view.GridView
 import org.team401.snakeeyes.view.PipView
 
 /*
@@ -23,17 +24,27 @@ import org.team401.snakeeyes.view.PipView
 fun main(args: Array<String>) {
     System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
 
-    val topView = Camera()
-    val frontView = Camera()
+    val top = Camera()
+    val front = Camera()
 
-    topView.open("/dev/v4l/by-path/platform-70090000.xusb-usb-0:1:1.0-video-index0")
-    frontView.open("/dev/v4l/by-path/platform-70090000.xusb-usb-0:3.1:1.0-video-index0")
+    val topView = CameraView(top)
+    val frontView = CameraView(front)
 
-    Cameras.add(topView)
-    Cameras.add(frontView)
+    top.open("/dev/v4l/by-path/platform-70090000.xusb-usb-0:1:1.0-video-index0")
+    front.open("/dev/v4l/by-path/platform-70090000.xusb-usb-0:3.1:1.0-video-index0")
+
+    Cameras.add(top)
+    Cameras.add(front)
     Cameras.start()
 
-    val view = PipView(CameraView(topView), CameraView(frontView), PipView.Position.BOTTOM_CENTER, .5)
+    val view = PipView(topView, frontView, PipView.Position.BOTTOM_CENTER, .5)
     val server = MjpegServer(1180, view)
     server.start()
+
+    val sideBySide = GridView(1, 2)
+    sideBySide.putView(topView, 0, 0)
+    sideBySide.putView(frontView, 0, 1)
+
+    val controller = ControllerServer(sideBySide, 640 * sideBySide.cols, 480 * sideBySide.rows, "/media/2018REC")
+    controller.start()
 }
