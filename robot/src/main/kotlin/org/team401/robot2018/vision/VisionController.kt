@@ -21,11 +21,6 @@ class VisionController(address: String, port: Int = 5801) {
     private val context = ZMQ.context(0)
     private lateinit var socket: ZMQ.Socket
 
-    enum class Commands(val cmdStr: String) {
-        START("START"),
-        STOP("STOP")
-    }
-
     init {
         executor.submit {
             socket = context.socket(ZMQ.REQ)
@@ -33,13 +28,14 @@ class VisionController(address: String, port: Int = 5801) {
         }
     }
 
-    fun sendCommand(command: Commands) {
+    fun sendCommand(command: String) {
         executor.submit {
-            socket.send(command.cmdStr)
+            socket.send(command)
             socket.recv()
         }
     }
 
-    fun startRecording() = sendCommand(Commands.START)
-    fun stopRecording() = sendCommand(Commands.STOP)
+    fun setup(time: Long, matchNo: String) = sendCommand("SETUP,$time,$matchNo")
+    fun start() = sendCommand("START")
+    fun stop() = sendCommand("STOP")
 }

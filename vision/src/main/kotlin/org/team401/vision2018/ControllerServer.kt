@@ -86,7 +86,8 @@ class ControllerServer(val view: View, val width: Int, val height: Int, val base
         socket.receiveTimeOut = 20
 
         while (!Thread.interrupted()) {
-            //"START,TIME,MATCH_NO"
+            //"SETUP,time,matchNo"
+            //"START"
             //"STOP"
             val recv: String? = socket.recvStr()
             if (recv != null && recv.isNotEmpty()) {
