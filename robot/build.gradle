@@ -17,6 +17,11 @@ deploy {
             debug = project.hasProperty("deployDebug") && deployDebug
             jar = "jar"
         }
+
+        fileCollectionArtifact("profiles") {
+            targets << "rio"
+            files = fileTree(dir: "profiles")
+        }
     }
 }
 
