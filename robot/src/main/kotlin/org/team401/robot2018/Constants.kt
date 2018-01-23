@@ -92,6 +92,11 @@ object Constants {
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
         const val MAX_FORWARD_TICKS = 40960 //ticks
+
+        const val SWITCH_POS = 0.0 //ticks
+        const val SCALE_POS = 0.0 //ticks
+        const val SCALE_POS_HIGH = 0.0 //ticks
+        const val SCALE_POS_LOW = 0.0
     }
 
     object IntakeParameters {

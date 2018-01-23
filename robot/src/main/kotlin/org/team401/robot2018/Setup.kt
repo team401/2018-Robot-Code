@@ -7,10 +7,11 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import org.snakeskin.auto.TempAutoManager
+import org.snakeskin.auto.AutoManager
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.snakeskin.registry.*
+import org.team401.robot2018.auto.PowerUpAuto
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 import java.io.File
@@ -31,12 +32,15 @@ import java.io.File
 val Vision = VisionController("10.4.1.3")
 
 @Setup fun setup() {
+    AutoManager.auto = PowerUpAuto
+
+    PowerUpAuto.publish()
+
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick, MasherBox)
 
     on(Events.DISABLED) {
         Vision.stop()
+        PowerUpAuto.publish()
     }
-
-    TempAutoManager.auto = autoLoop {}
 }

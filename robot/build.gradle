@@ -1,6 +1,6 @@
 apply plugin: "jaci.openrio.gradle.GradleRIO"
 
-def SNAKESKIN_VERSION = "1.2.3"
+def SNAKESKIN_VERSION = "1.2.4"
 def SNAKESKIN_MAIN = "org.snakeskin.Robot"
 
 def TEAM_NUMBER = 401
@@ -28,6 +28,8 @@ deploy {
 dependencies {
     compile wpilib()
     compile ctre()
+
+    compile openrio.powerup.matchData()
 
     compile group: "org.snakeskin", name: "SnakeSkin-Core", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-FRC", version: SNAKESKIN_VERSION

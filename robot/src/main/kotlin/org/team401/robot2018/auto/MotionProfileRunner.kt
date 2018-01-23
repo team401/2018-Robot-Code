@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import org.snakeskin.factory.ExecutorFactory
 import org.team401.robot2018.Constants
+import org.team401.robot2018.auto.steps.AutoStep
 import java.io.File
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
