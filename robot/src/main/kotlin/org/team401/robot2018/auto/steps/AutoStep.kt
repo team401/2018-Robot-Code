@@ -12,9 +12,9 @@ package org.team401.robot2018.auto.steps
  * @author Cameron Earle
  * @version 1/15/18
  */
-interface AutoStep {
-    fun reset()
-    fun start()
-    fun stop()
-    fun tick()
+abstract class AutoStep(var done: Boolean = false) {
+    abstract fun reset()
+    abstract fun start()
+    abstract fun stop()
+    abstract fun tick()
 }

@@ -3,6 +3,7 @@ package org.team401.robot2018.auto
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
+import org.team401.robot2018.auto.steps.AutoStep
 
 /*
  * 2018-Robot-Code - Created on 1/23/18
@@ -40,6 +41,8 @@ object PowerUpAuto: AutoLoop {
     var switch = MatchData.OwnedSide.UNKNOWN
     var scale = MatchData.OwnedSide.UNKNOWN
 
+    var sequence = arrayListOf<AutoStep>()
+
     /**
      * Polls the field for data until valid data is found
      * Runs at a 1 ms rate to ensure we get data as fast as possible
@@ -59,9 +62,17 @@ object PowerUpAuto: AutoLoop {
         robotPos = robotPosSelector.selected
     }
 
+    private fun assembleAuto(): List<AutoStep> {
+
+
+        return listOf()
+    }
+
+
     override fun entry() {
         fetchSD()
         fetchFieldLayout()
+
     }
 
     override fun action() {

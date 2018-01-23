@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import org.team401.robot2018.Constants
+import org.team401.robot2018.Sequences
 import org.team401.robot2018.Signals
 import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.SingleStep
@@ -22,7 +23,9 @@ import org.team401.robot2018.subsystems.ElevatorSubsystem
  * @version 1/23/18
  */
 
-val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
+object Commands {
+    val DeployElevator = LambdaStep(Sequences::deployElevator)
 
 
-val ElevatorToSwitch = LambdaStep({Signals.elevatorPosition = Constants.ElevatorParameters.SWITCH_POS})
+    val ElevatorToSwitch = LambdaStep({ Signals.elevatorPosition = Constants.ElevatorParameters.SWITCH_POS })
+}

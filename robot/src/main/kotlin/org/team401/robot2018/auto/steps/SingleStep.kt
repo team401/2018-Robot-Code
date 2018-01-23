@@ -12,7 +12,7 @@ package org.team401.robot2018.auto.steps
  * @author Cameron Earle
  * @version 1/23/18
  */
-abstract class SingleStep: AutoStep {
+abstract class SingleStep: AutoStep(true) {
     override fun tick() {}
     override fun stop() {}
     override fun reset() {}
