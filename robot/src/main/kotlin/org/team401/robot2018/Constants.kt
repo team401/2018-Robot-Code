@@ -54,9 +54,13 @@ object Constants {
         const val INVERT_RIGHT = false
         const val INVERT_SHIFTER = false
 
-        const val CURRENT_LIMIT_CONTINUOUS = 30 //A
-        const val CURRENT_LIMIT_PEAK = 40 //A
-        const val CURRENT_LIMIT_TIMEOUT = 100 //ms
+        const val CURRENT_LIMIT_CONTINUOUS_HIGH = 30 //A
+        const val CURRENT_LIMIT_PEAK_HIGH = 40 //A
+        const val CURRENT_LIMIT_TIMEOUT_HIGH = 100 //ms
+        
+        const val CURRENT_LIMIT_CONTINUOUS_LOW = 30 //A
+        const val CURRENT_LIMIT_PEAK_LOW = 40 //A
+        const val CURRENT_LIMIT_TIMEOUT_LOW = 100 //ms
 
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
@@ -86,8 +90,6 @@ object Constants {
         const val MANUAL_RATE = 512.0 //ticks / 20 ms
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
-        const val CURRENT_LIMIT_PEAK = 40 //A
-        const val CURRENT_LIMIT_TIMEOUT = 100 //ms
 
         const val MAX_FORWARD_TICKS = 40960 //ticks
     }

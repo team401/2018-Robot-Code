@@ -68,7 +68,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
 
     setup {
-        gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS, Constants.ElevatorParameters.CURRENT_LIMIT_PEAK, Constants.ElevatorParameters.CURRENT_LIMIT_TIMEOUT)
+        gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_FORWARD_TICKS, 10)
         master.configForwardSoftLimitEnable(true, 10)
