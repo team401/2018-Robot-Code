@@ -9,8 +9,10 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.auto.TempAutoManager
 import org.snakeskin.dsl.*
+import org.snakeskin.event.Events
 import org.snakeskin.registry.*
 import org.team401.robot2018.subsystems.*
+import org.team401.robot2018.vision.VisionController
 import java.io.File
 
 /*
@@ -26,9 +28,15 @@ import java.io.File
  * @version 1/5/18
  */
 
+val Vision = VisionController("10.4.1.3")
+
 @Setup fun setup() {
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick, MasherBox)
+
+    on(Events.DISABLED) {
+        Vision.stop()
+    }
 
     TempAutoManager.auto = autoLoop {}
 }
