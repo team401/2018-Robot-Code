@@ -2,15 +2,9 @@ package org.team401.robot2018
 
 import org.snakeskin.ShifterState
 import org.snakeskin.ShifterState.*
-
-//fixme
-private val MAX_AMP_DRAW = -1
-
-//fixme
-private val DELTA = -1
-
-//fixme
-private val SPEED_THRESHOLD = -1
+import org.team401.robot2018.Constants.DrivetrainParameters.MAX_AMP_DRAW
+import org.team401.robot2018.Constants.DrivetrainParameters.DELTA
+import org.team401.robot2018.Constants.DrivetrainParameters.SPEED_THRESHOLD
 
 //currentTime and lastShiftTime expected in ms
 fun shiftAuto(currentTime: Long, lastShiftTime: Long, currentAmpDraw: Double, desiredVel: Double, currentVel: Double, currentGear: ShifterState): ShifterState {

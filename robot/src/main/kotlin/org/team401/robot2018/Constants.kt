@@ -13,6 +13,9 @@ package org.team401.robot2018
  * @version 1/13/18
  */
 object Constants {
+
+
+
     object MotorControllers {
         const val DRIVE_LEFT_REAR_CAN = 1
         const val DRIVE_LEFT_MIDR_CAN = 2
@@ -29,6 +32,10 @@ object Constants {
     }
 
     object DrivetrainParameters {
+        const val MAX_AMP_DRAW = 30
+        const val DELTA = 1
+        const val SPEED_THRESHOLD = 7.5
+
         const val WHEEL_RADIUS = 2.0
         const val WHEELBASE = 0.0
 
