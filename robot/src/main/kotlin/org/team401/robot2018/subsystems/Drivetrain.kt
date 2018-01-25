@@ -1,9 +1,11 @@
 package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.Solenoid
+import org.snakeskin.ShifterState
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
@@ -30,6 +32,13 @@ object DriveStates {
     const val OPEN_LOOP = "openloop"
 }
 
+const val DRIVE_SHIFT_MACHINE = "shift"
+object DriveShiftStates {
+    const val HIGH = "high"
+    const val LOW = "low"
+    const val AUTO = "autoShifting"
+}
+
 val Drivetrain = TankDrivetrain(Constants.DrivetrainParameters.WHEEL_RADIUS, Constants.DrivetrainParameters.WHEELBASE)
 
 val DrivetrainSubsystem: Subsystem = buildSubsystem {
@@ -48,16 +57,47 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 
+    fun shift(state: ShifterState) {
+        when (state) {
+            ShifterState.HIGH -> {
+                Drivetrain.setCurrentLimit(
+                        Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS_HIGH,
+                        Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK_HIGH,
+                        Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT_HIGH
+                )
+                Drivetrain.high()
+            }
+
+            ShifterState.LOW -> {
+                Drivetrain.setCurrentLimit(
+                        Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS_LOW,
+                        Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK_LOW,
+                        Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT_LOW
+                )
+                Drivetrain.low()
+            }
+        }
+    }
+
+    fun high() = shift(ShifterState.HIGH)
+    fun low() = shift(ShifterState.LOW)
+
     setup {
+        left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
+        right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
+
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
-        Drivetrain.setCurrentLimit(Constants.DrivetrainParameters.CURRENT_LIMIT)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         state(DriveStates.OPEN_LOOP) {
+            entry {
+                Drivetrain.zero()
+            }
             action {
                 Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })
+                println(left.master.getSelectedSensorVelocity(0))
             }
         }
 
@@ -68,8 +108,29 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    on (Events.TELEOP_ENABLED) {
+    val shiftMachine = stateMachine(DRIVE_SHIFT_MACHINE) {
+        state(DriveShiftStates.HIGH) {
+            entry {
+                high()
+            }
+        }
+
+        state(DriveShiftStates.LOW) {
+            entry {
+                low()
+            }
+        }
+
+        state(DriveShiftStates.AUTO) {
+            action {
+                //TODO auto shift code
+            }
+        }
+    }
+
+    on (Events.ENABLED) {
         driveMachine.setState(DriveStates.OPEN_LOOP)
+        shiftMachine.setState(DriveShiftStates.LOW)
     }
 }
 
