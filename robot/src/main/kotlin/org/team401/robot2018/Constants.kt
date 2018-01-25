@@ -54,8 +54,6 @@ object Constants {
         const val DELTA = 1
         const val SPEED_THRESHOLD = 7.5
 
-        const val WHEEL_RADIUS = 2.0
-        const val WHEELBASE = 0.0
         const val WHEEL_RADIUS = 2.0 //in
         const val WHEELBASE = 0.0 //in
 
