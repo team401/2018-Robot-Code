@@ -63,7 +63,11 @@ object PowerUpAuto: AutoLoop {
     }
 
     private fun assembleAuto(): List<AutoStep> {
+        sequence.run {
+            add(Commands.DeployElevator)
 
+
+        }
 
         return listOf()
     }
@@ -72,15 +76,25 @@ object PowerUpAuto: AutoLoop {
     override fun entry() {
         fetchSD()
         fetchFieldLayout()
-
+        sequence.clear()
+        assembleAuto()
+        sequence.forEach {
+            it.start()
+        }
     }
 
     override fun action() {
-
+        sequence.forEach {
+            if (!it.done) {
+                it.tick()
+            }
+        }
     }
 
     override fun exit() {
-
+        sequence.forEach {
+            it.stop()
+        }
     }
 
 }

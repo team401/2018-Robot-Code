@@ -13,7 +13,6 @@ package org.team401.robot2018.auto.steps
  * @version 1/15/18
  */
 abstract class AutoStep(var done: Boolean = false) {
-    abstract fun reset()
     abstract fun start()
     abstract fun stop()
     abstract fun tick()

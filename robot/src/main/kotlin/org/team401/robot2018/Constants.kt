@@ -63,7 +63,7 @@ object Constants {
         const val CURRENT_LIMIT_TIMEOUT_LOW = 100 //ms
 
         const val CLOSED_LOOP_RAMP = 0.0
-        const val OPEN_LOOP_RAMP = .25
+        const val OPEN_LOOP_RAMP = 0.0 //.25
     }
 
     object MotionProfileParameters {
@@ -93,10 +93,11 @@ object Constants {
 
         const val MAX_FORWARD_TICKS = 40960 //ticks
 
-        const val SWITCH_POS = 0.0 //ticks
-        const val SCALE_POS = 0.0 //ticks
-        const val SCALE_POS_HIGH = 0.0 //ticks
-        const val SCALE_POS_LOW = 0.0
+        const val HOME_POS = 0.0 //ticks
+        const val SWITCH_POS = HOME_POS + 0.0 //ticks
+        const val SCALE_POS = HOME_POS + 0.0 //ticks
+        const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
+        const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
     }
 
     object IntakeParameters {

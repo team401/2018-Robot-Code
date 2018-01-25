@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
@@ -31,16 +32,32 @@ import java.io.File
 
 val Vision = VisionController("10.4.1.3")
 
+object TestAuto: AutoLoop {
+    override val rate = 10L
+
+    override fun entry() {
+    }
+
+    override fun action() {
+    }
+
+    override fun exit() {
+    }
+}
+
 @Setup fun setup() {
-    AutoManager.auto = PowerUpAuto
+    //AutoManager.auto = PowerUpAuto
+    AutoManager.auto = TestAuto
 
     PowerUpAuto.publish()
 
-    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
-    Controllers.add(LeftStick, RightStick, MasherBox)
+    Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Controllers.add(LeftStick, RightStick)
 
+    /*
     on(Events.DISABLED) {
         Vision.stop()
         PowerUpAuto.publish()
     }
+    */
 }

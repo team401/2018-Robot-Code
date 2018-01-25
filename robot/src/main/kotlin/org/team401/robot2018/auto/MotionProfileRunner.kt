@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * @version 1/13/18
  */
 
-class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep {
+class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep() {
     private enum class State {
         WAIT,
         CHECK_ENABLE,
@@ -82,15 +82,12 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
         }
     }
 
-    override fun reset() {
+    override fun start() {
         state = State.WAIT
-
         setValue = SetValueMotionProfile.Disable
         controller.clearMotionProfileTrajectories()
         controller.clearMotionProfileHasUnderrun(10)
-    }
 
-    override fun start() {
         future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
         setValue = SetValueMotionProfile.Disable
         controller.changeMotionControlFramePeriod(0)

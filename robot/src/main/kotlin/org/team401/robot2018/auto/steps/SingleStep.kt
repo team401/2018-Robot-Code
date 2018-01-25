@@ -15,5 +15,4 @@ package org.team401.robot2018.auto.steps
 abstract class SingleStep: AutoStep(true) {
     override fun tick() {}
     override fun stop() {}
-    override fun reset() {}
 }

@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
-import org.team401.robot2018.MasherBox
+//import org.team401.robot2018.MasherBox
 import org.team401.robot2018.Signals
 import org.team401.robot2018.configZeroPosOnReverseLimit
 
@@ -126,7 +126,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             action {
-                gearbox.set(ControlMode.PercentOutput, MasherBox.readAxis { PITCH_BLUE })
+                gearbox.set(ControlMode.PercentOutput, 0.0)//MasherBox.readAxis { PITCH_BLUE })
             }
         }
 
@@ -135,7 +135,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             var adjustment: Double
             action {
-                adjustment = Constants.ElevatorParameters.MANUAL_RATE * MasherBox.readAxis { PITCH_BLUE }
+                adjustment = Constants.ElevatorParameters.MANUAL_RATE * 0.0//MasherBox.readAxis { PITCH_BLUE }
                 Signals.elevatorPosition += adjustment
                 toSignal()
             }

@@ -2,6 +2,7 @@ package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.Solenoid
@@ -12,7 +13,11 @@ import org.snakeskin.component.TankDrivetrain
 import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
 import org.team401.robot2018.LeftStick
+//import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
+
+//import org.team401.robot2018.LeftStick
+//import org.team401.robot2018.RightStick
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -94,10 +99,32 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         state(DriveStates.OPEN_LOOP) {
             entry {
                 Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+
             }
             action {
-                Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })
-                println(left.master.getSelectedSensorVelocity(0))
+                Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })//MasherBox.readAxis { LEFT_Y }, MasherBox.readAxis { RIGHT_X })
+            }
+        }
+
+        state("testAccel") {
+            var startTime = 0L
+            var reading = 0.0
+
+            timeout(1000, DriveStates.OPEN_LOOP)
+            entry {
+                startTime = System.currentTimeMillis()
+                reading = 0.0
+            }
+
+            action {
+                Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
+                reading = Drivetrain.getVelocity()
+            }
+
+            exit {
+                System.out.println("Reached $reading after 1 second!")
+                Drivetrain.stop()
             }
         }
 
@@ -130,7 +157,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
     on (Events.ENABLED) {
         driveMachine.setState(DriveStates.OPEN_LOOP)
-        shiftMachine.setState(DriveShiftStates.LOW)
+        shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }
 
