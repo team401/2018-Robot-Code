@@ -13,7 +13,42 @@ package org.team401.robot2018.auto.steps
  * @version 1/15/18
  */
 abstract class AutoStep(var done: Boolean = false) {
-    abstract fun start()
-    abstract fun stop()
-    abstract fun tick()
+    enum class State {
+        ENTRY,
+        ACTION,
+        EXIT,
+        CONTINUE
+    }
+
+    var state = State.ENTRY; private set
+
+    fun reset() {
+        state = State.ENTRY
+    }
+
+    fun doContinue() = state == State.CONTINUE
+
+    fun tick() {
+        when (state) {
+            State.ENTRY -> {
+                entry()
+                state = State.ACTION
+            }
+            State.ACTION -> {
+                action()
+                if (done) {
+                    state = State.EXIT
+                }
+            }
+            State.EXIT -> {
+                exit()
+                state = State.CONTINUE
+            }
+            else -> {}
+        }
+    }
+
+    abstract fun entry()
+    abstract fun exit()
+    abstract fun action()
 }

@@ -26,15 +26,15 @@ import org.team401.robot2018.subsystems.*
 object Commands {
     val DeployElevator = LambdaStep(Sequences::deployElevator)
     val HomeElevator = object : AutoStep() {
-        override fun start() {
+        override fun entry() {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
 
-        override fun tick() {
+        override fun action() {
             done = Signals.elevatorHomed
         }
 
-        override fun stop() {}
+        override fun exit() {}
     }
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)

@@ -32,7 +32,7 @@ import java.io.File
 
 val Vision = VisionController("10.4.1.3")
 
-object TestAuto: AutoLoop {
+object TestAuto: AutoLoop() {
     override val rate = 10L
 
     override fun entry() {
@@ -56,7 +56,7 @@ object TestAuto: AutoLoop {
 
     /*
     on(Events.DISABLED) {
-        Vision.stop()
+        Vision.exit()
         PowerUpAuto.publish()
     }
     */

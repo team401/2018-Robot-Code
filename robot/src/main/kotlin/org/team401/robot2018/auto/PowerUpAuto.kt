@@ -3,7 +3,6 @@ package org.team401.robot2018.auto
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
-import org.team401.robot2018.Constants
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.StepGroup
@@ -22,7 +21,7 @@ import org.team401.robot2018.subsystems.Drivetrain
  * @version 1/23/18
  */
 
-object PowerUpAuto: AutoLoop {
+object PowerUpAuto: AutoLoop() {
     object Delays {
         const val ELEVATOR_DEPLOY = 500L //ms
         const val PRE_SCORE = 500L //ms
@@ -75,7 +74,7 @@ object PowerUpAuto: AutoLoop {
 
     /**
      * Builds a motion profile step group for the left and
-     * right sides of the drivetrain using the given start and end
+     * right sides of the drivetrain using the given entry and end
      */
     private fun mpStep(start: String, end: String, vararg otherActions: AutoStep): StepGroup {
         val leftMaster = Drivetrain.left.master
@@ -134,26 +133,33 @@ object PowerUpAuto: AutoLoop {
     }
 
     override fun entry() {
+        done = false
         fetchSD()
         fetchFieldLayout()
         sequence.clear()
+        sequenceIdx = 0
         assembleAuto()
         sequence.forEach {
-            it.start()
+            it.reset()
         }
     }
 
     override fun action() {
-        sequence.forEach {
-            if (!it.done) {
-                it.tick()
+        if (sequenceIdx < sequence.size) {
+            sequence[sequenceIdx].tick()
+            if (sequence[sequenceIdx].doContinue()) {
+                sequenceIdx++
             }
+        } else {
+            done = true
         }
     }
 
     override fun exit() {
         sequence.forEach {
-            it.stop()
+            if (it.state != AutoStep.State.CONTINUE) {
+                it.exit()
+            }
         }
     }
 

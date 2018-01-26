@@ -14,7 +14,7 @@ package org.team401.robot2018.auto.steps
  */
 
 class DelayStep(val time: Long): SingleStep() {
-    override fun start() {
+    override fun entry() {
         Thread.sleep(time)
     }
 }

@@ -83,7 +83,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
         }
     }
 
-    override fun start() {
+    override fun entry() {
         state = State.WAIT
         setValue = SetValueMotionProfile.Disable
         controller.clearMotionProfileTrajectories()
@@ -94,12 +94,12 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
         state = State.CHECK_ENABLE
     }
 
-    override fun tick() {
+    override fun action() {
         controller.getMotionProfileStatus(status)
 
         when (state) {
             State.WAIT -> {
-                throw RuntimeException("'start()' was not called before calling 'tick()'")
+                throw RuntimeException("'entry()' was not called before calling 'action()'")
             }
 
             State.CHECK_ENABLE -> {
@@ -122,7 +122,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
         controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
     }
 
-    override fun stop() {
+    override fun exit() {
         future?.cancel(false)
     }
 }

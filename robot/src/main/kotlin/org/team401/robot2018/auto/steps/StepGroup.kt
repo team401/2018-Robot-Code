@@ -24,16 +24,16 @@ class StepGroup(): AutoStep() {
 
     private val steps = arrayListOf<AutoStep>()
 
-    override fun start() {
+    override fun entry() {
         steps.forEach {
-            it.start()
+            it.entry()
         }
     }
 
-    override fun tick() {
+    override fun action() {
         steps.forEach {
             if (!it.done) {
-                it.tick()
+                it.action()
             }
         }
         if (steps.all { it.done }) {
@@ -41,9 +41,9 @@ class StepGroup(): AutoStep() {
         }
     }
 
-    override fun stop() {
+    override fun exit() {
         steps.forEach {
-            it.stop()
+            it.exit()
         }
     }
 }
