@@ -15,7 +15,6 @@ package org.team401.robot2018.auto
 enum class AutoTarget {
     SWITCH,
     SCALE,
-    SWITCH_SCALE,
     SCALE_SWITCH,
     NONE
 }

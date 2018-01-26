@@ -74,6 +74,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
     }
 
     fun load(fileName: String) {
+        points.clear()
         val lines = File(fileName).readLines()
         lines.forEachIndexed {
             i, line ->
@@ -86,12 +87,9 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
         state = State.WAIT
         setValue = SetValueMotionProfile.Disable
         controller.clearMotionProfileTrajectories()
-        controller.clearMotionProfileHasUnderrun(10)
-
+        controller.clearMotionProfileHasUnderrun(0)
         future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
-        setValue = SetValueMotionProfile.Disable
         controller.changeMotionControlFramePeriod(0)
-
         fill()
         state = State.CHECK_ENABLE
     }

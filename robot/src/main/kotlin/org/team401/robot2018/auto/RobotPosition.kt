@@ -14,7 +14,7 @@ package org.team401.robot2018.auto
  */
 
 enum class RobotPosition {
-    LEFT,
-    MID,
-    RIGHT
+    DS_LEFT,
+    DS_MID,
+    DS_RIGHT
 }

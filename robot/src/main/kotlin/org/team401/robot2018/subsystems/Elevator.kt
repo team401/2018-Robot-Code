@@ -55,6 +55,12 @@ object ElevatorRatchetStates {
     const val UNLOCKED = "unlocked"
 }
 
+val ELEVATOR_KICKER_MACHINE = "elevator_kicker"
+object ElevatorKickerStates {
+    const val KICK = "out"
+    const val STOW = "in"
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
     val slave1 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
@@ -66,6 +72,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val shifter = Solenoid(Constants.Pneumatics.ELEVATOR_SHIFTER_SOLENOID)
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
     val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
+    val kicker = Solenoid(Constants.Pneumatics.ELEVATOR_KICKER_SOLENOID)
 
     setup {
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
@@ -156,6 +163,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             entry {
                 master.configZeroPosOnReverseLimit(true)
+                Signals.elevatorHomed = false
             }
 
             var sensorData: SensorCollection
@@ -165,6 +173,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 if (sensorData.isRevLimitSwitchClosed) {
                     gearbox.stop()
                     Signals.elevatorPosition = 0.0
+                    Signals.elevatorHomed = true
                     setState(ElevatorStates.SIGNAL_CONTROL)
                 }
             }
@@ -226,6 +235,36 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
                 ratchet.set(unlocked)
+            }
+        }
+
+        default {
+            entry {
+                ratchet.set(false)
+            }
+        }
+    }
+
+    val elevatorKickerMachine = stateMachine(ELEVATOR_KICKER_MACHINE) {
+        //Constants for setting solenoid polarity
+        val extended = true
+        val retracted = false
+
+        state(ElevatorKickerStates.KICK) {
+            entry {
+                kicker.set(extended)
+            }
+        }
+
+        state(ElevatorKickerStates.STOW) {
+            entry {
+                kicker.set(retracted)
+            }
+        }
+
+        default {
+            entry {
+                kicker.set(false)
             }
         }
     }

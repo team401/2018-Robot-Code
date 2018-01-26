@@ -18,4 +18,5 @@ import org.snakeskin.publish.Publisher
 
 object Signals {
     var elevatorPosition by Publisher(0.0)
+    var elevatorHomed by Publisher(false)
 }

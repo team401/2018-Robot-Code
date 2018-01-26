@@ -42,6 +42,7 @@ object Constants {
         const val ELEVATOR_SHIFTER_SOLENOID = 0
         const val ELEVATOR_DEPLOY_SOLENOID = 0
         const val ELEVATOR_RATCHET_SOLENOID = 0
+        const val ELEVATOR_KICKER_SOLENOID = 0
 
         const val RUNGS_DEPLOY_SOLENOID = 0
     }
