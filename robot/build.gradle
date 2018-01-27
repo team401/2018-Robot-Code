@@ -20,6 +20,7 @@ deploy {
 
         fileCollectionArtifact("profiles") {
             targets << "rio"
+            directory = "profiles"
             files = fileTree(dir: "profiles")
         }
     }

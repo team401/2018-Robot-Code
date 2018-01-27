@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
  */
 
 class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep() {
-    private enum class State {
+    private enum class MpState {
         WAIT,
         CHECK_ENABLE,
         CHECK_HOLD,
@@ -39,7 +39,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
 
     private var setValue = SetValueMotionProfile.Disable
 
-    private var state = State.CHECK_ENABLE
+    private var mpState = MpState.CHECK_ENABLE
 
     private val executor = ExecutorFactory.getExecutor("")
     private var future: ScheduledFuture<*>? = null
@@ -84,39 +84,41 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
     }
 
     override fun entry() {
-        state = State.WAIT
+        mpState = MpState.WAIT
         setValue = SetValueMotionProfile.Disable
+        controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
         controller.clearMotionProfileTrajectories()
         controller.clearMotionProfileHasUnderrun(0)
-        future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
         controller.changeMotionControlFramePeriod(0)
         fill()
-        state = State.CHECK_ENABLE
+        mpState = MpState.CHECK_ENABLE
+        Thread.sleep(20)
+        future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
     }
 
     override fun action() {
         controller.getMotionProfileStatus(status)
 
-        when (state) {
-            State.WAIT -> {
+        when (mpState) {
+            MpState.WAIT -> {
                 throw RuntimeException("'entry()' was not called before calling 'action()'")
             }
 
-            State.CHECK_ENABLE -> {
+            MpState.CHECK_ENABLE -> {
                 if (status.btmBufferCnt > Constants.MotionProfileParameters.MIN_POINTS) {
                     setValue = SetValueMotionProfile.Enable
-                    state = State.CHECK_HOLD
+                    mpState = MpState.CHECK_HOLD
                 }
             }
 
-            State.CHECK_HOLD -> {
+            MpState.CHECK_HOLD -> {
                 if (status.activePointValid && status.isLast) {
                     setValue = SetValueMotionProfile.Hold
-                    state = State.DONE
+                    mpState = MpState.DONE
                 }
             }
 
-            State.DONE -> {}
+            MpState.DONE -> {}
         }
 
         controller.set(ControlMode.MotionProfile, setValue.value.toDouble())

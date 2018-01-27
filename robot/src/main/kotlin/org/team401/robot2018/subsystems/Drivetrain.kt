@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
+import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.ShifterState
 import org.snakeskin.component.Gearbox
@@ -15,6 +16,7 @@ import org.team401.robot2018.Constants
 import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
+import org.team401.robot2018.pidf
 
 //import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.RightStick
@@ -62,6 +64,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 
+    val pdp = PowerDistributionPanel(0)
+
     fun shift(state: ShifterState) {
         when (state) {
             ShifterState.HIGH -> {
@@ -91,6 +95,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
         right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
+        left.master.pidf(f = .20431, p = .15)
+        right.master.pidf(f = .22133)
+
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
     }
@@ -109,21 +116,24 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
         state("testAccel") {
             var startTime = 0L
-            var reading = 0.0
+            var readingLeft = 0
+            var readingRight = 0
 
-            timeout(1000, DriveStates.OPEN_LOOP)
+            timeout(1200, DriveStates.OPEN_LOOP)
             entry {
                 startTime = System.currentTimeMillis()
-                reading = 0.0
+                readingLeft = 0
+                readingRight = 0
             }
 
             action {
                 Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
-                reading = Drivetrain.getVelocity()
+                readingLeft = Drivetrain.left.getVelocity()
+                readingRight = Drivetrain.right.getVelocity()
             }
 
             exit {
-                System.out.println("Reached $reading after 1 second!")
+                System.out.println("${pdp.voltage},$readingLeft,$readingRight")
                 Drivetrain.stop()
             }
         }

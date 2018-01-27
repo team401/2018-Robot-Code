@@ -23,3 +23,10 @@ fun IMotorControllerEnhanced.configZeroPosOnReverseLimit(enable: Boolean, timeou
 fun IMotorControllerEnhanced.configZeroPosOnForwardLimit(enable: Boolean, timeout: Int = 0) {
     configSetParameter(ParamEnum.eClearPosOnLimitF, if (enable) 1.0 else 0.0, 0, 0, timeout)
 }
+
+fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 0.0, f: Double = 0.0, slot: Int = 0, timeout: Int = 0) {
+    config_kP(slot, p, timeout)
+    config_kI(slot, i, timeout)
+    config_kD(slot, d, timeout)
+    config_kF(slot, f, timeout)
+}
