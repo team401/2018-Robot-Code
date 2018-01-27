@@ -10,9 +10,10 @@ import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
 import org.snakeskin.event.Events
-import org.team401.robot2018.Constants
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
+import org.snakeskin.ShifterState.*
+import org.team401.robot2018.*
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -32,7 +33,7 @@ object DriveStates {
     const val OPEN_LOOP = "openloop"
 }
 
-const val DRIVE_SHIFT_MACHINE = "shift"
+const val DRIVE_SHIFT_MACHINE = "autoShifting"
 object DriveShiftStates {
     const val HIGH = "high"
     const val LOW = "low"
@@ -123,7 +124,22 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
         state(DriveShiftStates.AUTO) {
             action {
-                //TODO auto shift code
+                val newState = shiftAuto(
+                        System.currentTimeMillis(),
+                        lastShiftTime,
+                        leftFront.outputCurrent,
+                        Drivetrain.getVelocity(),
+                        Drivetrain.shifterState)
+
+                if(newState != Drivetrain.shifterState) {
+
+                    when(newState) {
+
+                        LOW -> { low(); update() }
+
+                        HIGH -> { high(); update() }
+                    }
+                }
             }
         }
     }
