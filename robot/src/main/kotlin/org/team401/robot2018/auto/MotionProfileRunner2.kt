@@ -30,7 +30,7 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: S
     private val points = arrayListOf<TrajectoryPoint>()
     private var streamIdx = 0
     private val status = MotionProfileStatus()
-    private var setValue by LockingDelegate(SetValueMotionProfile.Invalid)
+    private var setValue = SetValueMotionProfile.Invalid
 
     private var future: ScheduledFuture<*>? = null
     private val executor = ExecutorFactory.getExecutor("MPRunner2")
@@ -133,7 +133,7 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: S
         streamPoints() //Stream as many points as possible to save time in the loop
 
         //Schedule the task to push points to and enable the controller, this should be done as fast as possible
-        future = executor.scheduleAtFixedRate({ controller.processMotionProfileBuffer(); controller.set(ControlMode.MotionProfile, setValue.value.toDouble()); if (first && setValue == SetValueMotionProfile.Enable) {println("MPRunner $name enabled at ${System.currentTimeMillis()}"); first = false } }, 0L, pushRate, TimeUnit.MILLISECONDS)
+        future = executor.scheduleAtFixedRate(controller::processMotionProfileBuffer, 0L, pushRate, TimeUnit.MILLISECONDS)
         mpState = MpState.STREAMING
         println("MPRunner $name entered")
     }
@@ -145,6 +145,7 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: S
         when (mpState) {
             //This state should only happen if the auto executor is calling things incorrectly
             MpState.NOT_SETUP -> {
+                setValue = SetValueMotionProfile.Invalid
                 throw RuntimeException("'action()' called before 'entry()'!")
             }
 
@@ -169,6 +170,12 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: S
                 setValue = SetValueMotionProfile.Hold //Hold the controller
                 done = true //This AutoStep is now done
             }
+        }
+
+        controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
+        if (first && setValue == SetValueMotionProfile.Enable) {
+            println("MPRunner $name enabled at ${System.currentTimeMillis()}")
+            first = false
         }
     }
 
