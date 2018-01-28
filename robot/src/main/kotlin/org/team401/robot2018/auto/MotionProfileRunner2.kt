@@ -31,7 +31,7 @@ class MotionProfileRunner2(val controller: TalonSRX, val name: String, val pushR
     private val points = arrayListOf<TrajectoryPoint>()
     private var streamIdx = 0
     private val status = MotionProfileStatus()
-    private var setValue = SetValueMotionProfile.Invalid
+    var setValue = SetValueMotionProfile.Invalid; private set
 
     private var future: ScheduledFuture<*>? = null
     private val executor = ExecutorFactory.getExecutor("MPRunner2")
@@ -39,14 +39,14 @@ class MotionProfileRunner2(val controller: TalonSRX, val name: String, val pushR
     private var first = true
 
 
-    private enum class MpState {
+    enum class MpState {
         NOT_SETUP,
         STREAMING,
         RUNNING,
         HOLDING,
 
     }
-    private var mpState = MpState.NOT_SETUP
+    var mpState = MpState.NOT_SETUP; private set
 
     /**
      * Resets the controller, clearing all bottom and top buffer trajectory points,
@@ -171,11 +171,13 @@ class MotionProfileRunner2(val controller: TalonSRX, val name: String, val pushR
             }
         }
 
-        controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
+        //controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
+        /*
         if (first && setValue == SetValueMotionProfile.Enable) {
             println("MPRunner $name enabled at ${System.currentTimeMillis()}")
             first = false
         }
+        */
     }
 
     override fun exit() {

@@ -1,5 +1,6 @@
 package org.team401.robot2018
 
+import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.Talon
 import org.snakeskin.auto.AutoLoop
@@ -7,6 +8,7 @@ import org.snakeskin.auto.AutoManager
 import org.snakeskin.dsl.*
 import org.snakeskin.registry.*
 import org.team401.robot2018.auto.MotionProfileRunner2
+import org.team401.robot2018.auto.MotionProfileRunner3
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 
@@ -31,41 +33,36 @@ object TestAuto: AutoLoop() {
 
     override val rate = 10L
 
-    lateinit var runnerLeft: MotionProfileRunner2
-    lateinit var runnerRight: MotionProfileRunner2
+    lateinit var runner: MotionProfileRunner3
 
     var started = false
 
     override fun entry() {
         started = true
         done = false
-        runnerLeft = MotionProfileRunner2(Drivetrain.left.master as TalonSRX, "left", 5)
-        runnerRight = MotionProfileRunner2(Drivetrain.right.master as TalonSRX, "right", 5)
 
-        runnerLeft.loadPoints("/home/lvuser/profiles/TUNING_L.csv")
-        runnerRight.loadPoints("/home/lvuser/profiles/TUNING_R.csv")
-        runnerLeft.reset()
-        runnerRight.reset()
+        runner = MotionProfileRunner3(Drivetrain.left.master as TalonSRX, Drivetrain.right.master as TalonSRX)
+        runner.loadPoints("/home/lvuser/profiles/TUNING_L.csv", "/home/lvuser/profiles/TUNING_R.csv")
 
-        runnerLeft.entry()
-        runnerRight.entry()
+        runner.reset()
+
+        runner.entry()
     }
 
     override fun action() {
-        runnerLeft.action()
-        runnerRight.action()
+        runner.action()
+
         posLeft = Drivetrain.left.getPosition(0) / 4096.0
         posRight = Drivetrain.right.getPosition(0) / 4096.0
 
-        if (runnerLeft.done && runnerRight.done) {
+        if (runner.done) {
             done = true
         }
     }
 
     override fun exit() {
         if (started) {
-            runnerLeft.exit()
-            runnerRight.exit()
+            runner.exit()
         }
     }
 }
