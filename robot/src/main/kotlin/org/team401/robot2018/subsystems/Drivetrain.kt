@@ -95,8 +95,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
         right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
-        left.master.pidf(f = .20431, p = .15)
-        right.master.pidf(f = .22133,p = .15)
+        //left.master.pidf(f = .20431, p = .15)
+        //right.master.pidf(f = .22133,p = .15)
 
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
@@ -119,7 +119,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
             var readingLeft = 0
             var readingRight = 0
 
-            timeout(1200, DriveStates.OPEN_LOOP)
+            timeout(1500, DriveStates.OPEN_LOOP)
             entry {
                 startTime = System.currentTimeMillis()
                 readingLeft = 0
@@ -134,6 +134,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
             exit {
                 System.out.println("${pdp.voltage},$readingLeft,$readingRight")
+
                 Drivetrain.stop()
             }
         }
