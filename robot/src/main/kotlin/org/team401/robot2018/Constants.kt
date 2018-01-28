@@ -53,7 +53,7 @@ object Constants {
 
         const val INVERT_LEFT = true
         const val INVERT_RIGHT = false
-        const val INVERT_SHIFTER = false
+        const val INVERT_SHIFTER = true
 
         const val CURRENT_LIMIT_CONTINUOUS_HIGH = 30 //A
         const val CURRENT_LIMIT_PEAK_HIGH = 40 //A

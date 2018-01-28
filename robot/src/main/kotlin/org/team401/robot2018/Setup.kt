@@ -1,23 +1,12 @@
 package org.team401.robot2018
 
-import com.ctre.phoenix.motion.MotionProfileStatus
-import com.ctre.phoenix.motion.SetValueMotionProfile
-import com.ctre.phoenix.motion.TrajectoryPoint
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.dsl.*
-import org.snakeskin.event.Events
 import org.snakeskin.registry.*
-import org.team401.robot2018.auto.MotionProfileRunner
 import org.team401.robot2018.auto.MotionProfileRunner2
-import org.team401.robot2018.auto.PowerUpAuto
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
-import java.io.File
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -35,35 +24,46 @@ import java.io.File
 val Vision = VisionController("10.4.1.3")
 
 object TestAuto: AutoLoop() {
-    var pos by Publisher(0.0)
+    var posLeft by Publisher(0.0)
+    var posRight by Publisher(0.0)
 
     override val rate = 10L
 
-    lateinit var runner: MotionProfileRunner2
+    lateinit var runnerLeft: MotionProfileRunner2
+    lateinit var runnerRight: MotionProfileRunner2
 
     var started = false
 
     override fun entry() {
         started = true
         done = false
-        runner = MotionProfileRunner2(Drivetrain.left.master)
+        runnerLeft = MotionProfileRunner2(Drivetrain.left.master, 5)
+        runnerRight = MotionProfileRunner2(Drivetrain.right.master, 5)
 
-        runner.loadPoints("/home/lvuser/TUNING_L.csv")
-        runner.entry()
+        runnerLeft.loadPoints("/home/lvuser/profiles/TUNING_L.csv")
+        runnerRight.loadPoints("/home/lvuser/profiles/TUNING_R.csv")
+        runnerLeft.reset()
+        runnerRight.reset()
+
+        runnerLeft.entry()
+        runnerRight.entry()
     }
 
     override fun action() {
-        runner.action()
-        pos = Drivetrain.left.getPosition(0) / 4096.0
+        runnerLeft.action()
+        runnerRight.action()
+        posLeft = Drivetrain.left.getPosition(0) / 4096.0
+        posRight = Drivetrain.right.getPosition(0) / 4096.0
 
-        if (runner.done) {
+        if (runnerLeft.done && runnerRight.done) {
             done = true
         }
     }
 
     override fun exit() {
         if (started) {
-            runner.exit()
+            runnerLeft.exit()
+            runnerRight.exit()
         }
     }
 }

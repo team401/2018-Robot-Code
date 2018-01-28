@@ -96,7 +96,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
         left.master.pidf(f = .20431, p = .15)
-        right.master.pidf(f = .22133)
+        right.master.pidf(f = .22133,p = .15)
 
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
