@@ -157,11 +157,16 @@ class MotionProfileRunner3(leftController: TalonSRX, rightController: TalonSRX, 
         right.streamPoints()
 
         future = executor.scheduleAtFixedRate(::pushPoints, 0L, pushRate, TimeUnit.MILLISECONDS)
+
+        mpState = MpState.STREAMING
     }
 
     override fun action() {
         left.loadStatus()
         right.loadStatus()
+
+        left.streamPoints()
+        right.streamPoints()
 
         when (mpState) {
             //This state should only happen if the auto executor is calling things incorrectly
