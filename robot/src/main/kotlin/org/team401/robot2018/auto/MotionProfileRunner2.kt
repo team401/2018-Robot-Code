@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
  * @version 1/26/18
  */
 
-class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep() {
+class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: String, val pushRate: Long = 5L): AutoStep() {
     private val points = arrayListOf<TrajectoryPoint>()
     private var streamIdx = 0
     private val status = MotionProfileStatus()
@@ -34,6 +34,8 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val pushRat
 
     private var future: ScheduledFuture<*>? = null
     private val executor = ExecutorFactory.getExecutor("MPRunner2")
+
+    private var first = true
 
 
     private enum class MpState {
@@ -57,6 +59,7 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val pushRat
             Thread.sleep(5)
         } while (status.btmBufferCnt > 0 && status.topBufferCnt > 0)
         controller.clearMotionProfileHasUnderrun(0)
+        println("MPRunner $name controller cleared and reset!")
     }
 
     /**
@@ -117,6 +120,7 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val pushRat
             val point = genPoint(line, i, lines.lastIndex)
             points.add(point)
         }
+        println("MPRunner $name loaded points from $filename")
     }
 
     override fun entry() {
@@ -129,8 +133,9 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val pushRat
         streamPoints() //Stream as many points as possible to save time in the loop
 
         //Schedule the task to push points to and enable the controller, this should be done as fast as possible
-        future = executor.scheduleAtFixedRate({ controller.processMotionProfileBuffer(); controller.set(ControlMode.MotionProfile, setValue.value.toDouble()) }, 0L, pushRate, TimeUnit.MILLISECONDS)
+        future = executor.scheduleAtFixedRate({ controller.processMotionProfileBuffer(); controller.set(ControlMode.MotionProfile, setValue.value.toDouble()); if (first && setValue == SetValueMotionProfile.Enable) {println("MPRunner $name enabled at ${System.currentTimeMillis()}"); first = false } }, 0L, pushRate, TimeUnit.MILLISECONDS)
         mpState = MpState.STREAMING
+        println("MPRunner $name entered")
     }
 
     override fun action() {
@@ -169,5 +174,6 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val pushRat
 
     override fun exit() {
         future?.cancel(true) //Cancel the task responsible for streaming points
+        println("MPRunner $name exited!")
     }
 }

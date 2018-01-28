@@ -37,8 +37,8 @@ object TestAuto: AutoLoop() {
     override fun entry() {
         started = true
         done = false
-        runnerLeft = MotionProfileRunner2(Drivetrain.left.master, 5)
-        runnerRight = MotionProfileRunner2(Drivetrain.right.master, 5)
+        runnerLeft = MotionProfileRunner2(Drivetrain.left.master, "left", 5)
+        runnerRight = MotionProfileRunner2(Drivetrain.right.master, "right", 5)
 
         runnerLeft.loadPoints("/home/lvuser/profiles/TUNING_L.csv")
         runnerRight.loadPoints("/home/lvuser/profiles/TUNING_R.csv")
