@@ -1,5 +1,7 @@
 package org.team401.robot2018
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import edu.wpi.first.wpilibj.Talon
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.dsl.*
@@ -37,8 +39,8 @@ object TestAuto: AutoLoop() {
     override fun entry() {
         started = true
         done = false
-        runnerLeft = MotionProfileRunner2(Drivetrain.left.master, "left", 5)
-        runnerRight = MotionProfileRunner2(Drivetrain.right.master, "right", 5)
+        runnerLeft = MotionProfileRunner2(Drivetrain.left.master as TalonSRX, "left", 5)
+        runnerRight = MotionProfileRunner2(Drivetrain.right.master as TalonSRX, "right", 5)
 
         runnerLeft.loadPoints("/home/lvuser/profiles/TUNING_L.csv")
         runnerRight.loadPoints("/home/lvuser/profiles/TUNING_R.csv")

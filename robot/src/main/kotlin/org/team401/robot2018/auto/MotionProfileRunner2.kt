@@ -5,6 +5,7 @@ import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motion.TrajectoryPoint
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.factory.ExecutorFactory
 import org.snakeskin.logic.LockingDelegate
 import org.team401.robot2018.Constants
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit
  * @version 1/26/18
  */
 
-class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: String, val pushRate: Long = 5L): AutoStep() {
+class MotionProfileRunner2(val controller: TalonSRX, val name: String, val pushRate: Long = 5L): AutoStep() {
     private val points = arrayListOf<TrajectoryPoint>()
     private var streamIdx = 0
     private val status = MotionProfileStatus()
@@ -90,7 +91,7 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: S
 
         //Calculate the individual time duration by dividing the given duration in half
         //The other half is handled in the "motion control rate" setting on the controller
-        val timeDur = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms.valueOf(duration / 2)
+        val timeDur = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms.valueOf(duration)
 
         point.position = position * Constants.MotionProfileParameters.TICKS_PER_REV //revolutions to ticks
         point.velocity = velocity * Constants.MotionProfileParameters.TICKS_PER_REV / 600.0 //rpm to ticks per 100 ms
@@ -125,11 +126,9 @@ class MotionProfileRunner2(val controller: IMotorControllerEnhanced, val name: S
 
     override fun entry() {
         resetController() //Reset the controller to clear all buffers
-        if (points.size > 0) {
-            controller.changeMotionControlFramePeriod(points[0].timeDur.value / 2) //Set rate to half of per-point rate
-        } else {
-            controller.changeMotionControlFramePeriod(0) //Set rate to 0, as this profile is empty
-        }
+        controller.changeMotionControlFramePeriod(5)
+        controller.configMotionProfileTrajectoryPeriod(0, 0)
+
         streamPoints() //Stream as many points as possible to save time in the loop
 
         //Schedule the task to push points to and enable the controller, this should be done as fast as possible
