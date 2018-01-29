@@ -31,7 +31,7 @@ class RioProfileRunner(val controller: IMotorControllerEnhanced, val rate: Long 
         val position = split[0].toDouble()
         val velocity = split[1].toDouble()
         val duration = split[2].toInt()
-        val acceleration = split[3].toDouble()
+        val acceleration = 0.0//split[3].toDouble()
 
         return Point(position, velocity, duration, acceleration)
     }
@@ -79,25 +79,28 @@ class RioProfileRunner(val controller: IMotorControllerEnhanced, val rate: Long 
         output = 0.0
         reading = 0.0
         lastRun = 0L
+
+        controller.set(ControlMode.PercentOutput, 0.0)
+        controller.setSelectedSensorPosition(0, 0, 0)
     }
 
     override fun action() {
-        currentTime = System.currentTimeMillis()
-        if (currentTime - lastRun >= rate) {
-            if (pointIdx < points.size) {
-                point = points[pointIdx]
-                reading = controller.getSelectedSensorPosition(0) / Constants.MotionProfileParameters.TICKS_PER_REV
-                error = point.position - reading
-                output = f + (p * error) + (d * (error - lastError) / point.timestep) + (v * point.velocity)
-                lastError = error
-                pointIdx++
-            } else {
-                output = 0.0
-                done = true
+        currentTime = System.currentTimeMillis() //Get the current time
+        if (pointIdx < points.size) { //If we have points left
+            point = points[pointIdx] //Get the current point
+            reading = controller.getSelectedSensorPosition(0) / Constants.MotionProfileParameters.TICKS_PER_REV //Read the encoder
+            error = point.position - reading //Calculate error
+            output = f + (p * error) + (d * (error - lastError) / point.timestep) + (v * point.velocity) //Calculate output
+            lastError = error //Set lastError
+            if (currentTime - lastRun >= rate) {
+                pointIdx++ //Increment point counter
+                lastRun = currentTime //Set last time to current time
             }
-            lastRun = currentTime
-            controller.set(ControlMode.PercentOutput, output)
+        } else {
+            output = 0.0 //Stop motor
+            done = true //Step is done
         }
+        controller.set(ControlMode.PercentOutput, output) //Update the controller
     }
 
     override fun exit() {

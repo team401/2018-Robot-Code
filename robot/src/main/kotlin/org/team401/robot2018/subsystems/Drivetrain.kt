@@ -100,6 +100,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
+
+        Drivetrain.setNeutralMode(NeutralMode.Coast)
+
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
@@ -113,6 +116,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
                 Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })//MasherBox.readAxis { LEFT_Y }, MasherBox.readAxis { RIGHT_X })
             }
         }
+
+        state("nothing") {}
 
         state("testAccel") {
             var startTime = 0L
@@ -166,8 +171,15 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    on (Events.ENABLED) {
+    on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.OPEN_LOOP)
+    }
+
+    on (Events.AUTO_ENABLED) {
+        driveMachine.setState("nothing")
+    }
+
+    on (Events.ENABLED) {
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }

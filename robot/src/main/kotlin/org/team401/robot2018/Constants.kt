@@ -79,7 +79,7 @@ object Constants {
 
         const val NEUTRAL_DEADBAND = 0.01
 
-        const val MIN_POINTS = 50
+        const val MIN_POINTS = 10
 
     }
 
