@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import org.snakeskin.factory.ExecutorFactory
 import org.team401.robot2018.Constants
+import org.team401.robot2018.auto.steps.AutoStep
 import java.io.File
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -24,8 +25,8 @@ import java.util.concurrent.TimeUnit
  * @version 1/13/18
  */
 
-class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep {
-    private enum class State {
+class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate: Long = 5L): AutoStep() {
+    private enum class MpState {
         WAIT,
         CHECK_ENABLE,
         CHECK_HOLD,
@@ -38,7 +39,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
 
     private var setValue = SetValueMotionProfile.Disable
 
-    private var state = State.CHECK_ENABLE
+    private var mpState = MpState.CHECK_ENABLE
 
     private val executor = ExecutorFactory.getExecutor("")
     private var future: ScheduledFuture<*>? = null
@@ -73,6 +74,7 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
     }
 
     fun load(fileName: String) {
+        points.clear()
         val lines = File(fileName).readLines()
         lines.forEachIndexed {
             i, line ->
@@ -81,52 +83,48 @@ class MotionProfileRunner(val controller: IMotorControllerEnhanced, val pushRate
         }
     }
 
-    override fun reset() {
-        state = State.WAIT
-
+    override fun entry() {
+        mpState = MpState.WAIT
         setValue = SetValueMotionProfile.Disable
+        controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
         controller.clearMotionProfileTrajectories()
-        controller.clearMotionProfileHasUnderrun(10)
-    }
-
-    override fun start() {
-        future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
-        setValue = SetValueMotionProfile.Disable
+        controller.clearMotionProfileHasUnderrun(0)
         controller.changeMotionControlFramePeriod(0)
-
         fill()
-        state = State.CHECK_ENABLE
+        mpState = MpState.CHECK_ENABLE
+        Thread.sleep(20)
+        future = executor.scheduleAtFixedRate({controller.processMotionProfileBuffer()}, 0, pushRate, TimeUnit.MILLISECONDS)
     }
 
-    override fun tick() {
+    override fun action() {
         controller.getMotionProfileStatus(status)
 
-        when (state) {
-            State.WAIT -> {
-                throw RuntimeException("'start()' was not called before calling 'tick()'")
+        when (mpState) {
+            MpState.WAIT -> {
+                throw RuntimeException("'entry()' was not called before calling 'action()'")
             }
 
-            State.CHECK_ENABLE -> {
+            MpState.CHECK_ENABLE -> {
                 if (status.btmBufferCnt > Constants.MotionProfileParameters.MIN_POINTS) {
                     setValue = SetValueMotionProfile.Enable
-                    state = State.CHECK_HOLD
+                    mpState = MpState.CHECK_HOLD
                 }
             }
 
-            State.CHECK_HOLD -> {
+            MpState.CHECK_HOLD -> {
                 if (status.activePointValid && status.isLast) {
                     setValue = SetValueMotionProfile.Hold
-                    state = State.DONE
+                    mpState = MpState.DONE
                 }
             }
 
-            State.DONE -> {}
+            MpState.DONE -> {}
         }
 
         controller.set(ControlMode.MotionProfile, setValue.value.toDouble())
     }
 
-    override fun stop() {
+    override fun exit() {
         future?.cancel(false)
     }
 }

@@ -5,7 +5,8 @@
 .settings/
 
 # IntelliJ
-.idea/
+.idea/*
+!.idea/runConfigurations
 out/
 *.iml
 *.iws

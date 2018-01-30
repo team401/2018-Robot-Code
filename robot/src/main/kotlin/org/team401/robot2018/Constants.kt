@@ -45,6 +45,7 @@ object Constants {
         const val ELEVATOR_SHIFTER_SOLENOID = 0
         const val ELEVATOR_DEPLOY_SOLENOID = 0
         const val ELEVATOR_RATCHET_SOLENOID = 0
+        const val ELEVATOR_KICKER_SOLENOID = 0
 
         const val RUNGS_DEPLOY_SOLENOID = 0
     }
@@ -60,7 +61,7 @@ object Constants {
 
         const val INVERT_LEFT = true
         const val INVERT_RIGHT = false
-        const val INVERT_SHIFTER = false
+        const val INVERT_SHIFTER = true
 
         const val CURRENT_LIMIT_CONTINUOUS_HIGH = 30 //A
         const val CURRENT_LIMIT_PEAK_HIGH = 40 //A
@@ -71,7 +72,7 @@ object Constants {
         const val CURRENT_LIMIT_TIMEOUT_LOW = 100 //ms
 
         const val CLOSED_LOOP_RAMP = 0.0
-        const val OPEN_LOOP_RAMP = .25
+        const val OPEN_LOOP_RAMP = 0.0 //.25
     }
 
     object MotionProfileParameters {
@@ -86,7 +87,7 @@ object Constants {
 
         const val NEUTRAL_DEADBAND = 0.01
 
-        const val MIN_POINTS = 5
+        const val MIN_POINTS = 10
 
     }
 
@@ -100,6 +101,12 @@ object Constants {
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
         const val MAX_FORWARD_TICKS = 40960 //ticks
+
+        const val HOME_POS = 0.0 //ticks
+        const val SWITCH_POS = HOME_POS + 0.0 //ticks
+        const val SCALE_POS = HOME_POS + 0.0 //ticks
+        const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
+        const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
     }
 
     object IntakeParameters {

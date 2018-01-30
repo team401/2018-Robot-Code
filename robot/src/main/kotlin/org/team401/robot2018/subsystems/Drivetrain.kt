@@ -2,8 +2,10 @@ package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
+import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.ShifterState
 import org.snakeskin.component.Gearbox
@@ -11,7 +13,12 @@ import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
 import org.snakeskin.event.Events
 import org.team401.robot2018.LeftStick
+//import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
+import org.team401.robot2018.pidf
+
+//import org.team401.robot2018.LeftStick
+//import org.team401.robot2018.RightStick
 import org.snakeskin.ShifterState.*
 import org.team401.robot2018.*
 
@@ -58,6 +65,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 
+    val pdp = PowerDistributionPanel(0)
+
     fun shift(state: ShifterState) {
         when (state) {
             ShifterState.HIGH -> {
@@ -87,18 +96,52 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
         right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
+        //left.master.pidf(f = .20431, p = .15)
+        //right.master.pidf(f = .22133,p = .15)
+
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
+
+        Drivetrain.setNeutralMode(NeutralMode.Coast)
+
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         state(DriveStates.OPEN_LOOP) {
             entry {
                 Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+
             }
             action {
-                Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })
-                println(left.master.getSelectedSensorVelocity(0))
+                Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })//MasherBox.readAxis { LEFT_Y }, MasherBox.readAxis { RIGHT_X })
+            }
+        }
+
+        state("nothing") {}
+
+        state("testAccel") {
+            var startTime = 0L
+            var readingLeft = 0
+            var readingRight = 0
+
+            timeout(1500, DriveStates.OPEN_LOOP)
+            entry {
+                startTime = System.currentTimeMillis()
+                readingLeft = 0
+                readingRight = 0
+            }
+
+            action {
+                Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
+                readingLeft = Drivetrain.left.getVelocity()
+                readingRight = Drivetrain.right.getVelocity()
+            }
+
+            exit {
+                System.out.println("${pdp.voltage},$readingLeft,$readingRight")
+
+                Drivetrain.stop()
             }
         }
 
@@ -144,9 +187,16 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    on (Events.ENABLED) {
+    on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.OPEN_LOOP)
-        shiftMachine.setState(DriveShiftStates.LOW)
+    }
+
+    on (Events.AUTO_ENABLED) {
+        driveMachine.setState("nothing")
+    }
+
+    on (Events.ENABLED) {
+        shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }
 
