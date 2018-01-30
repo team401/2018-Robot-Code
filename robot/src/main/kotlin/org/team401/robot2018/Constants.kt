@@ -13,6 +13,9 @@ package org.team401.robot2018
  * @version 1/13/18
  */
 object Constants {
+
+
+
     object MotorControllers {
         const val DRIVE_LEFT_REAR_CAN = 1
         const val DRIVE_LEFT_MIDR_CAN = 2
@@ -48,6 +51,11 @@ object Constants {
     }
 
     object DrivetrainParameters {
+        const val DELTA = 0.5 //fixme (testme)
+        const val SPEED_THRESHOLD = 7.5 //fixme (testme)
+        const val SPEED_SPLIT = 10 //fixme (testme)
+        //above should be some value between the low gear speed and the high gear speed
+
         const val WHEEL_RADIUS = 2.0 //in
         const val WHEELBASE = 0.0 //in
 
