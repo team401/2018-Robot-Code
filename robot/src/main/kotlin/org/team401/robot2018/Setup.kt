@@ -65,7 +65,7 @@ object TestAuto: AutoLoop() {
         runner = MotionProfileRunner3(Drivetrain.left.master as TalonSRX, Drivetrain.right.master as TalonSRX)
 
         runner.reset()
-        runner.loadPoints("/home/lvuser/profiles/TUNING_L.csv", "/home/lvuser/profiles/TUNING_R.csv")
+        runner.loadPoints("/home/lvuser/profiles/SAD_L_.csv", "/home/lvuser/profiles/SAD_R_.csv")
         runner.entry()
 
     }
