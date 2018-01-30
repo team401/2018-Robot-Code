@@ -80,6 +80,7 @@ object PowerUpAuto: AutoLoop() {
         val leftMaster = Drivetrain.left.master
         val rightMaster = Drivetrain.right.master
 
+        /*
         val leftStep = MotionProfileRunner(leftMaster)
         val rightStep = MotionProfileRunner(rightMaster)
 
@@ -88,8 +89,9 @@ object PowerUpAuto: AutoLoop() {
 
         val steps = arrayListOf<AutoStep>(leftStep, rightStep)
         steps.addAll(otherActions.toList())
+        */
 
-        return StepGroup(steps)
+        return StepGroup()//steps)
     }
 
     private fun assembleAuto() {

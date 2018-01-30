@@ -15,11 +15,9 @@ import org.snakeskin.event.Events
 import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
-import org.team401.robot2018.pidf
 
 //import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.RightStick
-import org.snakeskin.ShifterState.*
 import org.team401.robot2018.*
 
 /*
@@ -167,14 +165,13 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
         state(DriveShiftStates.AUTO) {
             action {
-                val newState = shiftAuto(
+                val newState = AutoShifter.shiftAuto(
                         System.currentTimeMillis(),
-                        lastShiftTime,
                         Drivetrain.getCurrent(),
                         Drivetrain.getVelocity(),
                         Drivetrain.shifterState)
 
-                Drivetrain.shift(newState)
+                Drivetrain.shiftUpdate(newState)
             }
         }
     }

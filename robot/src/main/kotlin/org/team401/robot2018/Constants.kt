@@ -71,6 +71,8 @@ object Constants {
         const val CURRENT_LIMIT_PEAK_LOW = 40 //A
         const val CURRENT_LIMIT_TIMEOUT_LOW = 100 //ms
 
+        const val DOWNSHIFT_CURRENT = 30 //A
+
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = 0.0 //.25
     }
