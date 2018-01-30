@@ -2,6 +2,7 @@ package org.team401.robot2018
 
 import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import org.snakeskin.component.TankDrivetrain
 
 /*
  * 2018-Robot-Code - Created on 1/17/18
@@ -30,3 +31,5 @@ fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 
     config_kD(slot, d, timeout)
     config_kF(slot, f, timeout)
 }
+
+fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)

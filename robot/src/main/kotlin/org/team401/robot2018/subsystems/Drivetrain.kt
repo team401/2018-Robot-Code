@@ -170,19 +170,11 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
                 val newState = shiftAuto(
                         System.currentTimeMillis(),
                         lastShiftTime,
-                        leftFront.outputCurrent,
+                        Drivetrain.getCurrent(),
                         Drivetrain.getVelocity(),
                         Drivetrain.shifterState)
 
-                if(newState != Drivetrain.shifterState) {
-
-                    when(newState) {
-
-                        LOW -> { low(); update() }
-
-                        HIGH -> { high(); update() }
-                    }
-                }
+                Drivetrain.shift(newState)
             }
         }
     }
