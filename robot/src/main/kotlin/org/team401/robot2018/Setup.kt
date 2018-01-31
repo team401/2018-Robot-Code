@@ -3,10 +3,11 @@ package org.team401.robot2018
 import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.Talon
+import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
-import org.snakeskin.dsl.*
 import org.snakeskin.registry.*
+import org.snakeskin.dsl.Publisher
 import org.team401.robot2018.auto.MotionProfileRunner2
 import org.team401.robot2018.auto.MotionProfileRunner3
 import org.team401.robot2018.auto.RioProfileRunner
@@ -112,6 +113,7 @@ object TestAuto: AutoLoop() {
 
     Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick)
+    Sensors.add(VisionStopSensor)
     /*
     on(Events.DISABLED) {
         Vision.exit()
