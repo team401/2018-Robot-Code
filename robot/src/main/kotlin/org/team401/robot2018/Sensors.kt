@@ -21,6 +21,7 @@ val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOper
     pollAt(1000)
 
     whenTriggered {
+        Thread.sleep(10000)
         Vision.stop()
     }
 }
