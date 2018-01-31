@@ -53,7 +53,7 @@ object Constants {
     object DrivetrainParameters {
         const val DELTA = 0.5 //fixme (testme)
         const val SPEED_THRESHOLD = 7.5 //fixme (testme)
-        const val SPEED_SPLIT = 10 //fixme (testme)
+        const val SPEED_SPLIT = 3.5 //fixme (testme)
         //above should be some value between the low gear speed and the high gear speed
 
         const val WHEEL_RADIUS = 2.0 //in

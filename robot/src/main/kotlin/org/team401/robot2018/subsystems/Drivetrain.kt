@@ -164,11 +164,14 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         }
 
         state(DriveShiftStates.AUTO) {
+            entry {
+                low()
+            }
             action {
                 val newState = AutoShifter.shiftAuto(
                         System.currentTimeMillis(),
                         Drivetrain.getCurrent(),
-                        Drivetrain.getVelocity(),
+                        Drivetrain.getVelocity() * .0025566,
                         Drivetrain.shifterState)
 
                 Drivetrain.shiftUpdate(newState)
@@ -178,13 +181,11 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
     on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.OPEN_LOOP)
+        shiftMachine.setState(DriveShiftStates.AUTO)
     }
 
     on (Events.AUTO_ENABLED) {
         driveMachine.setState("nothing")
-    }
-
-    on (Events.ENABLED) {
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }

@@ -35,9 +35,10 @@ fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 
 
 fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)
 
-fun TankDrivetrain.shiftUpdate(state: ShifterState) {
-    if (shifterState != state) {
-        shift(state)
+fun TankDrivetrain.shiftUpdate(state: AutoShifter.ShiftCommand) {
+    if (shifterState != state.state) {
+        shift(state.state)
+        println("Drivetrain Shifted: $state")
         AutoShifter.update()
     }
 }
