@@ -1,5 +1,6 @@
 package org.team401.vision2018
 
+import com.google.gson.Gson
 import org.opencv.core.Core
 import org.team401.snakeeyes.Cameras
 import org.team401.snakeeyes.camera.Camera
@@ -7,6 +8,7 @@ import org.team401.snakeeyes.service.MjpegServer
 import org.team401.snakeeyes.view.CameraView
 import org.team401.snakeeyes.view.GridView
 import org.team401.snakeeyes.view.PipView
+import java.io.File
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -48,6 +50,9 @@ fun main(args: Array<String>) {
     val controller = ControllerServer(sideBySide, 640 * sideBySide.cols, 480 * sideBySide.rows, "/media/2018REC")
     controller.start()
 
-    val pipeline = GearFinderPipeline(top)
-    pipeline.start()
+    val paramFile = File("parameters.json")
+    val params = Gson().fromJson(paramFile.readText(), VisionParameters::class.java)
+
+    val cubeFinder = CubeFinderPipeline(top, params)
+    cubeFinder.start()
 }
