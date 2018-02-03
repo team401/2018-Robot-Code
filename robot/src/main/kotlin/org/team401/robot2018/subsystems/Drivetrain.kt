@@ -113,6 +113,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
             }
             action {
                 Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })//MasherBox.readAxis { LEFT_Y }, MasherBox.readAxis { RIGHT_X })
+                //println("${left.getPosition()}  ${right.getPosition()}");
+
             }
         }
 
@@ -123,21 +125,40 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
             var readingLeft = 0
             var readingRight = 0
 
-            timeout(1500, DriveStates.OPEN_LOOP)
+            var error = 0.0
+            val desired = 360
+            val yaw = DoubleArray(3)
+
+            //timeout(1500, DriveStates.OPEN_LOOP)
             entry {
                 startTime = System.currentTimeMillis()
                 readingLeft = 0
                 readingRight = 0
+                error = 0.0
+
+                left.setPosition(0)
+                right.setPosition(0)
+
+                imu.setYaw(0.0, 0)
             }
 
             action {
-                Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
-                readingLeft = Drivetrain.left.getVelocity()
-                readingRight = Drivetrain.right.getVelocity()
+                //Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
+                println("running")
+
+                imu.getYawPitchRoll(yaw)
+
+                error = (desired - yaw[0])
+
+                left.set(ControlMode.PercentOutput, -error/desired)
+                right.set(ControlMode.PercentOutput, error/desired)
+
+                readingLeft = Drivetrain.left.getPosition()
+                readingRight = Drivetrain.right.getPosition()
             }
 
             exit {
-                System.out.println("${pdp.voltage},$readingLeft,$readingRight")
+                System.out.println("${yaw[0]},$readingLeft,$readingRight")
 
                 Drivetrain.stop()
             }
@@ -181,7 +202,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
     on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.OPEN_LOOP)
-        shiftMachine.setState(DriveShiftStates.AUTO)
+        shiftMachine.setState(DriveShiftStates.HIGH)
+        //shiftMachine.setState(DriveShiftStates.AUTO)
     }
 
     on (Events.AUTO_ENABLED) {
