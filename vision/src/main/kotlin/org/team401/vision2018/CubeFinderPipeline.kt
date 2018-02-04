@@ -39,10 +39,25 @@ class CubeFinderPipeline(provider: MatProvider, val p: VisionParameters): Pipeli
         //Filter contours
         val filteredContours = filterContours(contours)
 
-        //Check if cube is present
-        val isCubePresent = filteredContours.isNotEmpty()
+        val data: VisionData
+        if (filteredContours.isNotEmpty()) {
+            val rect = Imgproc.boundingRect(filteredContours[0])
+            val center = rect.centerpoint()
 
-        //TODO publish data
+            val w2 = procMat.width() / 2
+            val h2 = procMat.height() / 2
+
+            val cubeX = (center.x - w2)/w2
+            val cubeY = (center.y - h2)/h2
+
+            data = VisionData(true, cubeX, cubeY)
+        } else {
+            data = VisionData(false)
+        }
+    }
+
+    private fun map(x: Double, min: Double, max: Double, newMin: Double, newMax: Double): Double {
+        return (newMax - newMin) * (x - min) / (max - min) + newMin
     }
 
     private fun checkBounds(value: Number, bounds: List<Number>) = bounds.size >= 2 && (value.toDouble() < bounds[0].toDouble() || value.toDouble() > bounds[1].toDouble())
