@@ -55,6 +55,13 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 //motors.set(Constants.IntakeParameters.INTAKE_RATE)
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+
+                    if(left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
+                            right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT) {
+                        //Have cube
+                        //Move elevator or whatever
+                        //turn on LED's
+                    }
             }
         }
 

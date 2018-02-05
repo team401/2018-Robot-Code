@@ -118,6 +118,8 @@ object Constants {
         const val STOWED_POS = 0.0
         const val INTAKE_POS = 0.0
         const val GRAB_POS = 0.0
+
+        const val HAVE_CUBE_CURRENT = 0.0
     }
 
     object RungsParameters {
