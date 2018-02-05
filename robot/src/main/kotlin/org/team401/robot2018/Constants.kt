@@ -31,8 +31,8 @@ object Constants {
         const val ELEVATOR_SLAVE_2_CAN = 0
         const val ELEVATOR_SLAVE_3_CAN = 0
 
-        const val INTAKE_LEFT_PWM = 0
-        const val INTAKE_RIGHT_PWM = 1
+        const val INTAKE_LEFT_CAN = 0
+        const val INTAKE_RIGHT_CAN = 1
         const val INTAKE_FOLDING_CAN = 0
     }
 
@@ -102,9 +102,10 @@ object Constants {
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
-        const val MAX_FORWARD_TICKS = 40960 //ticks
+        const val MAX_POS = 40960 //ticks
 
         const val HOME_POS = 0.0 //ticks
+        const val CUBE_POS = HOME_POS + 0.0 //ticks
         const val SWITCH_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
@@ -118,6 +119,8 @@ object Constants {
         const val STOWED_POS = 0.0
         const val INTAKE_POS = 0.0
         const val GRAB_POS = 0.0
+
+        const val HAVE_CUBE_CURRENT = 0.0
     }
 
     object RungsParameters {
