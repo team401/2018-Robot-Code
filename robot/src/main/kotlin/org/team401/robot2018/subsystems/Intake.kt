@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.VictorSP
 import org.snakeskin.component.MotorGroup
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
+import org.team401.robot2018.pidf
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -44,6 +45,9 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     setup {
         right.inverted = true
+
+        folding.configContinuousCurrentLimit(30, 0)
+        //folding.pidf(0.0,0.0,0.0,0.0)
     }
 
 
