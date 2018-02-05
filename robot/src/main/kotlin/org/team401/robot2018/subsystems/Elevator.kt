@@ -77,7 +77,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     setup {
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
-        master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_FORWARD_TICKS, 10)
+        master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS, 10)
         master.configForwardSoftLimitEnable(true, 10)
     }
 

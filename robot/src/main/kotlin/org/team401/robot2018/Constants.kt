@@ -102,9 +102,10 @@ object Constants {
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
-        const val MAX_FORWARD_TICKS = 40960 //ticks
+        const val MAX_POS = 40960 //ticks
 
         const val HOME_POS = 0.0 //ticks
+        const val CUBE_POS = HOME_POS + 0.0 //ticks
         const val SWITCH_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.VictorSP
 import org.snakeskin.component.MotorGroup
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
+import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
 
 /*
@@ -62,6 +63,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                         //Have cube
                         //Move elevator or whatever
                         //turn on LED's
+                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
                     }
             }
         }
