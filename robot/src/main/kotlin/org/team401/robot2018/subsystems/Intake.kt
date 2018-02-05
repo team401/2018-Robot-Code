@@ -3,6 +3,7 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.wpilibj.SpeedController
 import edu.wpi.first.wpilibj.VictorSP
 import org.snakeskin.component.MotorGroup
 import org.snakeskin.dsl.*
@@ -38,33 +39,46 @@ object IntakeFoldingStates {
 val IntakeSubsystem: Subsystem = buildSubsystem {
     val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
 
-    val left = VictorSP(Constants.MotorControllers.INTAKE_LEFT_PWM)
-    val right = VictorSP(Constants.MotorControllers.INTAKE_RIGHT_PWM)
+    val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
+    val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
-    val motors = MotorGroup(left, right)
+    //val motors = MotorGroup(left, right)
+
+    setup {
+        right.inverted = true
+    }
+
 
     stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
             action {
-                motors.set(Constants.IntakeParameters.INTAKE_RATE)
+                //motors.set(Constants.IntakeParameters.INTAKE_RATE)
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
             }
         }
 
         state(IntakeWheelsStates.REVERSE) {
             action {
-                motors.set(Constants.IntakeParameters.REVERSE_RATE)
+                //motors.set(Constants.IntakeParameters.REVERSE_RATE)
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
             }
         }
 
         state(IntakeWheelsStates.IDLE) {
             action {
-                motors.set(0.0)
+                //motors.set(0.0)
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
             }
         }
 
         default {
             action {
-                motors.set(0.0)
+                //motors.set(0.0)
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
             }
         }
     }

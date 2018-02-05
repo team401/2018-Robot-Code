@@ -31,8 +31,8 @@ object Constants {
         const val ELEVATOR_SLAVE_2_CAN = 0
         const val ELEVATOR_SLAVE_3_CAN = 0
 
-        const val INTAKE_LEFT_PWM = 0
-        const val INTAKE_RIGHT_PWM = 1
+        const val INTAKE_LEFT_CAN = 0
+        const val INTAKE_RIGHT_CAN = 1
         const val INTAKE_FOLDING_CAN = 0
     }
 
