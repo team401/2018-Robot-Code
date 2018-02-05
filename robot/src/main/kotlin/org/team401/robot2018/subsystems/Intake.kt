@@ -42,8 +42,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
     val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
-    //val motors = MotorGroup(left, right)
-
     setup {
         right.inverted = true
     }
@@ -52,7 +50,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
             action {
-                //motors.set(Constants.IntakeParameters.INTAKE_RATE)
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
 
@@ -67,7 +64,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         state(IntakeWheelsStates.REVERSE) {
             action {
-                //motors.set(Constants.IntakeParameters.REVERSE_RATE)
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
             }
@@ -75,7 +71,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         state(IntakeWheelsStates.IDLE) {
             action {
-                //motors.set(0.0)
                 left.set(ControlMode.PercentOutput, 0.0)
                 right.set(ControlMode.PercentOutput, 0.0)
             }
@@ -83,7 +78,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         default {
             action {
-                //motors.set(0.0)
                 left.set(ControlMode.PercentOutput, 0.0)
                 right.set(ControlMode.PercentOutput, 0.0)
             }
