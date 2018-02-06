@@ -2,6 +2,7 @@ package org.team401.robot2018
 
 import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Talon
 import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
@@ -28,6 +29,8 @@ import org.team401.robot2018.vision.VisionController
  */
 
 val Vision = VisionController("10.4.1.3")
+
+val PDP = PowerDistributionPanel()
 
 object TestAuto: AutoLoop() {
     var posLeft by Publisher(0.0)

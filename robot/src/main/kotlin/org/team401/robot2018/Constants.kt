@@ -46,6 +46,7 @@ object Constants {
         const val ELEVATOR_DEPLOY_SOLENOID = 0
         const val ELEVATOR_RATCHET_SOLENOID = 0
         const val ELEVATOR_KICKER_SOLENOID = 0
+        const val ELEVATOR_CLAMP_SOLENOID = 0
 
         const val RUNGS_DEPLOY_SOLENOID = 0
     }
@@ -102,7 +103,7 @@ object Constants {
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
-        const val MAX_FORWARD_TICKS = 40960 //ticks
+        const val MAX_POS = 40960.0 //ticks
 
         const val HOME_POS = 0.0 //ticks
         const val SWITCH_POS = HOME_POS + 0.0 //ticks
