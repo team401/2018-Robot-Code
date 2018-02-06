@@ -124,4 +124,9 @@ object Constants {
     object RungsParameters {
         const val DEPLOY_TIMER = 5000L //ms
     }
+
+    object MJPEGParameters {
+        const val ADDRESS = "10.4.1.3"
+        const val PORT = "1180"
+    }
 }
