@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
+import org.team401.robot2018.PDP
 //import org.team401.robot2018.MasherBox
 import org.team401.robot2018.Signals
 import org.team401.robot2018.configZeroPosOnReverseLimit
@@ -61,6 +62,12 @@ object ElevatorKickerStates {
     const val STOW = "in"
 }
 
+val ELEVAOTR_CLAMP_MACHINE = "elevator_clamp"
+object  ElevatorClampStates{
+    const val DEPLOYED = "out"
+    const val RETRACTED = "in"
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
     val slave1 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
@@ -73,11 +80,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
     val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
     val kicker = Solenoid(Constants.Pneumatics.ELEVATOR_KICKER_SOLENOID)
+    val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
 
     setup {
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
-        master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS, 10)
+        master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
         master.configForwardSoftLimitEnable(true, 10)
     }
 
@@ -267,5 +275,92 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 kicker.set(false)
             }
         }
+    }
+
+    val elevatorClampMachine = stateMachine(ELEVAOTR_CLAMP_MACHINE){
+        state(ElevatorClampStates.DEPLOYED){
+            entry{
+                clamp.set(true)
+            }
+        }
+        state(ElevatorClampStates.RETRACTED){
+            entry {
+                clamp.set(false)
+            }
+        }
+        default {
+            entry {
+                clamp.set(false)
+            }
+        }
+    }
+    test("Elevator test"){
+
+        //test kicker
+        elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
+        Thread.sleep(1000)
+        elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
+        Thread.sleep(1000)
+        elevatorKickerMachine.setState("")
+        Thread.sleep(1000)
+
+        //test clamp
+        elevatorClampMachine.setState(ElevatorClampStates.DEPLOYED)
+        Thread.sleep(1000)
+        elevatorClampMachine.setState(ElevatorClampStates.RETRACTED)
+        Thread.sleep(1000)
+        elevatorClampMachine.setState("")
+        Thread.sleep(1000)
+
+        //test ratchet
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+        Thread.sleep(1000)
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
+        Thread.sleep(1000)
+        elevatorRatchetMachine.setState("")
+        Thread.sleep(1000)
+
+        //test shifter
+        elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
+        Thread.sleep(1000)
+        elevatorShifterMachine.setState(ElevatorShifterStates.CLIMB)
+        Thread.sleep(1000)
+        elevatorShifterMachine.setState(ElevatorShifterStates.HOLD_CARRIAGE)
+        Thread.sleep(1000)
+        elevatorShifterMachine.setState("")
+        Thread.sleep(1000)
+
+        //test elevator
+        elevatorMachine.setState(ElevatorStates.HOMING)
+        Thread.sleep(2000)
+        elevatorMachine.setState(ElevatorStates.SIGNAL_CONTROL)
+        Signals.elevatorPosition = Constants.ElevatorParameters.MAX_POS
+
+        var masterPower by Publisher(0.0)
+        var slave1Power by Publisher(0.0)
+        var slave2Power by Publisher(0.0)
+        var slave3Power by Publisher(0.0)
+
+        masterPower = PDP.getCurrent(4)
+        slave1Power = PDP.getCurrent(5)
+        slave2Power = PDP.getCurrent(6)
+        slave3Power = PDP.getCurrent(7)
+
+        Thread.sleep(2000)
+        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_HIGH
+        Thread.sleep(2000)
+        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS
+        Thread.sleep(2000)
+        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_LOW
+        Thread.sleep(2000)
+        Signals.elevatorPosition = Constants.ElevatorParameters.HOME_POS
+        Thread.sleep(2000)
+        elevatorMachine.setState("")
+        Thread.sleep(1000)
+
+        //results of the test
+        val tolerance = 5.0
+        (masterPower + slave1Power + slave2Power + slave3Power + tolerance) / 4 >= masterPower
+        
     }
 }
