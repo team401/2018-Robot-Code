@@ -52,7 +52,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     }
 
 
-    stateMachine(INTAKE_WHEELS_MACHINE) {
+    val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
             action {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
@@ -90,7 +90,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    stateMachine(INTAKE_FOLDING_MACHINE) {
+    val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
         state(IntakeFoldingStates.GRAB) {
             entry {
                 folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
@@ -115,4 +115,42 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
+    test("Folding Machine"){
+        //test folding
+        foldingMachine.setState(IntakeFoldingStates.STOWED)
+        Thread.sleep(1000)
+
+        foldingMachine.setState(IntakeFoldingStates.GRAB)
+        Thread.sleep(1000)
+
+        foldingMachine.setState(IntakeFoldingStates.INTAKE)
+        Thread.sleep(1000)
+
+        true//TODO fix later
+    }
+    test("Intake Machine"){
+        //test each sides motors
+        left.set(ControlMode.PercentOutput, 1.0)
+        Thread.sleep(2000)
+        var leftVoltage by Publisher(0.0)
+        var leftCurrent by Publisher(0.0)
+        leftVoltage = left.motorOutputVoltage
+        leftCurrent = left.outputCurrent
+
+        left.set(ControlMode.PercentOutput, 0.0)
+        Thread.sleep(1000)
+
+        right.set(ControlMode.PercentOutput, 1.0)
+        Thread.sleep(2000)
+        var rightVoltage by Publisher(0.0)
+        var rightCurrent by Publisher(0.0)
+        rightVoltage = right.motorOutputVoltage
+        rightCurrent = right.outputCurrent
+
+        right.set(ControlMode.PercentOutput, 0.0)
+        Thread.sleep(1000)
+
+        leftCurrent + rightCurrent + 5.0 >= leftCurrent
+    }
+
 }
