@@ -59,4 +59,16 @@ val RungsSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
+
+    test("Rungs"){
+        rungsMachine.setState(RungsStates.STOWED)
+        Thread.sleep(1000)
+
+        rungsMachine.setState(RungsStates.DEPLOY)
+        Thread.sleep(1000)
+
+        rungsMachine.setState(RungsStates.DEPLOYED)
+        Thread.sleep(1000)
+        true
+    }
 }

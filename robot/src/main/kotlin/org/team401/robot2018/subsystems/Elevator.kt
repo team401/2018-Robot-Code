@@ -294,8 +294,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
-    test("Elevator test"){
-
+    test("Kicker test"){
         //test kicker
         elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
         Thread.sleep(1000)
@@ -304,6 +303,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorKickerMachine.setState("")
         Thread.sleep(1000)
 
+        true
+    }
+    test("Clamp test"){
         //test clamp
         elevatorClampMachine.setState(ElevatorClampStates.DEPLOYED)
         Thread.sleep(1000)
@@ -312,6 +314,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorClampMachine.setState("")
         Thread.sleep(1000)
 
+        true
+    }
+    test("Ratchet test"){
         //test ratchet
         elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
         Thread.sleep(1000)
@@ -320,6 +325,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorRatchetMachine.setState("")
         Thread.sleep(1000)
 
+        true
+    }
+    test("Shifter test"){
         //test shifter
         elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
         Thread.sleep(1000)
@@ -330,6 +338,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorShifterMachine.setState("")
         Thread.sleep(1000)
 
+        true
+    }
+    test("Elevator test"){
         //test elevator
         elevatorMachine.setState(ElevatorStates.HOMING)
         Thread.sleep(2000)
@@ -361,6 +372,5 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         //results of the test
         val tolerance = 5.0
         (masterPower + slave1Power + slave2Power + slave3Power + tolerance) / 4 >= masterPower
-        
     }
 }

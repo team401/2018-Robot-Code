@@ -115,8 +115,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
-    test("Intake test"){
-
+    test("Folding Machine"){
         //test folding
         foldingMachine.setState(IntakeFoldingStates.STOWED)
         Thread.sleep(1000)
@@ -127,6 +126,9 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         foldingMachine.setState(IntakeFoldingStates.INTAKE)
         Thread.sleep(1000)
 
+        true//TODO fix later
+    }
+    test("Intake Machine"){
         //test each sides motors
         left.set(ControlMode.PercentOutput, 1.0)
         Thread.sleep(2000)
@@ -150,4 +152,5 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         leftCurrent + rightCurrent + 5.0 >= leftCurrent
     }
+
 }
