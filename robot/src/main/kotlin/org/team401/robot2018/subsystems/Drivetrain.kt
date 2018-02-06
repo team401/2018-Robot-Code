@@ -2,6 +2,7 @@ package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
@@ -36,7 +37,9 @@ import org.team401.robot2018.*
 
 const val DRIVE_MACHINE = "drive"
 object DriveStates {
+    const val EXTERNAL_CONTROL = "nothing"
     const val OPEN_LOOP = "openloop"
+    const val CHEESY = "cheesy"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -48,7 +51,7 @@ object DriveShiftStates {
 
 val Drivetrain = TankDrivetrain(Constants.DrivetrainParameters.WHEEL_RADIUS, Constants.DrivetrainParameters.WHEELBASE)
 
-val DrivetrainSubsystem: Subsystem = buildSubsystem {
+val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     val leftFront = TalonSRX(Constants.MotorControllers.DRIVE_LEFT_FRONT_CAN)
     val leftMidF = TalonSRX(Constants.MotorControllers.DRIVE_LEFT_MIDF_CAN)
     val leftMidR = TalonSRX(Constants.MotorControllers.DRIVE_LEFT_MIDR_CAN)
@@ -106,6 +109,27 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
+        val cheesyParameters = CheesyDriveParameters(
+                0.65,
+                0.5,
+                4.0,
+                0.65,
+                3.5,
+                4.0,
+                5.0,
+                0.95,
+                1.3,
+                0.2,
+                0.1,
+                5.0,
+                3,
+                2
+        )
+
+        //Empty state for when the drivetrain is being controlled by other processes
+        state(DriveStates.EXTERNAL_CONTROL) {}
+
+        //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
             entry {
                 Drivetrain.zero()
@@ -113,14 +137,31 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
 
             }
             action {
-                Drivetrain.arcade(ControlMode.PercentOutput, LeftStick.readAxis { PITCH }, RightStick.readAxis { ROLL })//MasherBox.readAxis { LEFT_Y }, MasherBox.readAxis { RIGHT_X })
-                //println("${left.getPosition()}  ${right.getPosition()}");
-
+                Drivetrain.arcade(
+                        ControlMode.PercentOutput,
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL }
+                )
             }
 
         }
 
-        state("nothing") {}
+        //Totally our own control scheme and definitely not stolen from anywhere like team 254...
+        state(DriveStates.CHEESY) {
+            entry {
+                Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+            }
+            action {
+                Drivetrain.cheesy(
+                        ControlMode.PercentOutput,
+                        cheesyParameters,
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER }
+                )
+            }
+        }
 
         state("testAccel") {
             var startTime = 0L
@@ -202,104 +243,34 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    test("Drivetrain test"){
-        println("Running drivetrain test")
+    fun testMotor(controller: IMotorControllerEnhanced, name: String): Boolean {
+        Thread.sleep(1000)
+        controller.set(ControlMode.PercentOutput, 1.0)
+        Thread.sleep(1000)
 
-        Thread.sleep(1000)
-        leftFront.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val leftFrontEncPosition = leftFront.getSelectedSensorPosition(0)
-        val leftFrontEncVelocity = leftFront.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("leftFront Position", leftFrontEncPosition.toDouble())
-        SmartDashboard.putNumber("leftFront Velocity", leftFrontEncVelocity.toDouble())
-        leftFront.set(ControlMode.PercentOutput, 0.0)
+        val position = controller.getSelectedSensorPosition(0)
+        val velocity = controller.getSelectedSensorVelocity(0)
+        SmartDashboard.putNumber("$name Position", position.toDouble())
+        SmartDashboard.putNumber("$name Velocity", velocity.toDouble())
 
-        Thread.sleep(1000)
-        leftMidF.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val leftMidFEncPosition = leftMidF.getSelectedSensorPosition(0)
-        val leftMidFEncVelocity = leftMidF.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("leftMidF Position", leftMidFEncPosition.toDouble())
-        SmartDashboard.putNumber("leftMidF Velocity", leftMidFEncVelocity.toDouble())
-        leftMidF.set(ControlMode.PercentOutput, 0.0)
+        controller.set(ControlMode.PercentOutput, 0.0)
 
-        Thread.sleep(1000)
-        leftMidR.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val leftMidREncPosition = leftMidR.getSelectedSensorPosition(0)
-        val leftMidREncVelocity = leftMidR.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("leftMidR Position", leftMidREncPosition.toDouble())
-        SmartDashboard.putNumber("leftMidR Velocity", leftMidREncVelocity.toDouble())
-        leftMidR.set(ControlMode.PercentOutput, 0.0)
-
-        Thread.sleep(1000)
-        leftRear.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val leftRearEncPosition = leftRear.getSelectedSensorPosition(0)
-        val leftRearEncVelocity = leftRear.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("leftRear Position", leftRearEncPosition.toDouble())
-        SmartDashboard.putNumber("leftRear Velocity", leftRearEncVelocity.toDouble())
-        leftRear.set(ControlMode.PercentOutput, 0.0)
-
-        Thread.sleep(1000)
-        rightFront.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val rightFrontEncPosition = rightFront.getSelectedSensorPosition(0)
-        val rightFrontEncVelocity = rightFront.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("rightFront Position", rightFrontEncPosition.toDouble())
-        SmartDashboard.putNumber("rightFront Velocity", rightFrontEncVelocity.toDouble())
-        rightFront.set(ControlMode.PercentOutput, 0.0)
-
-        Thread.sleep(1000)
-        rightMidF.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val rightMidFEncPosition = rightMidF.getSelectedSensorPosition(0)
-        val rightMidFEncVelocity = rightMidF.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("rightMidF Position", rightMidFEncPosition.toDouble())
-        SmartDashboard.putNumber("rightMidF Velocity", rightMidFEncVelocity.toDouble())
-        rightMidF.set(ControlMode.PercentOutput, 0.0)
-
-        Thread.sleep(1000)
-        rightMidR.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val rightMidREncPosition = rightMidR.getSelectedSensorPosition(0)
-        val rightMidREncVelocity = rightMidR.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("rightMidR Position", rightMidREncPosition.toDouble())
-        SmartDashboard.putNumber("rightMidR Velocity", rightMidREncVelocity.toDouble())
-        rightMidR.set(ControlMode.PercentOutput, 0.0)
-
-        Thread.sleep(1000)
-        rightRear.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-        //Not sure if pidIdx if correct
-        val rightRearEncPosition = rightRear.getSelectedSensorPosition(0)
-        val rightRearEncVelocity = rightRear.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("rightRear Position", rightRearEncPosition.toDouble())
-        SmartDashboard.putNumber("rightRear Velocity", rightRearEncVelocity.toDouble())
-        rightRear.set(ControlMode.PercentOutput, 0.0)
-
-        leftMidF.follow(leftFront)
-        leftMidR.follow(leftFront)
-        leftRear.follow(leftFront)
-
-        rightMidF.follow(rightFront)
-        rightMidR.follow(rightFront)
-        rightRear.follow(rightFront)
-
-        false
+        return true //TODO pick a condition to test here
     }
 
+    test ("Drivetrain leftFront") { testMotor(leftFront, "leftFront") }
+    test ("Drivetrain leftMidF") { testMotor(leftMidF, "leftMidF") }
+    test ("Drivetrain leftMidR") { testMotor(leftMidR, "leftMidR") }
+    test ("Drivetrain leftRear") { testMotor(leftRear, "leftRear") }
+
+    test ("Drivetrain rightFront") { testMotor(rightFront, "rightFront") }
+    test ("Drivetrain rightMidF") { testMotor(rightMidF, "rightMidF") }
+    test("Drivetrain rightMidR") { testMotor(rightMidR, "rightMidR") }
+    test("Drivetrain rightRear") { testMotor(rightRear, "rightRear") }
+
     on (Events.TELEOP_ENABLED) {
-        driveMachine.setState(DriveStates.OPEN_LOOP)
+        driveMachine.setState(DriveStates.CHEESY)
         shiftMachine.setState(DriveShiftStates.HIGH)
-        //shiftMachine.setState(DriveShiftStates.AUTO)
     }
 
     on (Events.AUTO_ENABLED) {

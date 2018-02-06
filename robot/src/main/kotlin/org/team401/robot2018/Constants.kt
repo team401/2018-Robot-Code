@@ -17,36 +17,33 @@ object Constants {
 
 
     object MotorControllers {
-        const val DRIVE_LEFT_REAR_CAN = 1
-        const val DRIVE_LEFT_MIDR_CAN = 2
-        const val DRIVE_LEFT_MIDF_CAN = 3
-        const val DRIVE_LEFT_FRONT_CAN = 4
-        const val DRIVE_RIGHT_FRONT_CAN = 7
-        const val DRIVE_RIGHT_MIDF_CAN = 8
-        const val DRIVE_RIGHT_MIDR_CAN = 9
-        const val DRIVE_RIGHT_REAR_CAN = 10
+        const val DRIVE_LEFT_REAR_CAN = 0
+        const val DRIVE_LEFT_MIDR_CAN = 1
+        const val DRIVE_LEFT_MIDF_CAN = 2
+        const val DRIVE_LEFT_FRONT_CAN = 3
+        const val DRIVE_RIGHT_FRONT_CAN = 11
+        const val DRIVE_RIGHT_MIDF_CAN = 12
+        const val DRIVE_RIGHT_MIDR_CAN = 13
+        const val DRIVE_RIGHT_REAR_CAN = 14
 
-        const val ELEVATOR_MASTER_CAN = 0
-        const val ELEVATOR_SLAVE_1_CAN = 0
-        const val ELEVATOR_SLAVE_2_CAN = 0
-        const val ELEVATOR_SLAVE_3_CAN = 0
+        const val ELEVATOR_MASTER_CAN = 7
+        const val ELEVATOR_SLAVE_1_CAN = 10
+        const val ELEVATOR_SLAVE_2_CAN = 9
+        const val ELEVATOR_SLAVE_3_CAN = 8
 
-        const val INTAKE_LEFT_CAN = 0
-        const val INTAKE_RIGHT_CAN = 1
-        const val INTAKE_FOLDING_CAN = 0
+        const val INTAKE_LEFT_CAN = 5
+        const val INTAKE_RIGHT_CAN = 6
+        const val INTAKE_FOLDING_CAN = 4
     }
 
-    //PCM 0
     object Pneumatics {
-        const val PCM_ID = 0
+        const val SHIFTER_SOLENOID = 2
 
-        const val SHIFTER_SOLENOID = 7
-
-        const val ELEVATOR_SHIFTER_SOLENOID = 0
+        const val ELEVATOR_SHIFTER_SOLENOID = 3
         const val ELEVATOR_DEPLOY_SOLENOID = 0
-        const val ELEVATOR_RATCHET_SOLENOID = 0
-        const val ELEVATOR_KICKER_SOLENOID = 0
-        const val ELEVATOR_CLAMP_SOLENOID = 0
+        const val ELEVATOR_RATCHET_SOLENOID = 4
+        const val ELEVATOR_KICKER_SOLENOID = 6
+        const val ELEVATOR_CLAMP_SOLENOID = 5
 
         const val RUNGS_DEPLOY_SOLENOID = 0
     }
@@ -75,7 +72,7 @@ object Constants {
         const val DOWNSHIFT_CURRENT = 30 //A
 
         const val CLOSED_LOOP_RAMP = 0.0
-        const val OPEN_LOOP_RAMP = 0.0 //.25
+        const val OPEN_LOOP_RAMP = .25
     }
 
     object MotionProfileParameters {
