@@ -3,10 +3,13 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.wpilibj.SpeedController
 import edu.wpi.first.wpilibj.VictorSP
 import org.snakeskin.component.MotorGroup
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
+import org.team401.robot2018.Signals
+import org.team401.robot2018.pidf
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -38,33 +41,51 @@ object IntakeFoldingStates {
 val IntakeSubsystem: Subsystem = buildSubsystem {
     val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
 
-    val left = VictorSP(Constants.MotorControllers.INTAKE_LEFT_PWM)
-    val right = VictorSP(Constants.MotorControllers.INTAKE_RIGHT_PWM)
+    val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
+    val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
-    val motors = MotorGroup(left, right)
+    setup {
+        right.inverted = true
+
+        folding.configContinuousCurrentLimit(30, 0)
+        //folding.pidf(0.0,0.0,0.0,0.0)
+    }
+
 
     stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
             action {
-                motors.set(Constants.IntakeParameters.INTAKE_RATE)
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+
+                    if(left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
+                            right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT) {
+                        //Have cube
+                        //Move elevator or whatever
+                        //turn on LED's
+                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
+                    }
             }
         }
 
         state(IntakeWheelsStates.REVERSE) {
             action {
-                motors.set(Constants.IntakeParameters.REVERSE_RATE)
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
             }
         }
 
         state(IntakeWheelsStates.IDLE) {
             action {
-                motors.set(0.0)
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
             }
         }
 
         default {
             action {
-                motors.set(0.0)
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
             }
         }
     }
