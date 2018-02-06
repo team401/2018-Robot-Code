@@ -2,6 +2,10 @@ package org.team401.robot2018
 
 import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.sun.xml.internal.fastinfoset.util.StringArray
+import edu.wpi.first.networktables.NetworkTable
+import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.networktables.NetworkTablesJNI
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Talon
 import org.snakeskin.annotation.Setup
@@ -113,6 +117,10 @@ object TestAuto: AutoLoop() {
     AutoManager.auto = TestAuto
 
     //PowerUpAuto.publish()
+
+    val mjpeg = StringArray()
+    mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
+    NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
     Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick)
