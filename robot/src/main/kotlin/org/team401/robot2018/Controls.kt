@@ -21,6 +21,7 @@ import org.team401.robot2018.subsystems.*
 
 val LeftStick = HumanControls.t16000m(0) {
     invertAxis(Axes.PITCH)
+    /*
     whenButton(Buttons.TRIGGER) {
         pressed {
             DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("testAccel")
@@ -30,10 +31,12 @@ val LeftStick = HumanControls.t16000m(0) {
             DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.OPEN_LOOP)
         }
     }
+    */
 }
 
 val RightStick = HumanControls.t16000m(1) {
 //test masher code
+    /*
     whenButton(Buttons.TRIGGER){
         pressed {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.INTAKE)
@@ -64,6 +67,7 @@ val RightStick = HumanControls.t16000m(1) {
             IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
+    */
 
 }
 //val MasherBox = HumanControls.saitekButtonBox(2){}
