@@ -1,21 +1,15 @@
 package org.team401.robot2018
 
-import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.sun.xml.internal.fastinfoset.util.StringArray
-import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.networktables.NetworkTableInstance
-import edu.wpi.first.networktables.NetworkTablesJNI
 import edu.wpi.first.wpilibj.PowerDistributionPanel
-import edu.wpi.first.wpilibj.Talon
 import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
-import org.team401.robot2018.auto.MotionProfileRunner2
-import org.team401.robot2018.auto.MotionProfileRunner3
-import org.team401.robot2018.auto.RioProfileRunner
+import org.team401.robot2018.auto.motion.MotionProfileRunner
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 
@@ -42,11 +36,11 @@ object TestAuto: AutoLoop() {
 
     override val rate = 10L
     /*
-    lateinit var runnerLeft: RioProfileRunner
-    lateinit var runnerRight: RioProfileRunner
+    lateinit var runnerLeft: RioProfileRunnerOld
+    lateinit var runnerRight: RioProfileRunnerOld
     */
 
-    lateinit var runner: MotionProfileRunner3
+    lateinit var runner: MotionProfileRunner
 
     var started = false
 
@@ -55,8 +49,8 @@ object TestAuto: AutoLoop() {
         done = false
 
         /*
-        runnerLeft = RioProfileRunner(Drivetrain.left.master)
-        runnerRight = RioProfileRunner(Drivetrain.right.master)
+        runnerLeft = RioProfileRunnerOld(Drivetrain.left.master)
+        runnerRight = RioProfileRunnerOld(Drivetrain.right.master)
 
         runnerLeft.setPIDFV(f = 0.2)
         runnerRight.setPIDFV(f = 0.2)
@@ -70,7 +64,7 @@ object TestAuto: AutoLoop() {
         runnerRight.entry()
         */
 
-        runner = MotionProfileRunner3(Drivetrain.left.master as TalonSRX, Drivetrain.right.master as TalonSRX)
+        runner = MotionProfileRunner(Drivetrain.left.master as TalonSRX, Drivetrain.right.master as TalonSRX)
 
         runner.reset()
         runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L_.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R_.csv")
