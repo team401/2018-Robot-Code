@@ -40,8 +40,8 @@ fun main(args: Array<String>) {
     Cameras.start()
 
     val view = PipView(topView, frontView, PipView.Position.BOTTOM_CENTER, .5)
-    val server = MjpegServer(1180, view)
-    server.start()
+    val mjpegServer = MjpegServer(1180, view)
+    mjpegServer.start()
 
     val sideBySide = GridView(1, 2)
     sideBySide.putView(topView, 0, 0)
@@ -53,6 +53,9 @@ fun main(args: Array<String>) {
     val paramFile = File("parameters.json")
     val params = Gson().fromJson(paramFile.readText(), VisionParameters::class.java)
 
-    val cubeFinder = CubeFinderPipeline(top, params)
+    val dataServer = VisionDataServer(5801)
+    dataServer.start()
+
+    val cubeFinder = CubeFinderPipeline(top, dataServer, params)
     cubeFinder.start()
 }

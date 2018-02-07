@@ -5,7 +5,7 @@ import org.opencv.imgproc.Imgproc
 import org.team401.snakeeyes.MatProvider
 import org.team401.snakeeyes.pipeline.Pipeline
 
-class CubeFinderPipeline(provider: MatProvider, val p: VisionParameters): Pipeline(provider) {
+class CubeFinderPipeline(provider: MatProvider, server: VisionDataServer, val p: VisionParameters): Pipeline(provider) {
     val procRangeRect = Rect(Point(p.procRegionStart[0].toDouble(), p.procRegionStart[1].toDouble()),
                              Point(p.procRegionEnd[0].toDouble(), p.procRegionEnd[1].toDouble()))
 

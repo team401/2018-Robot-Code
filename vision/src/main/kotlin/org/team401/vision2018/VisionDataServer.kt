@@ -51,5 +51,6 @@ class VisionDataServer(override val port: Int): Server {
 
     override fun stop() {
         thread.interrupt()
+        thread.join()
     }
 }
