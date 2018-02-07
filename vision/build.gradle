@@ -5,7 +5,7 @@ def JETSON_USER = "ubuntu"
 def JETSON_PASS = "ubuntu"
 
 dependencies {
-    compile group: "org.team401", name: "snakeeyes", version: "1.0"
+    compile group: "org.team401", name: "snakeeyes", version: "1.1"
 
     compile group: 'org.zeromq', name: 'jeromq', version: '0.4.3'
 

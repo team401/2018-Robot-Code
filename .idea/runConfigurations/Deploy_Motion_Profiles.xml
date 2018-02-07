@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build Robot" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Deploy Motion Profiles" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/robot" />
@@ -10,11 +10,12 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="build" />
+          <option value="deployProfiles" />
         </list>
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <method />
   </configuration>
 </component>

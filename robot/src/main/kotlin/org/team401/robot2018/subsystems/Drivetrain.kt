@@ -244,7 +244,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     }
 
     fun testMotor(controller: IMotorControllerEnhanced, name: String): Boolean {
-        Thread.sleep(1000)
+        left.unlink()
+        right.unlink()
         controller.set(ControlMode.PercentOutput, 1.0)
         Thread.sleep(1000)
 
@@ -254,6 +255,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         SmartDashboard.putNumber("$name Velocity", velocity.toDouble())
 
         controller.set(ControlMode.PercentOutput, 0.0)
+
+        left.link()
+        right.link()
 
         return true //TODO pick a condition to test here
     }
