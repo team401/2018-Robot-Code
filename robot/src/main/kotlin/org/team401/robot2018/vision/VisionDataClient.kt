@@ -23,7 +23,7 @@ class VisionDataClient(val address: String = "10.4.1.3", val port: Int) {
     private val context = ZMQ.context(1)
     private lateinit var socket: ZMQ.Socket
     private val gson = Gson()
-    private val thread = Thread(::run)
+    private val thread = Thread(this::run)
 
     private fun run() {
         socket = context.socket(ZMQ.SUB)
