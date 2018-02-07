@@ -92,12 +92,12 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         }
 
         fun updateController(headingCorrection: Double) {
-            controller.set(ControlMode.PercentOutput, if (value != 0.0) value + (polarity * headingCorrection) else 0.0)
+            controller.set(ControlMode.PercentOutput, value + (polarity * headingCorrection))
         }
     }
 
-    private val left = MpSide(leftController, leftGains, 1.0)
-    private val right = MpSide(rightController, rightGains, -1.0)
+    private val left = MpSide(leftController, leftGains, -1.0)
+    private val right = MpSide(rightController, rightGains, 1.0)
 
     fun loadPoints(leftFilename: String, rightFilename: String) {
         val leftFile = File(leftFilename)
@@ -131,11 +131,6 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
     override fun action() {
         currentTime = System.currentTimeMillis()
 
-        if (currentTime - lastUpdate >= rate) {
-            pointIdx++
-            lastUpdate = currentTime
-        }
-
         if (pointIdx < Math.min(left.numPoints(), right.numPoints())) {
             left.calculate(pointIdx)
             right.calculate(pointIdx)
@@ -152,6 +147,11 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
         left.updateController(headingAdjustment)
         right.updateController(headingAdjustment)
+
+        if (currentTime - lastUpdate >= rate) {
+            pointIdx++
+            lastUpdate = currentTime
+        }
     }
 
     override fun exit() {
