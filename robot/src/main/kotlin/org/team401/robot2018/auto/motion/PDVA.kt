@@ -14,16 +14,14 @@ package org.team401.robot2018.auto.motion
  */
 
 /**
- * Gains for a PIDFVAH controller
+ * Gains for a PDVA controller
  *
  * @param p Proportional gain
  * @param d Derivative gain
- * @param f Feed-forward gain
  * @param v Velocity scalar.  Should be 1 / system max velocity
  * @param a Acceleration scalar.  Used to increase or decrease overall acceleration.  Usually 0.0
  */
-data class PDFVA(val p: Double = 0.0,
-                   val d: Double = 0.0,
-                   val f: Double = 0.0,
-                   val v: Double = 0.0,
-                   val a: Double = 0.0)
+data class PDVA(val p: Double = 0.0,
+                val d: Double = 0.0,
+                val v: Double = 0.0,
+                val a: Double = 0.0)

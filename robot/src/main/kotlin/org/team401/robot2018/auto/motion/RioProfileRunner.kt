@@ -18,7 +18,7 @@ import java.io.File
  * @version 2/6/18
  */
 
-class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDFVA, val rightGains: PDFVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
+class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
     /**
      * Represents a single point in a profile
      */
@@ -31,10 +31,10 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
              */
             fun fromCsv(line: String): Waypoint {
                 val split = line.split(",")
-                val position = split[0].toDouble() * 4096
-                val velocity = split[1].toDouble() * 4096 / 600
+                val position = UnitConversions.rotationsToNativeUnits(split[0].toDouble())
+                val velocity = UnitConversions.rpmToNativeUnits(split[1].toDouble())
                 val timestep = split[2].toInt()
-                val acceleration = split[3].toDouble()
+                val acceleration = UnitConversions.rpmpsToNativeUnits(split[3].toDouble())
                 val heading = split[4].toDouble()
 
                 return Waypoint(position, velocity, timestep, acceleration, heading)
@@ -46,7 +46,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
      * Represents one side of the drivetrain.
      * Contains all of the points, controllers, and gains for that side.
      */
-    private inner class MpSide(val controller: IMotorControllerEnhanced, val gains: PDFVA, val polarity: Double) {
+    private inner class MpSide(val controller: IMotorControllerEnhanced, val gains: PDVA, val polarity: Double) {
         private val points = arrayListOf<Waypoint>()
 
         fun loadPoints(file: File) {
@@ -81,10 +81,9 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
             error = currentWaypoint.position - sensor
             value =
-                    gains.f +
                     gains.p * error +
                     gains.d * ((error - lastError) / currentWaypoint.timestep) +
-                    (gains.v * currentWaypoint.velocity + gains.a * currentWaypoint.velocity)
+                    (gains.v * currentWaypoint.velocity + gains.a * currentWaypoint.acceleration)
 
             lastError = error
         }
@@ -93,7 +92,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         }
 
         fun updateController(headingCorrection: Double) {
-            controller.set(ControlMode.PercentOutput, value + (polarity * headingCorrection))
+            controller.set(ControlMode.PercentOutput, if (value != 0.0) value + (polarity * headingCorrection) else 0.0)
         }
     }
 
@@ -111,6 +110,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
     private var currentTime = 0L
     private var pointIdx = 0
     private var headingAdjustment = 0.0
+    private var desiredHeading = 0.0
+    private val imuValue = DoubleArray(3)
 
     override fun entry() {
         left.reset()
@@ -120,6 +121,11 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         currentTime = 0L
         pointIdx = 0
         headingAdjustment = 0.0
+        desiredHeading = 0.0
+
+        imuValue[0] = 0.0
+        imuValue[1] = 0.0
+        imuValue[2] = 0.0
     }
 
     override fun action() {
@@ -139,11 +145,17 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
             done = true
         }
 
-        left.updateController()
-        right.updateController()
+        imu.getYawPitchRoll(imuValue)
+        desiredHeading = left.activeHeading()
+
+        headingAdjustment = headingGain * (desiredHeading - imuValue[2])
+
+        left.updateController(headingAdjustment)
+        right.updateController(headingAdjustment)
     }
 
     override fun exit() {
-
+        left.controller.set(ControlMode.PercentOutput, 0.0)
+        right.controller.set(ControlMode.PercentOutput, 0.0)
     }
 }
