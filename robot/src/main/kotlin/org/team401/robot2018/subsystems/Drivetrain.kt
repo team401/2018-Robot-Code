@@ -148,6 +148,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
+            val imuData = DoubleArray(3)
+
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
@@ -160,6 +162,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         RightStick.readAxis { ROLL },
                         RightStick.readButton { TRIGGER }
                 )
+
+                imu.getYawPitchRoll(imuData)
+                println(imuData[0])
             }
         }
 

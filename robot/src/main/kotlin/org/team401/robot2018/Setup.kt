@@ -10,6 +10,8 @@ import org.snakeskin.auto.AutoManager
 import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
 import org.team401.robot2018.auto.motion.MotionProfileRunner
+import org.team401.robot2018.auto.motion.PDVA
+import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 
@@ -35,60 +37,25 @@ object TestAuto: AutoLoop() {
     var posRight by Publisher(0.0)
 
     override val rate = 10L
-    /*
-    lateinit var runnerLeft: RioProfileRunnerOld
-    lateinit var runnerRight: RioProfileRunnerOld
-    */
 
-    lateinit var runner: MotionProfileRunner
+    lateinit var runner: RioProfileRunner
 
     var started = false
 
     override fun entry() {
-        started = true
         done = false
+        started = true
+        runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
+                PDVA(p = 0.04, v = 1/1250.0, d = 0.25),
+                PDVA(p = 0.04, v = 1/1250.0, d = 0.25),
+                0.01)
 
-        /*
-        runnerLeft = RioProfileRunnerOld(Drivetrain.left.master)
-        runnerRight = RioProfileRunnerOld(Drivetrain.right.master)
-
-        runnerLeft.setPIDFV(f = 0.2)
-        runnerRight.setPIDFV(f = 0.2)
-
-        runnerLeft.loadPoints("/home/lvuser/profiles/TUNING_L.csv")
-        runnerRight.loadPoints("/home/lvuser/profiles/TUNING_R.csv")
-
-        runnerLeft.reset()
-        runnerRight.reset()
-        runnerLeft.entry()
-        runnerRight.entry()
-        */
-
-        runner = MotionProfileRunner(Drivetrain.left.master as TalonSRX, Drivetrain.right.master as TalonSRX)
-
-        runner.reset()
-        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L_.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R_.csv")
+        runner.loadPoints("/home/lvuser/profiles/TURNING_POINT_L_.csv", "/home/lvuser/profiles/TURNING_POINT_R_.csv")
         runner.entry()
-
     }
 
     override fun action() {
-        /*
-        runnerLeft.action()
-        runnerRight.action()
-
-        //posLeft = Drivetrain.left.getPosition(0) / 4096.0
-        //posRight = Drivetrain.right.getPosition(0) / 4096.0
-
-        if (runnerLeft.done && runnerRight.done) {
-            done = true
-        }
-        */
-
         runner.action()
-
-        posLeft = Drivetrain.left.getPosition(0) / 4096.0
-        posRight = Drivetrain.right.getPosition(0) / 4096.0
 
         if (runner.done) {
             done = true
@@ -97,10 +64,6 @@ object TestAuto: AutoLoop() {
 
     override fun exit() {
         if (started) {
-            /*
-            runnerLeft.exit()
-            runnerRight.exit()
-            */
             runner.exit()
         }
     }
