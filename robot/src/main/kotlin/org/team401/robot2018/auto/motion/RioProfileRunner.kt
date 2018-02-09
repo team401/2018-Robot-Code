@@ -35,7 +35,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
                 val velocity = split[1].toDouble()
                 val timestep = split[2].toInt()
                 val acceleration = try {
-                    UnitConversions.rpmpsToNativeUnits(split[3].toDouble())
+                    split[3].toDouble()
                 } catch (e: Exception) {
                     0.0
                 }
@@ -75,6 +75,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         var done = false
 
         fun reset() {
+            controller.set(ControlMode.PercentOutput, 0.0)
+
             error = 0.0
             lastError = 0.0
             sensor = 0.0

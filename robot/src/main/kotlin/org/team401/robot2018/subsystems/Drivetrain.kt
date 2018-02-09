@@ -40,6 +40,7 @@ object DriveStates {
     const val EXTERNAL_CONTROL = "nothing"
     const val OPEN_LOOP = "openloop"
     const val CHEESY = "cheesy"
+    const val CHEESY_CLOSED = "betterCheesy"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -109,25 +110,12 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
-        val cheesyParameters = CheesyDriveParameters(
-                0.65,
-                0.5,
-                4.0,
-                0.65,
-                3.5,
-                4.0,
-                5.0,
-                0.95,
-                1.3,
-                0.2,
-                0.1,
-                5.0,
-                3,
-                2
-        )
-
         //Empty state for when the drivetrain is being controlled by other processes
-        state(DriveStates.EXTERNAL_CONTROL) {}
+        state(DriveStates.EXTERNAL_CONTROL) {
+            entry {
+                Drivetrain.setRampRate(0.0, 0.0)
+            }
+        }
 
         //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
@@ -148,11 +136,29 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2
+            )
+
             val imuData = DoubleArray(3)
 
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
+                cheesyParameters.reset()
             }
             action {
                 Drivetrain.cheesy(
@@ -165,6 +171,43 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
                 imu.getYawPitchRoll(imuData)
                 println(imuData[0])
+            }
+        }
+
+        state(DriveStates.CHEESY_CLOSED) {
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2,
+                    4500.0
+            )
+
+            entry {
+                Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+                Drivetrain.setRampRate(.25, .25)
+                cheesyParameters.reset()
+            }
+
+            action {
+                Drivetrain.cheesy(
+                        ControlMode.Velocity,
+                        cheesyParameters,
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER }
+                )
             }
         }
 

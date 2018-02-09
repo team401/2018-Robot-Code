@@ -46,9 +46,9 @@ object TestAuto: AutoLoop() {
         done = false
         started = true
         runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
-                PDVA(p = 0.04, v = 1/1250.0, d = 0.25),
-                PDVA(p = 0.04, v = 1/1250.0, d = 0.25),
-                0.01)
+                PDVA(p = .07, v = 1/1000.0),
+                PDVA(p = .07, v = 1/1000.0),
+                0.015)
 
         runner.loadPoints("/home/lvuser/profiles/TURNING_POINT_L_.csv", "/home/lvuser/profiles/TURNING_POINT_R_.csv")
         runner.entry()
