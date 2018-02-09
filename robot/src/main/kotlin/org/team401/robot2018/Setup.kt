@@ -50,7 +50,7 @@ object TestAuto: AutoLoop() {
                 PDVA(p = 0.04, v = 1/1250.0, d = 0.25),
                 0.01)
 
-        runner.loadPoints("/home/lvuser/profiles/TURNING_POINT_L_.csv", "/home/lvuser/profiles/TURNING_POINT_R_.csv")
+        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_RIGHT_L_.csv", "/home/lvuser/profiles/LEFT_TO_RIGHT_R_.csv")
         runner.entry()
     }
 
