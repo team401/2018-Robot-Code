@@ -82,7 +82,15 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
 
     setup {
-        
+        master.setSelectedSensorPosition(0, 0, 0)
+        master.configMotionCruiseVelocity(2046, 0)
+        master.configMotionAcceleration(1023, 0)
+        master.config_kP(0, 0.1, 0)
+        master.config_kI(0, 0.0, 0)
+        master.config_kD(0, 0.0, 0)
+        master.config_kF(0, 0.0, 0)
+
+
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
@@ -188,6 +196,17 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             exit {
                 master.configZeroPosOnReverseLimit(false)
+            }
+        }
+        state("test"){
+            action{
+                if(MasherBox.readButton { 1 }){
+                    Signals.elevatorPosition += 512
+                }
+                if(MasherBox.readButton { 2 }){
+                    Signals.elevatorPosition -= 512
+                }
+                gearbox.set(ControlMode.MotionMagic, Signals.elevatorPosition)
             }
         }
 
@@ -298,7 +317,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     on (Events.TELEOP_ENABLED){
         elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
         Thread.sleep(500)
-        elevatorMachine.setState(ElevatorStates.MANUAL_ADJUSTMENT)
+        elevatorMachine.setState("test")
         println(elevatorMachine.getState())
     }
     test("Kicker test"){
