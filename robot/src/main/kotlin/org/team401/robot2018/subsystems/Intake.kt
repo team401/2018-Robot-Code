@@ -3,6 +3,7 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
+import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
@@ -121,6 +122,11 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
         }
+    }
+
+    on (Events.TELEOP_ENABLED){
+        intakeMachine.setState(IntakeWheelsStates.IDLE)
+        foldingMachine.setState(IntakeFoldingStates.STOWED)
     }
     test("Folding Machine"){
         //test folding

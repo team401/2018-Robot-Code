@@ -50,7 +50,7 @@ val LeftStick = HumanControls.t16000m(0) {
 
 val RightStick = HumanControls.t16000m(1) {
 //test masher code
-    /*
+
     whenButton(Buttons.TRIGGER){
         pressed {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.INTAKE)
@@ -81,7 +81,7 @@ val RightStick = HumanControls.t16000m(1) {
             IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
-    */
+    
 
 }
 
