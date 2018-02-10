@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
 import org.team401.robot2018.Signals
+import org.team401.robot2018.pidf
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -41,10 +42,20 @@ val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 val IntakeSubsystem: Subsystem = buildSubsystem {
 
     setup {
-        right.inverted = true
+        left.inverted = Constants.IntakeParameters.INVERT_LEFT
+        right.inverted = Constants.IntakeParameters.INVERT_RIGHT
 
-        folding.configContinuousCurrentLimit(30, 0)
-        //folding.pidf(0.0,0.0,0.0,0.0)
+        folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
+        folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
+
+        //folding.configContinuousCurrentLimit(30, 0)
+        /*
+        folding.pidf(
+                Constants.IntakeParameters.PIDF.P,
+                Constants.IntakeParameters.PIDF.I,
+                Constants.IntakeParameters.PIDF.D,
+                Constants.IntakeParameters.PIDF.F)
+                */
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
@@ -53,12 +64,14 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
 
+                /*
                     if(boxHeld()) {
                         //Have cube
                         //Move elevator or whatever
                         //turn on LED's
                         Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
                     }
+                    */
             }
         }
 

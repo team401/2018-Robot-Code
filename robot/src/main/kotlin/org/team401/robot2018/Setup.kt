@@ -33,7 +33,7 @@ import org.team401.robot2018.vision.VisionDataClient
 
 val Vision = VisionController("10.4.1.3")
 
-val visionDataClient = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
+val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 
 val PDP = PowerDistributionPanel()
 
@@ -85,13 +85,7 @@ object TestAuto: AutoLoop() {
     mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
-    Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
-    Controllers.add(LeftStick, RightStick)//,MasherBox)
+    Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
+    Controllers.add(LeftStick, RightStick)
     Sensors.add(VisionStopSensor)
-    /*
-    on(Events.DISABLED) {
-        Vision.exit()
-        PowerUpAuto.publish()
-    }
-    */
 }

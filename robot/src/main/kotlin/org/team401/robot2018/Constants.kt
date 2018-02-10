@@ -126,6 +126,17 @@ object Constants {
         const val GRAB_POS = 0.0
 
         const val HAVE_CUBE_CURRENT = 0.0
+        const val VOLTAGE_LIMIT = 0.25 //Percent vbus
+
+        const val INVERT_LEFT = false
+        const val INVERT_RIGHT = true
+
+        object PIDF {
+            const val P = 0.0
+            const val I = 0.0
+            const val D = 0.0
+            const val F = 0.0
+        }
     }
 
     object RungsParameters {
