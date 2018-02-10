@@ -2,14 +2,9 @@ package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import edu.wpi.first.wpilibj.Solenoid
-import edu.wpi.first.wpilibj.SpeedController
-import edu.wpi.first.wpilibj.VictorSP
-import org.snakeskin.component.MotorGroup
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
 import org.team401.robot2018.Signals
-import org.team401.robot2018.pidf
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -38,11 +33,12 @@ object IntakeFoldingStates {
     const val STOWED = "in"
 }
 
-val IntakeSubsystem: Subsystem = buildSubsystem {
-    val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
+val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
 
-    val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
-    val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
+val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
+val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
+
+val IntakeSubsystem: Subsystem = buildSubsystem {
 
     setup {
         right.inverted = true
@@ -51,15 +47,13 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         //folding.pidf(0.0,0.0,0.0,0.0)
     }
 
-
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
             action {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
 
-                    if(left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
-                            right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT) {
+                    if(boxHeld()) {
                         //Have cube
                         //Move elevator or whatever
                         //turn on LED's
@@ -152,5 +146,9 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         leftCurrent + rightCurrent + 5.0 >= leftCurrent
     }
+}
 
+fun boxHeld(): Boolean {
+    return left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
+           right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
 }
