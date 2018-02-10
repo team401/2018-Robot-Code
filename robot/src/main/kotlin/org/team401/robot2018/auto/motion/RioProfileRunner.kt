@@ -3,6 +3,7 @@ package org.team401.robot2018.auto.motion
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
+import org.team401.robot2018.UnitConversions
 import java.io.File
 
 /*
@@ -18,7 +19,7 @@ import java.io.File
  * @version 2/6/18
  */
 
-class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
+class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val tuning: Boolean = false, val rate: Long = 20): TankMotionStep() {
     /**
      * Represents a single point in a profile
      */
@@ -31,11 +32,19 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
              */
             fun fromCsv(line: String): Waypoint {
                 val split = line.split(",")
-                val position = UnitConversions.rotationsToNativeUnits(split[0].toDouble())
-                val velocity = UnitConversions.rpmToNativeUnits(split[1].toDouble())
+                val position = split[0].toDouble()
+                val velocity = split[1].toDouble()
                 val timestep = split[2].toInt()
-                val acceleration = UnitConversions.rpmpsToNativeUnits(split[3].toDouble())
-                val heading = split[4].toDouble()
+                val acceleration = try {
+                    split[3].toDouble()
+                } catch (e: Exception) {
+                    0.0
+                }
+                val heading = try {
+                    split[4].toDouble()
+                } catch (e: Exception) {
+                    90.0
+                }
 
                 return Waypoint(position, velocity, timestep, acceleration, heading)
             }
@@ -63,21 +72,29 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         var sensor = 0.0
         var value = 0.0
         var currentWaypoint = Waypoint(0.0, 0.0, 0, 0.0, 0.0)
+        var saturated = false
+        var done = false
 
         fun reset() {
+            controller.set(ControlMode.PercentOutput, 0.0)
+
             error = 0.0
             lastError = 0.0
             sensor = 0.0
             value = 0.0
+            currentWaypoint = Waypoint(0.0, 0.0, 0, 0.0, 0.0)
+            saturated = false
+            done = false
         }
 
         fun numPoints() = points.size
 
         fun activeHeading() = currentWaypoint.heading
 
-        fun calculate(index: Int) {
+        fun calculate(index: Int): Boolean {
+            saturated = false
             currentWaypoint = points[index]
-            sensor = controller.getSelectedSensorPosition(0).toDouble()
+            sensor = UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
 
             error = currentWaypoint.position - sensor
             value =
@@ -85,14 +102,33 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
                     gains.d * ((error - lastError) / currentWaypoint.timestep) +
                     (gains.v * currentWaypoint.velocity + gains.a * currentWaypoint.acceleration)
 
+            if (value > 1.0) {
+                value = 1.0
+                saturated = true
+            }
+            if (value < -1.0) {
+                value = -1.0
+                saturated = true
+            }
             lastError = error
+            return saturated
         }
+
         fun done() {
             value = 0.0
+            done = true
         }
 
         fun updateController(headingCorrection: Double) {
-            controller.set(ControlMode.PercentOutput, value + (polarity * headingCorrection))
+            if (!done) {
+                controller.set(ControlMode.PercentOutput, value + (polarity * headingCorrection))
+            } else {
+                controller.set(ControlMode.PercentOutput, 0.0)
+            }
+        }
+
+        fun zero(position: Int) {
+            controller.setSelectedSensorPosition(position, 0, 0)
         }
     }
 
@@ -126,6 +162,10 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imuValue[0] = 0.0
         imuValue[1] = 0.0
         imuValue[2] = 0.0
+
+        imu.setYaw(UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
+        left.zero(0)
+        right.zero(0)
     }
 
     override fun action() {
@@ -143,10 +183,14 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imu.getYawPitchRoll(imuValue)
         desiredHeading = left.activeHeading()
 
-        headingAdjustment = headingGain * (desiredHeading - imuValue[2])
+        headingAdjustment = headingGain * (desiredHeading - imuValue[0])
 
         left.updateController(headingAdjustment)
         right.updateController(headingAdjustment)
+
+        if (tuning) {
+            println("Index: $pointIdx, Left: ${left.value} (S: ${left.saturated}), Right: ${right.value} (S: ${right.saturated}), Heading: ${headingAdjustment}")
+        }
 
         if (currentTime - lastUpdate >= rate) {
             pointIdx++
