@@ -46,12 +46,12 @@ object TestAuto: AutoLoop() {
         done = false
         started = true
         runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
-                PDVA(p = .07, v = 1/1000.0),
-                PDVA(p = .07, v = 1/1000.0),
+                PDVA(p = 0.1, v = 1/1250.0),
+                PDVA(p = 0.1, v = 1/1250.0),
                 0.015,
                 tuning = true)
 
-        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_RIGHT_L_.csv", "/home/lvuser/profiles/LEFT_TO_RIGHT_R_.csv")
+        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
         runner.entry()
     }
 
@@ -80,8 +80,8 @@ object TestAuto: AutoLoop() {
     mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
-    Subsystems.add(ElevatorSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
-    Controllers.add(MasherBox)//LeftStick, RightStick)
+    Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Controllers.add(LeftStick, RightStick)//,MasherBox)
     Sensors.add(VisionStopSensor)
     /*
     on(Events.DISABLED) {

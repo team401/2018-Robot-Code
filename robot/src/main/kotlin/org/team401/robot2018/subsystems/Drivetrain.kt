@@ -193,6 +193,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         if (quickTurn) cube(roll) else roll,
                         quickTurn
                         )
+                println("${left.master.getSelectedSensorVelocity(0)}  ${right.master.getSelectedSensorVelocity(0)}")
             }
         }
 
@@ -218,7 +219,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                     5.0,
                     3,
                     2,
-                    3600.0
+                    4200.0
             )
 
             entry {
@@ -267,14 +268,12 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
             action {
                 //Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
-                println("running")
-
                 imu.getYawPitchRoll(yaw)
 
                 error = (desired - yaw[0])
 
-                left.set(ControlMode.PercentOutput, -error/desired)
-                right.set(ControlMode.PercentOutput, error/desired)
+                left.set(ControlMode.PercentOutput, (-error/desired) * 1.1)
+                right.set(ControlMode.PercentOutput, (error/desired) * 1.1)
 
                 readingLeft = Drivetrain.left.getPosition()
                 readingRight = Drivetrain.right.getPosition()
