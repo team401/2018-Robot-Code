@@ -119,6 +119,10 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
+            var leftVelocity = 0
+            var rightVelocity = 0
+            var lastLeft = 0
+            var lastRight = 0
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
@@ -130,6 +134,18 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         LeftStick.readAxis { PITCH },
                         RightStick.readAxis { ROLL }
                 )
+                leftVelocity = left.master.getSelectedSensorVelocity(0)
+                rightVelocity = right.master.getSelectedSensorVelocity(0)
+
+                if(leftVelocity > lastLeft){
+                    lastLeft = leftVelocity
+                    println("${lastLeft}  ${lastRight}")
+                }
+                if(rightVelocity > lastRight){
+                    lastRight = rightVelocity
+                    println("${lastLeft}  ${lastRight}")
+                }
+
             }
 
         }
@@ -202,7 +218,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                     5.0,
                     3,
                     2,
-                    4500.0
+                    3600.0
             )
 
             entry {
@@ -217,12 +233,13 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                 pitch = LeftStick.readAxis { PITCH }
                 roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
-                        ControlMode.PercentOutput,
+                        ControlMode.Velocity,
                         cheesyParameters,
                         pitch,
                         if (quickTurn) cube(roll) else roll,
                         quickTurn
                 )
+
             }
         }
 

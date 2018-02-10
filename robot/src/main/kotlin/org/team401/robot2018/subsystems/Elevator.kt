@@ -5,14 +5,13 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource
 import com.ctre.phoenix.motorcontrol.SensorCollection
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
-import org.team401.robot2018.Constants
-import org.team401.robot2018.PDP
+import org.snakeskin.event.Events
+import org.team401.robot2018.*
 //import org.team401.robot2018.MasherBox
-import org.team401.robot2018.Signals
-import org.team401.robot2018.configZeroPosOnReverseLimit
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -70,9 +69,9 @@ object  ElevatorClampStates{
 
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
-    val slave1 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
-    val slave2 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_2_CAN)
-    val slave3 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_3_CAN)
+    val slave1 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
+    val slave2 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_2_CAN)
+    val slave3 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_3_CAN)
 
     val gearbox = Gearbox(master, slave1, slave2, slave3)
 
@@ -83,6 +82,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
 
     setup {
+        
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
@@ -141,7 +141,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             action {
-                gearbox.set(ControlMode.PercentOutput, 0.0)//MasherBox.readAxis { PITCH_BLUE })
+                gearbox.set(ControlMode.PercentOutput, MasherBox.readAxis { PITCH_BLUE })
             }
         }
 
@@ -150,7 +150,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             var adjustment: Double
             action {
-                adjustment = Constants.ElevatorParameters.MANUAL_RATE * 0.0//MasherBox.readAxis { PITCH_BLUE }
+                adjustment = Constants.ElevatorParameters.MANUAL_RATE * MasherBox.readAxis { PITCH_BLUE }
                 Signals.elevatorPosition += adjustment
                 toSignal()
             }
@@ -293,6 +293,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 clamp.set(false)
             }
         }
+    }
+
+    on (Events.TELEOP_ENABLED){
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
+        Thread.sleep(500)
+        elevatorMachine.setState(ElevatorStates.MANUAL_ADJUSTMENT)
+        println(elevatorMachine.getState())
     }
     test("Kicker test"){
         //test kicker

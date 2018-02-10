@@ -80,8 +80,8 @@ object TestAuto: AutoLoop() {
     mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
-    Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
-    Controllers.add(LeftStick, RightStick)
+    Subsystems.add(ElevatorSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Controllers.add(MasherBox)//LeftStick, RightStick)
     Sensors.add(VisionStopSensor)
     /*
     on(Events.DISABLED) {
