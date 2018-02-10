@@ -1,4 +1,4 @@
-package org.team401.robot2018.auto
+package org.team401.robot2018.auto.motion
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
@@ -23,7 +23,7 @@ import java.io.File
  * RIO side motion profile runner.  Inspired by Jaci's DistanceFollower from Pathfinder
  * https://github.com/JacisNonsense/Pathfinder/blob/master/Pathfinder-Java/src/main/java/jaci/pathfinder/followers/DistanceFollower.java
  */
-class RioProfileRunner(val controller: IMotorControllerEnhanced, val rate: Long = 20L): AutoStep() {
+class RioProfileRunnerOld(val controller: IMotorControllerEnhanced, val rate: Long = 20L): AutoStep() {
     data class Point(val position: Double, val velocity: Double, val timestep: Int, val acceleration: Double)
 
     private fun genPoint(line: String): Point {

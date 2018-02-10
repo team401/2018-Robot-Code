@@ -1,4 +1,4 @@
-package org.team401.robot2018.auto
+package org.team401.robot2018.auto.motion
 
 import com.ctre.phoenix.motion.MotionProfileStatus
 import com.ctre.phoenix.motion.SetValueMotionProfile
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * @version 1/28/18
  */
 
-class MotionProfileRunner3(leftController: TalonSRX, rightController: TalonSRX, val pushRate: Long = 5L): AutoStep() {
+class MotionProfileRunner(override val leftController: TalonSRX, override val rightController: TalonSRX, val pushRate: Long = 5L): TankMotionStep() {
     private enum class MpState {
         NOT_SETUP,
         STREAMING,
