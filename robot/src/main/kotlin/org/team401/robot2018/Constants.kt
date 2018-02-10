@@ -1,5 +1,7 @@
 package org.team401.robot2018
 
+import org.team401.robot2018.auto.motion.PDVA
+
 /*
  * 2018-Robot-Code - Created on 1/13/18
  * Author: Cameron Earle
@@ -73,6 +75,9 @@ object Constants {
 
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
+
+        val LEFT_PDVA = PDVA()
+        val RIGHT_PDVA = PDVA()
     }
 
     object MotionProfileParameters {
@@ -108,6 +113,8 @@ object Constants {
         const val SCALE_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
+
+        const val PITCH_DIAMETER = 1.805 //in
     }
 
     object IntakeParameters {
