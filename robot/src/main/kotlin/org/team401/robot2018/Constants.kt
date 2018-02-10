@@ -73,6 +73,8 @@ object Constants {
 
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
+
+        const val PITCH_CORRECTION_MIN = 10 //fixme (testme)
     }
 
     object MotionProfileParameters {

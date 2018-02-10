@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.Sensors
 import org.snakeskin.dsl.machine
 import org.team401.robot2018.subsystems.*
+import org.team401.robot2018.Constants.DrivetrainParameters.PITCH_CORRECTION_MIN
 
 /*
  * 2018-Robot-Code - Created on 1/30/18
@@ -27,7 +28,7 @@ val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOper
     }
 }
 
-val CubeVisionSensor = Sensors.booleanSensor({ visionDataClient.read().isCubePresent}) {
+val CubeVisionSensor = Sensors.booleanSensor({visionDataClient.read().isCubePresent}) {
     pollAt(20)
 
     whenTriggered {
@@ -42,5 +43,21 @@ val CubeVisionSensor = Sensors.booleanSensor({ visionDataClient.read().isCubePre
         if(boxHeld()) IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.STOWED)
         else IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
     }
+}
 
+var imuData = DoubleArray(3)
+
+
+val RobotTipSensor = Sensors.numericSensor({Drivetrain.imu.getYawPitchRoll(imuData); Math.abs(imuData[1])}) {
+    pollAt(20)
+
+    whenAbove(PITCH_CORRECTION_MIN.toDouble()) {
+
+        //TODO
+    }
+
+    whenBelow(PITCH_CORRECTION_MIN.toDouble()) {
+
+        //TODO
+    }
 }
