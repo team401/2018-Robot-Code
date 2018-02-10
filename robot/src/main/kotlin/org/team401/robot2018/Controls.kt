@@ -80,4 +80,15 @@ val RightStick = HumanControls.t16000m(1) {
 
 }
 
-val MasherBox = HumanControls.saitekButtonBox(2){}
+val MasherBox = HumanControls.saitekButtonBox(2){
+    whenButton(1){
+        pressed {
+            Signals.elevatorPosition += 4096
+        }
+    }
+    whenButton(2){
+        pressed {
+            Signals.elevatorPosition-=4096
+        }
+    }
+}

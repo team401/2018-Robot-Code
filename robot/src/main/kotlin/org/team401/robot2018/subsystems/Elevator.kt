@@ -1,9 +1,6 @@
 package org.team401.robot2018.subsystems
 
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal
-import com.ctre.phoenix.motorcontrol.LimitSwitchSource
-import com.ctre.phoenix.motorcontrol.SensorCollection
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import edu.wpi.first.wpilibj.Solenoid
@@ -82,14 +79,15 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
 
     setup {
+        gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
+
         master.setSelectedSensorPosition(0, 0, 0)
         master.configMotionCruiseVelocity(2046, 0)
         master.configMotionAcceleration(1023, 0)
-        master.config_kP(0, 0.1, 0)
+        master.config_kP(0, 0.5, 0)
         master.config_kI(0, 0.0, 0)
         master.config_kD(0, 0.0, 0)
-        master.config_kF(0, 0.0, 0)
-
+        master.config_kF(0, 1/100.0, 0)
 
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
@@ -199,14 +197,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
         state("test"){
+            entry{
+                master.setSelectedSensorPosition(0,0,0)
+                Signals.elevatorPosition = 0.0
+            }
             action{
-                if(MasherBox.readButton { 1 }){
-                    Signals.elevatorPosition += 512
-                }
-                if(MasherBox.readButton { 2 }){
-                    Signals.elevatorPosition -= 512
-                }
                 gearbox.set(ControlMode.MotionMagic, Signals.elevatorPosition)
+                println("${master.getSelectedSensorPosition(0)}  ${Signals.elevatorPosition}")
             }
         }
 
@@ -315,10 +312,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED){
-        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
-        Thread.sleep(500)
-        elevatorMachine.setState("test")
-        println(elevatorMachine.getState())
+        elevatorMachine.setState(ElevatorStates.MANUAL_ADJUSTMENT)
+
     }
     test("Kicker test"){
         //test kicker

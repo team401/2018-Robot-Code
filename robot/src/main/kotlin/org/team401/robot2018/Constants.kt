@@ -96,7 +96,7 @@ object Constants {
 
         const val HOMING_RATE = -.1 //percent vbus
 
-        const val MANUAL_RATE = 512.0 //ticks / 20 ms
+        const val MANUAL_RATE = 4096/4.0 //ticks / 20 ms
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
