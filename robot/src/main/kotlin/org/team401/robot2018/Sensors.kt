@@ -2,7 +2,8 @@ package org.team401.robot2018
 
 import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.Sensors
-import org.snakeskin.sensors.BooleanSensor
+import org.snakeskin.dsl.machine
+import org.team401.robot2018.subsystems.*
 
 /*
  * 2018-Robot-Code - Created on 1/30/18
@@ -24,4 +25,22 @@ val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOper
         Thread.sleep(10000)
         Vision.stop()
     }
+}
+
+val CubeVisionSensor = Sensors.booleanSensor({ visionDataClient.read().isCubePresent}) {
+    pollAt(20)
+
+    whenTriggered {
+
+        IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.INTAKE)
+        IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.INTAKE)
+    }
+
+    whenUntriggered {
+
+        IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
+        if(boxHeld()) IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.STOWED)
+        else IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+    }
+
 }

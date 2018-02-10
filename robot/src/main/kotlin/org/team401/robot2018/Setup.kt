@@ -9,11 +9,14 @@ import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
+import org.team401.robot2018.Constants.MJPEGParameters.ADDRESS
+import org.team401.robot2018.Constants.MJPEGParameters.PORT
 import org.team401.robot2018.auto.motion.MotionProfileRunner
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
+import org.team401.robot2018.vision.VisionDataClient
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -29,6 +32,8 @@ import org.team401.robot2018.vision.VisionController
  */
 
 val Vision = VisionController("10.4.1.3")
+
+val visionDataClient = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 
 val PDP = PowerDistributionPanel()
 
