@@ -108,6 +108,8 @@ object Constants {
         const val SCALE_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
+
+        const val PITCH_DIAMETER = 1.805 //in
     }
 
     object IntakeParameters {

@@ -1,4 +1,4 @@
-package org.team401.robot2018.auto.motion
+package org.team401.robot2018
 
 /*
  * 2018-Robot-Code - Created on 2/7/18
