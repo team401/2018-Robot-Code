@@ -21,6 +21,15 @@ import org.team401.robot2018.subsystems.*
 
 val LeftStick = HumanControls.t16000m(0) {
     invertAxis(Axes.PITCH)
+    whenButton(Buttons.TRIGGER) {
+        pressed {
+            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY)
+        }
+        released {
+            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY_CLOSED)
+        }
+    }
+
     /*
     whenButton(Buttons.TRIGGER) {
         pressed {

@@ -18,7 +18,7 @@ import java.io.File
  * @version 2/6/18
  */
 
-class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
+class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val tuning: Boolean = false, val rate: Long = 20): TankMotionStep() {
     /**
      * Represents a single point in a profile
      */
@@ -162,7 +162,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imuValue[1] = 0.0
         imuValue[2] = 0.0
 
-        val error = imu.setYaw(UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
+        imu.setYaw(UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
         left.zero(0)
         right.zero(0)
     }
@@ -187,7 +187,9 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         left.updateController(headingAdjustment)
         right.updateController(headingAdjustment)
 
-        println("Index: $pointIdx, Left: ${left.value} (S: ${left.saturated}), Right: ${right.value} (S: ${right.saturated}), Heading: ${headingAdjustment}")
+        if (tuning) {
+            println("Index: $pointIdx, Left: ${left.value} (S: ${left.saturated}), Right: ${right.value} (S: ${right.saturated}), Heading: ${headingAdjustment}")
+        }
 
         if (currentTime - lastUpdate >= rate) {
             pointIdx++

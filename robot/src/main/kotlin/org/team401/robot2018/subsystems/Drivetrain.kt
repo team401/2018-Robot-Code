@@ -136,6 +136,12 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
+            var quickTurn = false
+            var pitch = 0.0
+            var roll = 0.0
+
+            fun cube(d: Double) = d*d*d
+
             val cheesyParameters = CheesyDriveParameters(
                     0.65,
                     0.5,
@@ -161,20 +167,26 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                 cheesyParameters.reset()
             }
             action {
+                quickTurn = RightStick.readButton { TRIGGER }
+                pitch = LeftStick.readAxis { PITCH }
+                roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
                         ControlMode.PercentOutput,
                         cheesyParameters,
-                        LeftStick.readAxis { PITCH },
-                        RightStick.readAxis { ROLL },
-                        RightStick.readButton { TRIGGER }
-                )
-
-                imu.getYawPitchRoll(imuData)
-                println(imuData[0])
+                        pitch,
+                        if (quickTurn) cube(roll) else roll,
+                        quickTurn
+                        )
             }
         }
 
         state(DriveStates.CHEESY_CLOSED) {
+            var quickTurn = false
+            var pitch = 0.0
+            var roll = 0.0
+
+            fun cube(d: Double) = d*d*d
+
             val cheesyParameters = CheesyDriveParameters(
                     0.65,
                     0.5,
@@ -201,12 +213,15 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             }
 
             action {
+                quickTurn = RightStick.readButton { TRIGGER }
+                pitch = LeftStick.readAxis { PITCH }
+                roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
-                        ControlMode.Velocity,
+                        ControlMode.PercentOutput,
                         cheesyParameters,
-                        LeftStick.readAxis { PITCH },
-                        RightStick.readAxis { ROLL },
-                        RightStick.readButton { TRIGGER }
+                        pitch,
+                        if (quickTurn) cube(roll) else roll,
+                        quickTurn
                 )
             }
         }
@@ -321,12 +336,12 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     test("Drivetrain rightRear") { testMotor(rightRear, "rightRear") }
 
     on (Events.TELEOP_ENABLED) {
-        driveMachine.setState(DriveStates.CHEESY)
+        driveMachine.setState(DriveStates.CHEESY_CLOSED)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 
     on (Events.AUTO_ENABLED) {
-        driveMachine.setState("nothing")
+        driveMachine.setState(DriveStates.EXTERNAL_CONTROL)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }
