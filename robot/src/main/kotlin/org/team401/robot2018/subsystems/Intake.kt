@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
+import org.team401.robot2018.RightStick
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
 
@@ -49,14 +50,15 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
         folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
 
-        //folding.configContinuousCurrentLimit(30, 0)
-        /*
+        folding.configContinuousCurrentLimit(30, 0)
+        folding.configPeakCurrentLimit(30,0)
+
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
                 Constants.IntakeParameters.PIDF.I,
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
-                */
+
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
@@ -115,7 +117,17 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             entry {
                 folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
             }
+            action{
+                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
+            }
         }
+        state("test"){
+            action{
+                folding.set(ControlMode.PercentOutput, RightStick.readAxis { PITCH })
+                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
+            }
+        }
+
 
         default {
             entry {

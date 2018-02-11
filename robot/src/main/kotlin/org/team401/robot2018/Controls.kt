@@ -20,6 +20,7 @@ import org.team401.robot2018.subsystems.*
 
 
 val LeftStick = HumanControls.t16000m(0) {
+
     invertAxis(Axes.PITCH)
     whenButton(Buttons.TRIGGER) {
         pressed {
@@ -81,7 +82,7 @@ val RightStick = HumanControls.t16000m(1) {
             IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
-    
+
 
 }
 
