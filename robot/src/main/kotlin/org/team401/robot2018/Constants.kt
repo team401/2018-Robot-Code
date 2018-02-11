@@ -121,9 +121,9 @@ object Constants {
         const val INTAKE_RATE = .5
         const val REVERSE_RATE = -.5
 
-        const val STOWED_POS = 467.0
-        const val INTAKE_POS = -795.0
-        const val GRAB_POS = 25.0
+        const val STOWED_POS = 1530.0
+        const val INTAKE_POS = 90.0
+        const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
         const val HAVE_CUBE_CURRENT = 0.0
         const val VOLTAGE_LIMIT = 1.0 //Percent vbus

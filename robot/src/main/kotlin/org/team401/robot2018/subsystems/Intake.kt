@@ -1,6 +1,7 @@
 package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
@@ -47,18 +48,24 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         left.inverted = Constants.IntakeParameters.INVERT_LEFT
         right.inverted = Constants.IntakeParameters.INVERT_RIGHT
 
+        folding.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,0)
+
         folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
         folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
 
         folding.configContinuousCurrentLimit(30, 0)
-        folding.configPeakCurrentLimit(30,0)
+        folding.configPeakCurrentLimit(30, 0)
 
+        //folding.setSelectedSensorPosition(folding.sensorCollection.pulseWidthPosition % 4096,0, 0)
+
+        /*
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
                 Constants.IntakeParameters.PIDF.I,
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
-
+    }*/
+        //P = 3 D = 30
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
@@ -105,11 +112,17 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             entry {
                 folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
             }
+            action{
+                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
+            }
         }
 
         state(IntakeFoldingStates.INTAKE) {
             entry {
                 folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
+            }
+            action{
+                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
             }
         }
 
@@ -121,10 +134,14 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
             }
         }
-        
+
         default {
             entry {
                 folding.set(ControlMode.PercentOutput, 0.0)
+            }
+            action{
+                println(folding.sensorCollection.pulseWidthPosition)
+
             }
         }
     }
