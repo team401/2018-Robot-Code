@@ -121,14 +121,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
             }
         }
-        state("test"){
-            action{
-                folding.set(ControlMode.PercentOutput, RightStick.readAxis { PITCH })
-                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
-            }
-        }
-
-
+        
         default {
             entry {
                 folding.set(ControlMode.PercentOutput, 0.0)
