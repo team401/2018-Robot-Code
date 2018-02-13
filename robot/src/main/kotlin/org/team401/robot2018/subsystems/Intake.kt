@@ -40,7 +40,11 @@ val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
 val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
 val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
+var cubeCount = 0
+
+
 val IntakeSubsystem: Subsystem = buildSubsystem {
+
 
     setup {
         left.inverted = Constants.IntakeParameters.INVERT_LEFT
@@ -63,46 +67,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         right.configVoltageCompSaturation(12.0,0)
         right.enableVoltageCompensation(true)
-    }
-
-    val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
-
-        state(IntakeWheelsStates.INTAKE) {
-            action {
-                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
-                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
-
-                /*
-                    if(boxHeld()) {
-                        //Have cube
-                        //Move elevator or whatever
-                        //turn on LED's
-                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
-                    }
-                    */
-            }
-        }
-
-        state(IntakeWheelsStates.REVERSE) {
-            action {
-                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
-                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
-            }
-        }
-
-        state(IntakeWheelsStates.IDLE) {
-            action {
-                left.set(ControlMode.PercentOutput, 0.0)
-                right.set(ControlMode.PercentOutput, 0.0)
-            }
-        }
-
-        default {
-            action {
-                left.set(ControlMode.PercentOutput, 0.0)
-                right.set(ControlMode.PercentOutput, 0.0)
-            }
-        }
     }
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
@@ -130,6 +94,57 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
+
+    val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+
+        state(IntakeWheelsStates.INTAKE) {
+            action {
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+
+                    if(boxHeld()) {
+                        //turn on LED's
+                        cubeCount++
+
+                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.DEPLOYED)
+
+                        setState(IntakeWheelsStates.IDLE)
+                        foldingMachine.setState(IntakeFoldingStates.GRAB)
+
+                        Thread.sleep(250)
+
+                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
+                    }else{
+                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.RETRACTED)
+                        ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
+                        //elevator to get cube is button mashers responsibility
+                    }
+
+            }
+        }
+
+        state(IntakeWheelsStates.REVERSE) {
+            action {
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
+            }
+        }
+
+        state(IntakeWheelsStates.IDLE) {
+            action {
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
+            }
+        }
+
+        default {
+            action {
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
+            }
+        }
+    }
+
     test("Folding Machine"){
         //test folding
         foldingMachine.setState(IntakeFoldingStates.STOWED)
