@@ -164,4 +164,8 @@ object Constants {
         const val ADDRESS = "10.4.1.3"
         const val PORT = "1180"
     }
+
+    object ReportingParameters {
+        const val REPORTING_RATE = 100L //ms
+    }
 }

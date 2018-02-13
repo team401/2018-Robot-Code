@@ -5,11 +5,14 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Sendable
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.ShifterState
+import org.snakeskin.dsl.Publisher
+import org.snakeskin.factory.ExecutorFactory
 import org.team401.robot2018.subsystems.Drivetrain
 import org.team401.robot2018.subsystems.Elevator
 import org.team401.robot2018.subsystems.Intake
 import org.team401.robot2018.subsystems.Rungs
 import java.lang.reflect.Field
+import java.util.concurrent.TimeUnit
 
 /*
  * 2018-Robot-Code - Created on 2/12/18
@@ -24,46 +27,36 @@ import java.lang.reflect.Field
  * @version 2/12/18
  */
 object Reporting {
+    private val executor = ExecutorFactory.getExecutor("reporting")
+
     private fun fusedCurrent(vararg channels: Int) = channels.map { PDP.getCurrent(it) }.average()
     class Report {
-        var yaw = 0.0
-        var pitch = 0.0
-        var driveLeftVelocity = 0.0
-        var driveRightVelocity = 0.0
-        var driveLeftPosition = 0.0
-        var driveRightPosition = 0.0
-        var driveLeftAmps = 0.0
-        var driveRightAmps = 0.0
-        var vbus = 0.0
-        var totalAmps = 0.0
-        var intakePos = 0.0
-        var intakeVelocity = 0.0
-        var intakeAmps = 0.0
-        var intakeLeftAmps = 0.0
-        var intakeRightAmps = 0.0
-        var elevatorVelocity = 0.0
-        var elevatorPosition = 0.0
-        var elevatorAmps = 0.0
-        var kicker = false
-        var clamp = false
-        var elevatorLowerLimit = false
-        var driveShift = "low"
-        var elevatorShift = "low"
-        var elevatorDeploy = "locked"
-        var elevatorRatchet = false
-        var rungsDeploy = "locked"
-
-        fun publishToSD() {
-            val fields = javaClass.declaredFields
-            fields.forEach {
-                when (it.type) {
-                    Double::class.java -> SmartDashboard.putNumber(it.name, it.get(this) as Double)
-                    Int::class.java -> SmartDashboard.putNumber(it.name, (it.get(this) as Int).toDouble())
-                    Boolean::class.java -> SmartDashboard.putBoolean(it.name, it.get(this) as Boolean)
-                    String::class.java -> SmartDashboard.putString(it.name, it.get(this) as String)
-                }
-            }
-        }
+        var yaw by Publisher(0.0)
+        var pitch by Publisher(0.0)
+        var driveLeftVelocity by Publisher(0.0)
+        var driveRightVelocity by Publisher(0.0)
+        var driveLeftPosition by Publisher(0.0)
+        var driveRightPosition by Publisher(0.0)
+        var driveLeftAmps by Publisher(0.0)
+        var driveRightAmps by Publisher(0.0)
+        var vbus by Publisher(0.0)
+        var totalAmps by Publisher(0.0)
+        var intakePos by Publisher(0.0)
+        var intakeVelocity by Publisher(0.0)
+        var intakeAmps by Publisher(0.0)
+        var intakeLeftAmps by Publisher(0.0)
+        var intakeRightAmps by Publisher(0.0)
+        var elevatorVelocity by Publisher(0.0)
+        var elevatorPosition by Publisher(0.0)
+        var elevatorAmps by Publisher(0.0)
+        var kicker by Publisher(false)
+        var clamp by Publisher(false)
+        var elevatorLowerLimit by Publisher(false)
+        var driveShift by Publisher("low")
+        var elevatorShift by Publisher("low")
+        var elevatorDeploy by Publisher("locked")
+        var elevatorRatchet by Publisher(false)
+        var rungsDeploy by Publisher("locked")
     }
     
     fun update() {
@@ -114,7 +107,9 @@ object Reporting {
             elevatorRatchet = Elevator.ratchet.get()
             rungsDeploy = if (Rungs.deployer.get()) "unlocked" else "locked"
         }
+    }
 
-        report.publishToSD()
+    fun start() {
+        executor.scheduleAtFixedRate(this::update, 0L, Constants.ReportingParameters.REPORTING_RATE, TimeUnit.MILLISECONDS)
     }
 }
