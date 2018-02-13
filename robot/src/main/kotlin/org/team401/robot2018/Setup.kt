@@ -88,6 +88,5 @@ object TestAuto: AutoLoop() {
     Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
     Controllers.add(LeftStick, RightStick)
     Sensors.add(VisionStopSensor)
-
     Reporting.start()
 }

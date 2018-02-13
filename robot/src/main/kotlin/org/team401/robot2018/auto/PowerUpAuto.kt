@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
 import org.team401.robot2018.auto.steps.AutoStep
@@ -48,6 +49,7 @@ object PowerUpAuto: AutoLoop() {
     var target = AutoTarget.SCALE_SWITCH
     var switch = MatchData.OwnedSide.UNKNOWN
     var scale = MatchData.OwnedSide.UNKNOWN
+    var baseDelay = 0L
 
     var sequence = arrayListOf<AutoStep>()
     private var sequenceIdx = 0
@@ -70,6 +72,7 @@ object PowerUpAuto: AutoLoop() {
     private fun fetchSD() {
         robotPos = robotPosSelector.selected
         target = autoTargetSelector.selected
+        baseDelay = SmartDashboard.getNumber("baseDelay", 0.0).toLong()
     }
 
     /**
@@ -96,6 +99,8 @@ object PowerUpAuto: AutoLoop() {
 
     private fun assembleAuto() {
         sequence.run {
+            add(DelayStep(baseDelay))
+
             add(Commands.DeployElevator)
             add(DelayStep(Delays.ELEVATOR_DEPLOY)) //Wait for the elevator to deploy
 
