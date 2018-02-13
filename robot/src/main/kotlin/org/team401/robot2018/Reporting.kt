@@ -1,5 +1,6 @@
 package org.team401.robot2018
 
+import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Sendable
@@ -29,7 +30,6 @@ import java.util.concurrent.TimeUnit
 object Reporting {
     private val executor = ExecutorFactory.getExecutor("reporting")
 
-    private fun fusedCurrent(vararg channels: Int) = channels.map { PDP.getCurrent(it) }.average()
     class Report {
         var yaw by Publisher(0.0)
         var pitch by Publisher(0.0)
@@ -71,33 +71,22 @@ object Reporting {
             driveRightVelocity = UnitConversions.nativeUnitsToRpm(Drivetrain.right.getVelocity().toDouble())
             driveLeftPosition = UnitConversions.nativeUnitsToRevolutions(Drivetrain.left.getPosition().toDouble())
             driveRightPosition = UnitConversions.nativeUnitsToRevolutions(Drivetrain.right.getPosition().toDouble())
-            driveLeftAmps = fusedCurrent(
-                    Constants.PDPChannels.DRIVE_LEFT_FRONT_PDP,
-                    Constants.PDPChannels.DRIVE_LEFT_MIDF_PDP,
-                    Constants.PDPChannels.DRIVE_LEFT_MIDR_PDP,
-                    Constants.PDPChannels.DRIVE_LEFT_REAR_PDP
-            )
-            driveRightAmps = fusedCurrent(
-                    Constants.PDPChannels.DRIVE_RIGHT_FRONT_PDP,
-                    Constants.PDPChannels.DRIVE_RIGHT_MIDF_PDP,
-                    Constants.PDPChannels.DRIVE_RIGHT_MIDR_PDP,
-                    Constants.PDPChannels.DRIVE_RIGHT_REAR_PDP
-            )
+            driveLeftAmps = Drivetrain.left.getCurrent()
+            driveRightAmps = Drivetrain.right.getCurrent()
             vbus = PDP.voltage
             totalAmps = PDP.totalCurrent
             intakePos = UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
             intakeVelocity = UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
-            intakeAmps = PDP.getCurrent(Constants.PDPChannels.INTAKE_FOLDING_PDP)
-            intakeLeftAmps = PDP.getCurrent(Constants.PDPChannels.INTAKE_LEFT_PDP)
-            intakeRightAmps = PDP.getCurrent(Constants.PDPChannels.INTAKE_RIGHT_PDP)
+            intakeAmps = Intake.folding.outputCurrent
+            intakeLeftAmps = Intake.left.outputCurrent
+            intakeRightAmps = Intake.right.outputCurrent
             elevatorVelocity = Elevator.gearbox.getVelocity().toDouble()
             elevatorPosition = Elevator.gearbox.getPosition().toDouble()
-            elevatorAmps = fusedCurrent(
-                    Constants.PDPChannels.ELEVATOR_MASTER_PDP,
+            elevatorAmps = Elevator.gearbox.getCurrent(
                     Constants.PDPChannels.ELEVATOR_SLAVE_1_PDP,
                     Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
                     Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
-            )
+                    )
             kicker = Elevator.kicker.get()
             clamp = Elevator.clamp.get()
             elevatorLowerLimit = (Elevator.gearbox.master as TalonSRX).sensorCollection.isRevLimitSwitchClosed
