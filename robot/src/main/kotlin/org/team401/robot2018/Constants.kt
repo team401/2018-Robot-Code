@@ -15,9 +15,6 @@ import org.team401.robot2018.auto.motion.PDVA
  * @version 1/13/18
  */
 object Constants {
-
-
-
     object MotorControllers {
         const val DRIVE_LEFT_REAR_CAN = 0
         const val DRIVE_LEFT_MIDR_CAN = 1
@@ -33,9 +30,29 @@ object Constants {
         const val ELEVATOR_SLAVE_2_CAN = 9
         const val ELEVATOR_SLAVE_3_CAN = 8
 
-        const val INTAKE_LEFT_CAN = 5
-        const val INTAKE_RIGHT_CAN = 6
-        const val INTAKE_FOLDING_CAN = 4
+        const val INTAKE_LEFT_CAN = 9
+        const val INTAKE_RIGHT_CAN = 8
+        const val INTAKE_FOLDING_CAN = 10
+    }
+
+    object PDPChannels {
+        const val DRIVE_LEFT_REAR_PDP = 15
+        const val DRIVE_LEFT_MIDR_PDP = 14
+        const val DRIVE_LEFT_MIDF_PDP = 13
+        const val DRIVE_LEFT_FRONT_PDP = 12
+        const val DRIVE_RIGHT_FRONT_PDP = 3
+        const val DRIVE_RIGHT_MIDF_PDP = 2
+        const val DRIVE_RIGHT_MIDR_PDP = 1
+        const val DRIVE_RIGHT_REAR_PDP = 0
+
+        const val ELEVATOR_MASTER_PDP = 7
+        const val ELEVATOR_SLAVE_1_PDP = 6
+        const val ELEVATOR_SLAVE_2_PDP = 5
+        const val ELEVATOR_SLAVE_3_PDP = 4
+
+        const val INTAKE_LEFT_PDP = 5
+        const val INTAKE_RIGHT_PDP = 6
+        const val INTAKE_FOLDING_PDP = 4
     }
 
     object Pneumatics {
