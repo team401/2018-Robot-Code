@@ -80,7 +80,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 Constants.IntakeParameters.PIDF.F)
     }*/
         //P = 3 D = 30
-                */
 
         left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
         left.enableVoltageCompensation(true)
@@ -111,6 +110,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         default {
             entry {
                 folding.set(ControlMode.PercentOutput, 0.0)
+            }
+
+            action {
+                println("INTAKE_POS: ${folding.sensorCollection.pulseWidthPosition}")
             }
         }
     }
@@ -202,6 +205,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         Thread.sleep(1000)
 
         leftCurrent + rightCurrent + 5.0 >= leftCurrent
+    }
+
+    on (Events.TELEOP_ENABLED) {
+        foldingMachine.setState(IntakeFoldingStates.STOWED)
     }
 }
 

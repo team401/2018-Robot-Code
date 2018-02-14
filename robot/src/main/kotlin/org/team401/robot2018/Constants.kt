@@ -30,9 +30,9 @@ object Constants {
         const val ELEVATOR_SLAVE_2_CAN = 9
         const val ELEVATOR_SLAVE_3_CAN = 8
 
-        const val INTAKE_LEFT_CAN = 9
-        const val INTAKE_RIGHT_CAN = 8
-        const val INTAKE_FOLDING_CAN = 10
+        const val INTAKE_LEFT_CAN = 5
+        const val INTAKE_RIGHT_CAN = 6
+        const val INTAKE_FOLDING_CAN = 4
     }
 
     object PDPChannels {
@@ -138,8 +138,8 @@ object Constants {
         const val INTAKE_RATE = .5
         const val REVERSE_RATE = -.5
 
-        const val STOWED_POS = 1530.0
-        const val INTAKE_POS = 90.0
+        const val STOWED_POS = 500.0
+        const val INTAKE_POS = 1600.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
         const val HAVE_CUBE_CURRENT = 0.0
@@ -148,7 +148,7 @@ object Constants {
         const val INVERT_LEFT = false
         const val INVERT_RIGHT = false
 
-        const val INTAKE_VOLTAGE = 12.0
+        const val INTAKE_VOLTAGE = 0.1
 
         object PIDF {
             const val P = 0.01
