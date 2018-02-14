@@ -62,7 +62,7 @@ val RightStick = HumanControls.t16000m(1) {
         }
         released {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
-            IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            //IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
     whenButton(Buttons.STICK_BOTTOM){
@@ -72,7 +72,7 @@ val RightStick = HumanControls.t16000m(1) {
         }
         released {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
-            IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            //IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
     whenButton(Buttons.STICK_LEFT){

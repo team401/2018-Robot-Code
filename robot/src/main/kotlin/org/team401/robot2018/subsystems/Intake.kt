@@ -63,12 +63,23 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         right.inverted = Constants.IntakeParameters.INVERT_RIGHT
 
         folding.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,0)
+        folding.setSelectedSensorPosition(folding.getSelectedSensorPosition(0) % 4096, 0, 0)
 
-        folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
-        folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
-
-        folding.configContinuousCurrentLimit(30, 0)
+        folding.configPeakOutputForward(.5, 0)
+        folding.configPeakOutputReverse(-.5, 0)
+        folding.enableCurrentLimit(true)
+        folding.configContinuousCurrentLimit(10, 0)
         folding.configPeakCurrentLimit(30, 0)
+        folding.configPeakCurrentDuration(100, 0)
+
+        left.enableCurrentLimit(false)
+        right.enableCurrentLimit(false)
+        left.configPeakCurrentLimit(40, 0)
+        right.configPeakCurrentLimit(40, 0)
+        left.configContinuousCurrentLimit(30, 0)
+        right.configContinuousCurrentLimit(30, 0)
+        left.configPeakCurrentDuration(100, 0)
+        right.configPeakCurrentDuration(100, 0)
 
         //folding.setSelectedSensorPosition(folding.sensorCollection.pulseWidthPosition % 4096,0, 0)
 
@@ -82,10 +93,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         //P = 3 D = 30
 
         left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
-        left.enableVoltageCompensation(true)
+        left.enableVoltageCompensation(false)
 
         right.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE,0)
-        right.enableVoltageCompensation(true)
+        right.enableVoltageCompensation(false)
     }
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
@@ -113,7 +124,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                println("INTAKE_POS: ${folding.sensorCollection.pulseWidthPosition}")
+                println("Intake:  present=${folding.sensorCollection.pulseWidthRiseToRiseUs != 0} pulsePos=${folding.sensorCollection.pulseWidthPosition} pos=${folding.getSelectedSensorPosition(0)}")
             }
         }
     }
@@ -125,6 +136,9 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
 
+                println("INTAKE")
+
+                /*
                     if(boxHeld()) {
                         //turn on LED's
                         cubeCount++
@@ -142,6 +156,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                         ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
                         //elevator to get cube is button mashers responsibility
                     }
+                    */
 
             }
         }
