@@ -35,14 +35,23 @@ object IntakeFoldingStates {
     const val STOWED = "in"
 }
 
-val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
-
-val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
-val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
+object Intake {
+    lateinit var folding: TalonSRX
+    lateinit var left: TalonSRX
+    lateinit var right: TalonSRX
+}
 
 val IntakeSubsystem: Subsystem = buildSubsystem {
+    val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
+
+    val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
+    val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
     setup {
+        Intake.folding = folding
+        Intake.left = left
+        Intake.right = right
+
         left.inverted = Constants.IntakeParameters.INVERT_LEFT
         right.inverted = Constants.IntakeParameters.INVERT_RIGHT
 
@@ -170,6 +179,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 }
 
 fun boxHeld(): Boolean {
-    return left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
-           right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
+    return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
+           Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
 }

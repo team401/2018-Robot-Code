@@ -20,6 +20,7 @@ object UnitConversions {
     fun rpmpsToNativeUnits(rpmps: Double, ticksPerRev: Double = 4096.0) = rpmps //TODO
 
     fun nativeUnitsToRevolutions(native: Double, ticksPerRev: Double = 4096.0) = native / ticksPerRev
+    fun nativeUnitsToRpm(native: Double, ticksPerRev: Double = 4096.0) = native * 600.0 / ticksPerRev
 
     fun degreesToCTREDumbUnit(degrees: Double) = degrees * 64.0 //Because that makes sense
 }
