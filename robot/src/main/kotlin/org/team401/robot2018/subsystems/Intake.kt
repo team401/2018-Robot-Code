@@ -58,10 +58,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 Constants.IntakeParameters.PIDF.F)
                 */
 
-        left.configVoltageCompSaturation(12.0, 0)
+        left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
         left.enableVoltageCompensation(true)
 
-        right.configVoltageCompSaturation(12.0,0)
+        right.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE,0)
         right.enableVoltageCompensation(true)
     }
 
