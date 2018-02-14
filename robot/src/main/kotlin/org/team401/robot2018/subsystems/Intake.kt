@@ -89,12 +89,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 Constants.IntakeParameters.PIDF.F)
     }*/
         //P = 3.5 D = 35
-
-        left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
-        left.enableVoltageCompensation(false)
-
-        right.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE,0)
-        right.enableVoltageCompensation(false)
     }
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
@@ -128,11 +122,15 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+        fun voltageCompensation(desiredOutput : Double) : Double{
+            return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)
+            println("Current Voltage ${PDP.voltage}")
+        }
 
         state(IntakeWheelsStates.INTAKE) {
             action {
-                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
-                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
+                left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
+                right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
 
                 println("INTAKE")
 

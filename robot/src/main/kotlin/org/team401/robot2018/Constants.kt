@@ -148,7 +148,9 @@ object Constants {
         const val INVERT_LEFT = true
         const val INVERT_RIGHT = true
 
-        const val INTAKE_VOLTAGE = 0.1
+        const val INTAKE_VOLTAGE = 12.0
+
+
 
         object PIDF {
             const val P = 3.5
