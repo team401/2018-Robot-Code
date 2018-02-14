@@ -6,10 +6,12 @@ import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
+import edu.wpi.first.wpilibj.PIDController
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.ShifterState
+import org.snakeskin.SnakeskinConstants
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
@@ -40,6 +42,7 @@ object DriveStates {
     const val EXTERNAL_CONTROL = "nothing"
     const val OPEN_LOOP = "openloop"
     const val CHEESY = "cheesy"
+    const val TIP_CONTROL = "tipControl"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -228,11 +231,34 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         }
 
         state(DriveShiftStates.AUTO) {
+
+            data class ShiftCommand(val state: ShifterState, val reason: String = "")
+
+            var lastShiftTime = System.currentTimeMillis()
+
+            //currentTime and lastShiftTime in ms
+            fun shiftAuto(currentTime: Long, currentAmpDraw: Double, currentVel: Double, currentGear: ShifterState): ShiftCommand {
+                if (currentAmpDraw >= Constants.DrivetrainParameters.DOWNSHIFT_CURRENT) return ShiftCommand(ShifterState.LOW, "Overcurrent")
+
+                if (currentTime - lastShiftTime <= 250) return ShiftCommand(currentGear, "Fast toggle")
+                //high gear and low velocity likely means the robot is stuck on a wall, so we return low gear
+                if (currentGear == ShifterState.HIGH && currentVel < Constants.DrivetrainParameters.SPEED_THRESHOLD) return ShiftCommand(ShifterState.LOW, "Underspeed")
+
+                if (Constants.DrivetrainParameters.SPEED_SPLIT - currentVel > Constants.DrivetrainParameters.DELTA) return ShiftCommand(ShifterState.LOW, "Low speed")
+                if (Constants.DrivetrainParameters.SPEED_SPLIT - currentVel < -Constants.DrivetrainParameters.DELTA) return ShiftCommand(ShifterState.HIGH, "High speed")
+                //minor velocity change, so no gear shift
+                return ShiftCommand(currentGear, "No cases satisfied")
+            }
+
+            fun update() {
+                lastShiftTime = System.currentTimeMillis()
+            }
+
             entry {
                 low()
             }
             action {
-                val newState = AutoShifter.shiftAuto(
+                val newState = shiftAuto(
                         System.currentTimeMillis(),
                         Drivetrain.getCurrent(),
                         Drivetrain.getVelocity() * .0025566,
