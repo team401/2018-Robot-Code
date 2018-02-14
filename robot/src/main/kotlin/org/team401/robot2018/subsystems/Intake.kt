@@ -7,6 +7,7 @@ import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
 import org.team401.robot2018.RightStick
+import org.team401.robot2018.PDP
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
 
@@ -42,7 +43,11 @@ val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
 val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
 val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
+var cubeCount = 0
+
+
 val IntakeSubsystem: Subsystem = buildSubsystem {
+
 
     setup {
         left.inverted = Constants.IntakeParameters.INVERT_LEFT
@@ -66,22 +71,66 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 Constants.IntakeParameters.PIDF.F)
     }*/
         //P = 3 D = 30
+                */
+
+        left.configVoltageCompSaturation(12.0, 0)
+        left.enableVoltageCompensation(true)
+
+        right.configVoltageCompSaturation(12.0,0)
+        right.enableVoltageCompensation(true)
+    }
+
+    val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
+        state(IntakeFoldingStates.GRAB) {
+            entry {
+                folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
+            }
+        }
+
+        state(IntakeFoldingStates.INTAKE) {
+            entry {
+                folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
+            }
+        }
+
+        state(IntakeFoldingStates.STOWED) {
+            entry {
+                folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
+            }
+        }
+
+        default {
+            entry {
+                folding.set(ControlMode.PercentOutput, 0.0)
+            }
+        }
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+
         state(IntakeWheelsStates.INTAKE) {
             action {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
 
-                /*
                     if(boxHeld()) {
-                        //Have cube
-                        //Move elevator or whatever
                         //turn on LED's
+                        cubeCount++
+
+                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.DEPLOYED)
+
+                        setState(IntakeWheelsStates.IDLE)
+                        foldingMachine.setState(IntakeFoldingStates.GRAB)
+
+                        Thread.sleep(250)
+
                         Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
+                    }else{
+                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.RETRACTED)
+                        ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
+                        //elevator to get cube is button mashers responsibility
                     }
-                    */
+
             }
         }
 
@@ -107,49 +156,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
-        state(IntakeFoldingStates.GRAB) {
-            entry {
-                folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
-            }
-            action{
-                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
-            }
-        }
 
-        state(IntakeFoldingStates.INTAKE) {
-            entry {
-                folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
-            }
-            action{
-                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
-            }
-        }
-
-        state(IntakeFoldingStates.STOWED) {
-            entry {
-                folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
-            }
-            action{
-                println("${folding.outputCurrent}  Pos:${folding.getSelectedSensorPosition(0)}")
-            }
-        }
-
-        default {
-            entry {
-                folding.set(ControlMode.PercentOutput, 0.0)
-            }
-            action{
-                println(folding.sensorCollection.pulseWidthPosition)
-
-            }
-        }
-    }
-
-    on (Events.TELEOP_ENABLED){
-        intakeMachine.setState(IntakeWheelsStates.IDLE)
-        foldingMachine.setState(IntakeFoldingStates.STOWED)
-    }
     test("Folding Machine"){
         //test folding
         foldingMachine.setState(IntakeFoldingStates.STOWED)
