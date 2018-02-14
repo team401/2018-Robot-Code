@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
+import org.team401.robot2018.PDP
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
 
@@ -65,9 +66,16 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
                 */
+
+        left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
+        left.enableVoltageCompensation(true)
+
+        right.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE,0)
+        right.enableVoltageCompensation(true)
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+
         state(IntakeWheelsStates.INTAKE) {
             action {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
