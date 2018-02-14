@@ -64,6 +64,15 @@ object  ElevatorClampStates{
     const val RETRACTED = "in"
 }
 
+object Elevator {
+    lateinit var gearbox: Gearbox
+    lateinit var shifter: Solenoid
+    lateinit var deployer: Solenoid
+    lateinit var ratchet: Solenoid
+    lateinit var kicker: Solenoid
+    lateinit var clamp: Solenoid
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
     val slave1 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
@@ -79,6 +88,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
 
     setup {
+        Elevator.gearbox = gearbox
+        Elevator.shifter = shifter
+        Elevator.deployer = deployer
+        Elevator.ratchet = ratchet
+        Elevator.kicker = kicker
+        Elevator.clamp = clamp
+        
         gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
         master.setSelectedSensorPosition(0, 0, 0)
