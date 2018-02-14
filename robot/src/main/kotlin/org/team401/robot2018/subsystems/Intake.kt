@@ -81,8 +81,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         left.configPeakCurrentDuration(100, 0)
         right.configPeakCurrentDuration(100, 0)
 
-        //folding.setSelectedSensorPosition(folding.sensorCollection.pulseWidthPosition % 4096,0, 0)
-
         /*
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
@@ -90,7 +88,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
     }*/
-        //P = 3 D = 30
+        //P = 3.5 D = 35
 
         left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
         left.enableVoltageCompensation(false)
