@@ -1,9 +1,12 @@
 package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
+import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
+import org.team401.robot2018.RightStick
 import org.team401.robot2018.PDP
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
@@ -50,16 +53,24 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         left.inverted = Constants.IntakeParameters.INVERT_LEFT
         right.inverted = Constants.IntakeParameters.INVERT_RIGHT
 
+        folding.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,0)
+
         folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
         folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
 
-        //folding.configContinuousCurrentLimit(30, 0)
+        folding.configContinuousCurrentLimit(30, 0)
+        folding.configPeakCurrentLimit(30, 0)
+
+        //folding.setSelectedSensorPosition(folding.sensorCollection.pulseWidthPosition % 4096,0, 0)
+
         /*
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
                 Constants.IntakeParameters.PIDF.I,
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
+    }*/
+        //P = 3 D = 30
                 */
 
         left.configVoltageCompSaturation(12.0, 0)
@@ -144,6 +155,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
+
 
     test("Folding Machine"){
         //test folding

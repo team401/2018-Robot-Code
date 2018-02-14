@@ -121,18 +121,18 @@ object Constants {
         const val INTAKE_RATE = .5
         const val REVERSE_RATE = -.5
 
-        const val STOWED_POS = 0.0
-        const val INTAKE_POS = 0.0
-        const val GRAB_POS = 0.0
+        const val STOWED_POS = 1530.0
+        const val INTAKE_POS = 90.0
+        const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
         const val HAVE_CUBE_CURRENT = 0.0
-        const val VOLTAGE_LIMIT = 0.25 //Percent vbus
+        const val VOLTAGE_LIMIT = 1.0 //Percent vbus
 
         const val INVERT_LEFT = false
-        const val INVERT_RIGHT = true
+        const val INVERT_RIGHT = false
 
         object PIDF {
-            const val P = 0.0
+            const val P = 0.01
             const val I = 0.0
             const val D = 0.0
             const val F = 0.0
