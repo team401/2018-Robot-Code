@@ -153,6 +153,13 @@ object Constants {
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
 
         const val PITCH_DIAMETER = 1.805 //in
+
+        object PIDF{
+            const val P = 0.5
+            const val I = 0.0
+            const val D = 0.0
+            const val F = 1/100.0
+        }
     }
 
     object IntakeParameters {
