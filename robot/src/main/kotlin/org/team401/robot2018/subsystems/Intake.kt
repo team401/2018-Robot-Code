@@ -114,17 +114,12 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             entry {
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
-
-            action {
-                println("Intake:  present=${folding.sensorCollection.pulseWidthRiseToRiseUs != 0} pulsePos=${folding.sensorCollection.pulseWidthPosition} pos=${folding.getSelectedSensorPosition(0)}")
-            }
         }
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
         fun voltageCompensation(desiredOutput : Double) : Double{
             return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)
-            println("Current Voltage ${PDP.voltage}")
         }
 
         state(IntakeWheelsStates.INTAKE) {
@@ -132,9 +127,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
                 right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
 
-                println("INTAKE")
 
-                /*
                     if(boxHeld()) {
                         //turn on LED's
                         cubeCount++
@@ -152,8 +145,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                         ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
                         //elevator to get cube is button mashers responsibility
                     }
-                    */
-
             }
         }
 
