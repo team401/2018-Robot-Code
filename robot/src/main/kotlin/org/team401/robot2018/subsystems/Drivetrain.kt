@@ -40,6 +40,7 @@ object DriveStates {
     const val EXTERNAL_CONTROL = "nothing"
     const val OPEN_LOOP = "openloop"
     const val CHEESY = "cheesy"
+    const val TIP_CONTROL = "tip_control"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -159,6 +160,20 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         LeftStick.readAxis { PITCH },
                         RightStick.readAxis { ROLL },
                         RightStick.readButton { TRIGGER }
+                )
+            }
+        }
+
+        state(DriveStates.TIP_CONTROL) {
+
+            action {
+
+                Drivetrain.cheesy(
+                        ControlMode.PercentOutput,
+                        cheesyParameters,
+                        Math.rint(getPitch()/Constants.DrivetrainParameters.PITCH_CORRECTION_MIN),
+                        Math.rint(getPitch()/Constants.DrivetrainParameters.ROLL_CORRECTION_MIN),
+                        false
                 )
             }
         }
