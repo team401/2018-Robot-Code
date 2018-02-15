@@ -68,9 +68,9 @@ object Constants {
     }
 
     object DrivetrainParameters {
-        const val DELTA = 0.5 //fixme (testme)
-        const val SPEED_THRESHOLD = 7.5 //fixme (testme)
-        const val SPEED_SPLIT = 3.5 //fixme (testme)
+        const val DELTA = 0.5 //f/s
+        const val SPEED_THRESHOLD = 7.5 //f/s
+        const val SPEED_SPLIT = 3.5 //f/s
         //above should be some value between the low gear speed and the high gear speed
 
         const val WHEEL_RADIUS = 2.0 //in
@@ -95,6 +95,9 @@ object Constants {
 
         val LEFT_PDVA = PDVA()
         val RIGHT_PDVA = PDVA()
+      
+        const val PITCH_CORRECTION_MIN = 10 //fixme (testme)
+        const val ROLL_CORRECTION_MIN = 10 //fixme (testme)
     }
 
     object MotionProfileParameters {
