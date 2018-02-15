@@ -160,6 +160,28 @@ object Constants {
             const val D = 0.0
             const val F = 1/100.0
         }
+
+        object KickerMachine{
+            const val EXTENDED = true
+            const val RETRACTED = false
+        }
+        object ClampMachine{
+            const val DEPLOYED = true
+            const val RETRACTED = false
+        }
+        object RachetMachine{
+            const val LOCKED = true
+            const val UNLOCKED = false
+        }
+        object ShifterMachine{
+            const val HIGH = true
+            const val LOW = false
+            const val HOLD = false
+        }
+        object DeployMachine{
+            const val LOCKED = false
+            const val UNLOCKED = true
+        }
     }
 
     object IntakeParameters {

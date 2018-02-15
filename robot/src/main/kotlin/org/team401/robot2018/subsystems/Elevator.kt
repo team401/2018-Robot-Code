@@ -3,6 +3,7 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
@@ -112,13 +113,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
-        //Constants for setting solenoid polarity
-        val locked = false
-        val unlocked = true
 
         state(ElevatorDeployStates.STOWED) {
             entry {
-                deployer.set(locked)
+                deployer.set(Constants.ElevatorParameters.DeployMachine.LOCKED)
             }
         }
 
@@ -126,13 +124,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             timeout(Constants.ElevatorParameters.DEPLOY_TIMER, ElevatorDeployStates.DEPLOYED)
 
             entry {
-                deployer.set(unlocked)
+                deployer.set(Constants.ElevatorParameters.DeployMachine.UNLOCKED)
             }
         }
 
         state(ElevatorDeployStates.DEPLOYED) {
             entry {
-                deployer.set(locked)
+                deployer.set(Constants.ElevatorParameters.DeployMachine.LOCKED)
             }
         }
 
@@ -212,44 +210,25 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 master.configZeroPosOnReverseLimit(false)
             }
         }
-        state("test"){
-            entry{
-                master.setSelectedSensorPosition(0,0,0)
-                Signals.elevatorPosition = 0.0
-            }
-            action{
-                gearbox.set(ControlMode.MotionMagic, Signals.elevatorPosition)
-            }
-        }
-
-        default {
-            action {
-                gearbox.stop()
-            }
-        }
     }
 
     val elevatorShifterMachine = stateMachine(ELEVATOR_SHIFTER_MACHINE) {
-        //Constants for setting solenoid polarity
-        val high = true
-        val low = false
-        val hold = false
 
         state(ElevatorShifterStates.RUN) {
             entry {
-                shifter.set(high)
+                shifter.set(Constants.ElevatorParameters.ShifterMachine.HIGH)
             }
         }
 
         state(ElevatorShifterStates.CLIMB) {
             entry {
-                shifter.set(low)
+                shifter.set(Constants.ElevatorParameters.ShifterMachine.LOW)
             }
         }
 
         state(ElevatorShifterStates.HOLD_CARRIAGE) {
             entry {
-                shifter.set(hold)
+                shifter.set(Constants.ElevatorParameters.ShifterMachine.HOLD)
             }
         }
 
@@ -261,19 +240,16 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
-        //Constants for setting solenoid polarity
-        val locked = true
-        val unlocked = false
 
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                ratchet.set(locked)
+                ratchet.set(Constants.ElevatorParameters.RachetMachine.LOCKED)
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                ratchet.set(unlocked)
+                ratchet.set(Constants.ElevatorParameters.RachetMachine.UNLOCKED)
             }
         }
 
@@ -285,19 +261,16 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     val elevatorKickerMachine = stateMachine(ELEVATOR_KICKER_MACHINE) {
-        //Constants for setting solenoid polarity
-        val extended = true
-        val retracted = false
 
         state(ElevatorKickerStates.KICK) {
             entry {
-                kicker.set(extended)
+                kicker.set(Constants.ElevatorParameters.KickerMachine.EXTENDED)
             }
         }
 
         state(ElevatorKickerStates.STOW) {
             entry {
-                kicker.set(retracted)
+                kicker.set(Constants.ElevatorParameters.KickerMachine.RETRACTED)
             }
         }
 
