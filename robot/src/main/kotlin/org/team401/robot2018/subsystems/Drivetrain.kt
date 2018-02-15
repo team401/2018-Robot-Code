@@ -186,7 +186,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                 cheesyParameters.reset()
             }
             action {
-                quickTurn = RightStick.readButton { TRIGGER }
+                quickTurn = LeftStick.readButton { TRIGGER }
                 pitch = LeftStick.readAxis { PITCH }
                 roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
@@ -405,7 +405,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     test("Drivetrain rightRear") { testMotor(rightRear, "rightRear") }
 
     on (Events.TELEOP_ENABLED) {
-        driveMachine.setState(DriveStates.CHEESY_CLOSED)
+        driveMachine.setState(DriveStates.CHEESY)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 
