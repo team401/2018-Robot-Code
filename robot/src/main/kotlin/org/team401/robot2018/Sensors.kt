@@ -29,7 +29,7 @@ val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOper
     }
 }
 
-val CubeVisionSensor = Sensors.booleanSensor({visionDataClient.read().isCubePresent}) {
+val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent }) {
     pollAt(20)
 
     whenTriggered {
