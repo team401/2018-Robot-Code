@@ -228,46 +228,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             }
         }
 
-
-        state("testAccel") {
-            var startTime = 0L
-            var readingLeft = 0
-            var readingRight = 0
-
-            var error = 0.0
-            val desired = 360
-            val yaw = DoubleArray(3)
-
-            //timeout(1500, DriveStates.OPEN_LOOP)
-            entry {
-                startTime = System.currentTimeMillis()
-                readingLeft = 0
-                readingRight = 0
-                error = 0.0
-
-                left.setPosition(0)
-                right.setPosition(0)
-
-                imu.setYaw(0.0, 0)
-            }
-
-            action {
-                imu.getYawPitchRoll(yaw)
-
-                error = (desired - yaw[0])
-
-                left.set(ControlMode.PercentOutput, -error/desired)
-                right.set(ControlMode.PercentOutput, error/desired)
-
-                readingLeft = Drivetrain.left.getPosition()
-                readingRight = Drivetrain.right.getPosition()
-            }
-
-            exit {
-                Drivetrain.stop()
-            }
-        }
-
         default {
             entry {
                 Drivetrain.stop()
