@@ -29,11 +29,6 @@ val LeftStick = HumanControls.t16000m(0) {
             DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY_CLOSED)
         }
     }
-    whenButton(Buttons.STICK_BOTTOM){
-        pressed {
-            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("testAccel")
-        }
-    }
 
     /*
     whenButton(Buttons.TRIGGER) {

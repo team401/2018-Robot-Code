@@ -219,7 +219,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
             action{
                 gearbox.set(ControlMode.MotionMagic, Signals.elevatorPosition)
-                println("${master.getSelectedSensorPosition(0)}  ${Signals.elevatorPosition}")
             }
         }
 
