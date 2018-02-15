@@ -95,6 +95,8 @@ object Constants {
 
         val LEFT_PDVA = PDVA()
         val RIGHT_PDVA = PDVA()
+      
+        const val PITCH_CORRECTION_MIN = 10 //fixme (testme)
     }
 
     object MotionProfileParameters {
