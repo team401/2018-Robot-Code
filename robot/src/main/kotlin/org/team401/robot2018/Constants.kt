@@ -1,5 +1,7 @@
 package org.team401.robot2018
 
+import org.team401.robot2018.auto.motion.PDVA
+
 /*
  * 2018-Robot-Code - Created on 1/13/18
  * Author: Cameron Earle
@@ -13,9 +15,6 @@ package org.team401.robot2018
  * @version 1/13/18
  */
 object Constants {
-
-
-
     object MotorControllers {
         const val DRIVE_LEFT_REAR_CAN = 0
         const val DRIVE_LEFT_MIDR_CAN = 1
@@ -31,9 +30,29 @@ object Constants {
         const val ELEVATOR_SLAVE_2_CAN = 9
         const val ELEVATOR_SLAVE_3_CAN = 8
 
-        const val INTAKE_LEFT_CAN = 5
-        const val INTAKE_RIGHT_CAN = 6
-        const val INTAKE_FOLDING_CAN = 4
+        const val INTAKE_LEFT_CAN = 9
+        const val INTAKE_RIGHT_CAN = 8
+        const val INTAKE_FOLDING_CAN = 10
+    }
+
+    object PDPChannels {
+        const val DRIVE_LEFT_REAR_PDP = 15
+        const val DRIVE_LEFT_MIDR_PDP = 14
+        const val DRIVE_LEFT_MIDF_PDP = 13
+        const val DRIVE_LEFT_FRONT_PDP = 12
+        const val DRIVE_RIGHT_FRONT_PDP = 3
+        const val DRIVE_RIGHT_MIDF_PDP = 2
+        const val DRIVE_RIGHT_MIDR_PDP = 1
+        const val DRIVE_RIGHT_REAR_PDP = 0
+
+        const val ELEVATOR_MASTER_PDP = 7
+        const val ELEVATOR_SLAVE_1_PDP = 6
+        const val ELEVATOR_SLAVE_2_PDP = 5
+        const val ELEVATOR_SLAVE_3_PDP = 4
+
+        const val INTAKE_LEFT_PDP = 5
+        const val INTAKE_RIGHT_PDP = 6
+        const val INTAKE_FOLDING_PDP = 4
     }
 
     object Pneumatics {
@@ -74,6 +93,9 @@ object Constants {
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
 
+        val LEFT_PDVA = PDVA()
+        val RIGHT_PDVA = PDVA()
+      
         const val PITCH_CORRECTION_MIN = 10 //fixme (testme)
     }
 
@@ -98,7 +120,7 @@ object Constants {
 
         const val HOMING_RATE = -.1 //percent vbus
 
-        const val MANUAL_RATE = 512.0 //ticks / 20 ms
+        const val MANUAL_RATE = 4096/4.0 //ticks / 20 ms
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
@@ -110,6 +132,8 @@ object Constants {
         const val SCALE_POS = HOME_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
+
+        const val PITCH_DIAMETER = 1.805 //in
     }
 
     object IntakeParameters {
@@ -121,6 +145,19 @@ object Constants {
         const val GRAB_POS = 0.0
 
         const val HAVE_CUBE_CURRENT = 0.0
+        const val VOLTAGE_LIMIT = 0.25 //Percent vbus
+
+        const val INVERT_LEFT = false
+        const val INVERT_RIGHT = true
+
+        const val INTAKE_VOLTAGE = 12.0
+
+        object PIDF {
+            const val P = 0.0
+            const val I = 0.0
+            const val D = 0.0
+            const val F = 0.0
+        }
     }
 
     object RungsParameters {
@@ -130,5 +167,9 @@ object Constants {
     object MJPEGParameters {
         const val ADDRESS = "10.4.1.3"
         const val PORT = "1180"
+    }
+
+    object ReportingParameters {
+        const val REPORTING_RATE = 100L //ms
     }
 }

@@ -1,18 +1,14 @@
 package org.team401.robot2018.subsystems
 
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal
-import com.ctre.phoenix.motorcontrol.LimitSwitchSource
-import com.ctre.phoenix.motorcontrol.SensorCollection
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
-import org.team401.robot2018.Constants
-import org.team401.robot2018.PDP
+import org.snakeskin.event.Events
+import org.team401.robot2018.*
 //import org.team401.robot2018.MasherBox
-import org.team401.robot2018.Signals
-import org.team401.robot2018.configZeroPosOnReverseLimit
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -68,11 +64,20 @@ object  ElevatorClampStates{
     const val RETRACTED = "in"
 }
 
+object Elevator {
+    lateinit var gearbox: Gearbox
+    lateinit var shifter: Solenoid
+    lateinit var deployer: Solenoid
+    lateinit var ratchet: Solenoid
+    lateinit var kicker: Solenoid
+    lateinit var clamp: Solenoid
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
-    val slave1 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
-    val slave2 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_2_CAN)
-    val slave3 = TalonSRX(Constants.MotorControllers.ELEVATOR_SLAVE_3_CAN)
+    val slave1 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
+    val slave2 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_2_CAN)
+    val slave3 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_3_CAN)
 
     val gearbox = Gearbox(master, slave1, slave2, slave3)
 
@@ -83,6 +88,23 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
 
     setup {
+        Elevator.gearbox = gearbox
+        Elevator.shifter = shifter
+        Elevator.deployer = deployer
+        Elevator.ratchet = ratchet
+        Elevator.kicker = kicker
+        Elevator.clamp = clamp
+        
+        gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
+
+        master.setSelectedSensorPosition(0, 0, 0)
+        master.configMotionCruiseVelocity(2046, 0)
+        master.configMotionAcceleration(1023, 0)
+        master.config_kP(0, 0.5, 0)
+        master.config_kI(0, 0.0, 0)
+        master.config_kD(0, 0.0, 0)
+        master.config_kF(0, 1/100.0, 0)
+
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
@@ -141,7 +163,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             action {
-                gearbox.set(ControlMode.PercentOutput, 0.0)//MasherBox.readAxis { PITCH_BLUE })
+                gearbox.set(ControlMode.PercentOutput, MasherBox.readAxis { PITCH_BLUE })
             }
         }
 
@@ -150,7 +172,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             var adjustment: Double
             action {
-                adjustment = Constants.ElevatorParameters.MANUAL_RATE * 0.0//MasherBox.readAxis { PITCH_BLUE }
+                adjustment = Constants.ElevatorParameters.MANUAL_RATE * MasherBox.readAxis { PITCH_BLUE }
                 Signals.elevatorPosition += adjustment
                 toSignal()
             }
@@ -188,6 +210,16 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             exit {
                 master.configZeroPosOnReverseLimit(false)
+            }
+        }
+        state("test"){
+            entry{
+                master.setSelectedSensorPosition(0,0,0)
+                Signals.elevatorPosition = 0.0
+            }
+            action{
+                gearbox.set(ControlMode.MotionMagic, Signals.elevatorPosition)
+                println("${master.getSelectedSensorPosition(0)}  ${Signals.elevatorPosition}")
             }
         }
 
@@ -293,6 +325,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 clamp.set(false)
             }
         }
+    }
+
+    on (Events.TELEOP_ENABLED){
+        elevatorMachine.setState(ElevatorStates.MANUAL_ADJUSTMENT)
+
     }
     test("Kicker test"){
         //test kicker
