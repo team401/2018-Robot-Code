@@ -25,8 +25,16 @@ object RungsStates {
     const val DEPLOYED = "deployed"
 }
 
+object Rungs {
+    lateinit var deployer: Solenoid
+}
+
 val RungsSubsystem: Subsystem = buildSubsystem {
     val deployer = Solenoid(Constants.Pneumatics.RUNGS_DEPLOY_SOLENOID)
+
+    setup {
+        Rungs.deployer = deployer
+    }
 
     val rungsMachine = stateMachine(RUNGS_MACHINE) {
         //Constants for setting solenoid polarity

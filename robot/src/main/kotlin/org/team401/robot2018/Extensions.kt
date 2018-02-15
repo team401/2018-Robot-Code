@@ -2,7 +2,9 @@ package org.team401.robot2018
 
 import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.ShifterState
+import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
 
 /*
@@ -34,6 +36,20 @@ fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 
 }
 
 fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)
+
+fun Gearbox.getCurrent(vararg pdpIds: Int): Double {
+    val amps = arrayListOf<Double>(master.outputCurrent)
+    slaves.forEachIndexed {
+        i, slave ->
+        if (slave is TalonSRX) {
+            amps.add(slave.outputCurrent)
+        } else {
+            amps.add(PDP.getCurrent(pdpIds[i]))
+        }
+    }
+
+    return amps.average()
+}
 
 fun TankDrivetrain.shiftUpdate(state: AutoShifter.ShiftCommand) {
     if (shifterState != state.state) {

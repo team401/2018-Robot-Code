@@ -12,6 +12,8 @@ import org.snakeskin.dsl.Publisher
 import org.team401.robot2018.Constants.MJPEGParameters.ADDRESS
 import org.team401.robot2018.Constants.MJPEGParameters.PORT
 import org.team401.robot2018.auto.motion.MotionProfileRunner
+import org.team401.robot2018.auto.motion.PDVA
+import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 import org.team401.robot2018.vision.VisionDataClient
@@ -31,7 +33,7 @@ import org.team401.robot2018.vision.VisionDataClient
 
 val Vision = VisionController("10.4.1.3")
 
-val visionDataClient = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
+val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 
 val PDP = PowerDistributionPanel()
 
@@ -40,60 +42,26 @@ object TestAuto: AutoLoop() {
     var posRight by Publisher(0.0)
 
     override val rate = 10L
-    /*
-    lateinit var runnerLeft: RioProfileRunnerOld
-    lateinit var runnerRight: RioProfileRunnerOld
-    */
 
-    lateinit var runner: MotionProfileRunner
+    lateinit var runner: RioProfileRunner
 
     var started = false
 
     override fun entry() {
-        started = true
         done = false
+        started = true
+        runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
+                PDVA(p = 0.1, v = 1/1250.0),
+                PDVA(p = 0.1, v = 1/1250.0),
+                0.015,
+                tuning = true)
 
-        /*
-        runnerLeft = RioProfileRunnerOld(Drivetrain.left.master)
-        runnerRight = RioProfileRunnerOld(Drivetrain.right.master)
-
-        runnerLeft.setPIDFV(f = 0.2)
-        runnerRight.setPIDFV(f = 0.2)
-
-        runnerLeft.loadPoints("/home/lvuser/profiles/TUNING_L.csv")
-        runnerRight.loadPoints("/home/lvuser/profiles/TUNING_R.csv")
-
-        runnerLeft.reset()
-        runnerRight.reset()
-        runnerLeft.entry()
-        runnerRight.entry()
-        */
-
-        runner = MotionProfileRunner(Drivetrain.left.master as TalonSRX, Drivetrain.right.master as TalonSRX)
-
-        runner.reset()
-        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L_.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R_.csv")
+        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
         runner.entry()
-
     }
 
     override fun action() {
-        /*
-        runnerLeft.action()
-        runnerRight.action()
-
-        //posLeft = Drivetrain.left.getPosition(0) / 4096.0
-        //posRight = Drivetrain.right.getPosition(0) / 4096.0
-
-        if (runnerLeft.done && runnerRight.done) {
-            done = true
-        }
-        */
-
         runner.action()
-
-        posLeft = Drivetrain.left.getPosition(0) / 4096.0
-        posRight = Drivetrain.right.getPosition(0) / 4096.0
 
         if (runner.done) {
             done = true
@@ -102,10 +70,6 @@ object TestAuto: AutoLoop() {
 
     override fun exit() {
         if (started) {
-            /*
-            runnerLeft.exit()
-            runnerRight.exit()
-            */
             runner.exit()
         }
     }
@@ -121,13 +85,8 @@ object TestAuto: AutoLoop() {
     mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
-    Subsystems.add(DrivetrainSubsystem)//, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
     Controllers.add(LeftStick, RightStick)
     Sensors.add(VisionStopSensor)
-    /*
-    on(Events.DISABLED) {
-        Vision.exit()
-        PowerUpAuto.publish()
-    }
-    */
+    Reporting.start()
 }

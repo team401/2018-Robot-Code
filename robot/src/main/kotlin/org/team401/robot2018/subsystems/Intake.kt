@@ -4,7 +4,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.team401.robot2018.Constants
+import org.team401.robot2018.PDP
 import org.team401.robot2018.Signals
+import org.team401.robot2018.pidf
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -33,32 +35,60 @@ object IntakeFoldingStates {
     const val STOWED = "in"
 }
 
-val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
-
-val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
-val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
+object Intake {
+    lateinit var folding: TalonSRX
+    lateinit var left: TalonSRX
+    lateinit var right: TalonSRX
+}
 
 val IntakeSubsystem: Subsystem = buildSubsystem {
+    val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
+
+    val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
+    val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
 
     setup {
-        right.inverted = true
+        Intake.folding = folding
+        Intake.left = left
+        Intake.right = right
 
-        folding.configContinuousCurrentLimit(30, 0)
-        //folding.pidf(0.0,0.0,0.0,0.0)
+        left.inverted = Constants.IntakeParameters.INVERT_LEFT
+        right.inverted = Constants.IntakeParameters.INVERT_RIGHT
+
+        folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
+        folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
+
+        //folding.configContinuousCurrentLimit(30, 0)
+        /*
+        folding.pidf(
+                Constants.IntakeParameters.PIDF.P,
+                Constants.IntakeParameters.PIDF.I,
+                Constants.IntakeParameters.PIDF.D,
+                Constants.IntakeParameters.PIDF.F)
+                */
+
+        left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
+        left.enableVoltageCompensation(true)
+
+        right.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE,0)
+        right.enableVoltageCompensation(true)
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+
         state(IntakeWheelsStates.INTAKE) {
             action {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
 
+                /*
                     if(boxHeld()) {
                         //Have cube
                         //Move elevator or whatever
                         //turn on LED's
                         Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
                     }
+                    */
             }
         }
 
@@ -149,6 +179,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 }
 
 fun boxHeld(): Boolean {
-    return left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
-           right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
+    return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
+           Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
 }
