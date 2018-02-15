@@ -150,7 +150,21 @@ object Constants {
 
         const val INTAKE_VOLTAGE = 12.0
 
-        
+        const val FOLDING_PEAK_LIMIT = 30
+        const val FOLDING_CONTINUOUS_LIMIT = 10
+        const val FOLDING_PEAK_LIMIT_DUR = 100
+
+        const val FOLDING_PEAK_OUTPUT_FORWARD = 0.5
+        const val FOLDING_PEAK_OUTPUT_REVERSE = -0.5
+
+        const val LEFT_PEAK_LIMIT = 40
+        const val RIGHT_PEAK_LIMIT = 40
+
+        const val LEFT_CONTINUOUS_LIMIT = 30
+        const val RIGHT_CONTINUOUS_LIMIT = 30
+
+        const val LEFT_PEAK_LIMIT_DUR = 100
+        const val RIGHT_PEAK_LIMIT_DUR = 100
 
 
 

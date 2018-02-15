@@ -65,30 +65,31 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         folding.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,0)
         folding.setSelectedSensorPosition(folding.getSelectedSensorPosition(0) % 4096, 0, 0)
 
-        folding.configPeakOutputForward(.5, 0)
-        folding.configPeakOutputReverse(-.5, 0)
+        folding.configPeakOutputForward(Constants.IntakeParameters.FOLDING_PEAK_OUTPUT_FORWARD, 0)
+        folding.configPeakOutputReverse(Constants.IntakeParameters.FOLDING_PEAK_OUTPUT_REVERSE, 0)
         folding.enableCurrentLimit(true)
-        folding.configContinuousCurrentLimit(10, 0)
-        folding.configPeakCurrentLimit(30, 0)
-        folding.configPeakCurrentDuration(100, 0)
+        folding.configContinuousCurrentLimit(Constants.IntakeParameters.FOLDING_CONTINUOUS_LIMIT, 0)
+        folding.configPeakCurrentLimit(Constants.IntakeParameters.FOLDING_PEAK_LIMIT, 0)
+        folding.configPeakCurrentDuration(Constants.IntakeParameters.FOLDING_PEAK_LIMIT_DUR, 0)
 
         left.enableCurrentLimit(false)
         right.enableCurrentLimit(false)
-        left.configPeakCurrentLimit(40, 0)
-        right.configPeakCurrentLimit(40, 0)
-        left.configContinuousCurrentLimit(30, 0)
-        right.configContinuousCurrentLimit(30, 0)
-        left.configPeakCurrentDuration(100, 0)
-        right.configPeakCurrentDuration(100, 0)
 
-        /*
+        left.configPeakCurrentLimit(Constants.IntakeParameters.LEFT_PEAK_LIMIT, 0)
+        right.configPeakCurrentLimit(Constants.IntakeParameters.RIGHT_PEAK_LIMIT, 0)
+
+        left.configContinuousCurrentLimit(Constants.IntakeParameters.LEFT_CONTINUOUS_LIMIT, 0)
+        right.configContinuousCurrentLimit(Constants.IntakeParameters.RIGHT_CONTINUOUS_LIMIT, 0)
+
+        left.configPeakCurrentDuration(Constants.IntakeParameters.LEFT_PEAK_LIMIT_DUR, 0)
+        right.configPeakCurrentDuration(Constants.IntakeParameters.RIGHT_PEAK_LIMIT_DUR, 0)
+
+
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
                 Constants.IntakeParameters.PIDF.I,
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
-    }*/
-        //P = 3.5 D = 35
     }
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
