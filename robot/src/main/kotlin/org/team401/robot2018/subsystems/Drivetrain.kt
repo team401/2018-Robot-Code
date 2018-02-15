@@ -168,7 +168,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                 cheesyParameters.reset()
             }
             action {
-                quickTurn = RightStick.readButton { TRIGGER }
+                quickTurn = LeftStick.readButton { TRIGGER }
                 pitch = LeftStick.readAxis { PITCH }
                 roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
@@ -225,6 +225,35 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         quickTurn
                 )
 
+            }
+        }
+
+        state(DriveStates.TIP_CONTROL) {
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2
+            )
+            action {
+
+                Drivetrain.cheesy(
+                        ControlMode.PercentOutput,
+                        cheesyParameters,
+                        Math.rint(getPitch()/Constants.DrivetrainParameters.PITCH_CORRECTION_MIN),
+                        Math.rint(getPitch()/Constants.DrivetrainParameters.ROLL_CORRECTION_MIN),
+                        false
+                )
             }
         }
 

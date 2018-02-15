@@ -49,9 +49,9 @@ object Constants {
         const val ELEVATOR_SLAVE_2_CAN = 9
         const val ELEVATOR_SLAVE_3_CAN = 8
 
-        const val INTAKE_LEFT_CAN = 9
-        const val INTAKE_RIGHT_CAN = 8
-        const val INTAKE_FOLDING_CAN = 10
+        const val INTAKE_LEFT_CAN = 5
+        const val INTAKE_RIGHT_CAN = 6
+        const val INTAKE_FOLDING_CAN = 4
     }
 
     object PDPChannels {
@@ -87,9 +87,9 @@ object Constants {
     }
 
     object DrivetrainParameters {
-        const val DELTA = 0.5 //fixme (testme)
-        const val SPEED_THRESHOLD = 7.5 //fixme (testme)
-        const val SPEED_SPLIT = 3.5 //fixme (testme)
+        const val DELTA = 0.5 //f/s
+        const val SPEED_THRESHOLD = 7.5 //f/s
+        const val SPEED_SPLIT = 3.5 //f/s
         //above should be some value between the low gear speed and the high gear speed
 
         const val WHEEL_RADIUS = 2.0 //in
@@ -116,6 +116,7 @@ object Constants {
         val RIGHT_PDVA = PDVA()
       
         const val PITCH_CORRECTION_MIN = 10 //fixme (testme)
+        const val ROLL_CORRECTION_MIN = 10 //fixme (testme)
     }
 
     object MotionProfileParameters {
@@ -185,25 +186,43 @@ object Constants {
     }
 
     object IntakeParameters {
-        const val INTAKE_RATE = .5
-        const val REVERSE_RATE = -.5
+        const val INTAKE_RATE = 1.0
+        const val REVERSE_RATE = -0.7
 
-        const val STOWED_POS = 0.0
-        const val INTAKE_POS = 0.0
-        const val GRAB_POS = 0.0
+        const val STOWED_POS = 650.0
+        const val INTAKE_POS = 2400.0
+        const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
         const val HAVE_CUBE_CURRENT = 0.0
-        const val VOLTAGE_LIMIT = 0.25 //Percent vbus
+        const val VOLTAGE_LIMIT = 1.0 //Percent vbus
 
-        const val INVERT_LEFT = false
+        const val INVERT_LEFT = true
         const val INVERT_RIGHT = true
 
         const val INTAKE_VOLTAGE = 12.0
 
+        const val FOLDING_PEAK_LIMIT = 30
+        const val FOLDING_CONTINUOUS_LIMIT = 10
+        const val FOLDING_PEAK_LIMIT_DUR = 100
+
+        const val FOLDING_PEAK_OUTPUT_FORWARD = 0.5
+        const val FOLDING_PEAK_OUTPUT_REVERSE = -0.5
+
+        const val LEFT_PEAK_LIMIT = 40
+        const val RIGHT_PEAK_LIMIT = 40
+
+        const val LEFT_CONTINUOUS_LIMIT = 30
+        const val RIGHT_CONTINUOUS_LIMIT = 30
+
+        const val LEFT_PEAK_LIMIT_DUR = 100
+        const val RIGHT_PEAK_LIMIT_DUR = 100
+
+
+
         object PIDF {
-            const val P = 0.0
+            const val P = 3.5
             const val I = 0.0
-            const val D = 0.0
+            const val D = 35.0
             const val F = 0.0
         }
     }

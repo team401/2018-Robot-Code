@@ -1,9 +1,12 @@
 package org.team401.robot2018.subsystems
 
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
+import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
+import org.team401.robot2018.RightStick
 import org.team401.robot2018.PDP
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
@@ -41,11 +44,15 @@ object Intake {
     lateinit var right: TalonSRX
 }
 
+var cubeCount = 0
+
+
 val IntakeSubsystem: Subsystem = buildSubsystem {
     val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
 
     val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
     val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
+
 
     setup {
         Intake.folding = folding
@@ -55,63 +62,35 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         left.inverted = Constants.IntakeParameters.INVERT_LEFT
         right.inverted = Constants.IntakeParameters.INVERT_RIGHT
 
-        folding.configPeakOutputForward(Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
-        folding.configPeakOutputReverse(-Constants.IntakeParameters.VOLTAGE_LIMIT, 0)
+        folding.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,0)
+        folding.setSelectedSensorPosition(folding.getSelectedSensorPosition(0) % 4096, 0, 0)
 
-        //folding.configContinuousCurrentLimit(30, 0)
-        /*
+        folding.configPeakOutputForward(Constants.IntakeParameters.FOLDING_PEAK_OUTPUT_FORWARD, 0)
+        folding.configPeakOutputReverse(Constants.IntakeParameters.FOLDING_PEAK_OUTPUT_REVERSE, 0)
+        folding.configContinuousCurrentLimit(Constants.IntakeParameters.FOLDING_CONTINUOUS_LIMIT, 0)
+        folding.configPeakCurrentLimit(Constants.IntakeParameters.FOLDING_PEAK_LIMIT, 0)
+        folding.configPeakCurrentDuration(Constants.IntakeParameters.FOLDING_PEAK_LIMIT_DUR, 0)
+
+        folding.enableCurrentLimit(true)
+        
+        left.enableCurrentLimit(false)
+        right.enableCurrentLimit(false)
+
+        left.configPeakCurrentLimit(Constants.IntakeParameters.LEFT_PEAK_LIMIT, 0)
+        right.configPeakCurrentLimit(Constants.IntakeParameters.RIGHT_PEAK_LIMIT, 0)
+
+        left.configContinuousCurrentLimit(Constants.IntakeParameters.LEFT_CONTINUOUS_LIMIT, 0)
+        right.configContinuousCurrentLimit(Constants.IntakeParameters.RIGHT_CONTINUOUS_LIMIT, 0)
+
+        left.configPeakCurrentDuration(Constants.IntakeParameters.LEFT_PEAK_LIMIT_DUR, 0)
+        right.configPeakCurrentDuration(Constants.IntakeParameters.RIGHT_PEAK_LIMIT_DUR, 0)
+
+
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
                 Constants.IntakeParameters.PIDF.I,
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
-                */
-
-        left.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE, 0)
-        left.enableVoltageCompensation(true)
-
-        right.configVoltageCompSaturation(Constants.IntakeParameters.INTAKE_VOLTAGE,0)
-        right.enableVoltageCompensation(true)
-    }
-
-    val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
-
-        state(IntakeWheelsStates.INTAKE) {
-            action {
-                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
-                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.INTAKE_RATE)
-
-                /*
-                    if(boxHeld()) {
-                        //Have cube
-                        //Move elevator or whatever
-                        //turn on LED's
-                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
-                    }
-                    */
-            }
-        }
-
-        state(IntakeWheelsStates.REVERSE) {
-            action {
-                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
-                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
-            }
-        }
-
-        state(IntakeWheelsStates.IDLE) {
-            action {
-                left.set(ControlMode.PercentOutput, 0.0)
-                right.set(ControlMode.PercentOutput, 0.0)
-            }
-        }
-
-        default {
-            action {
-                left.set(ControlMode.PercentOutput, 0.0)
-                right.set(ControlMode.PercentOutput, 0.0)
-            }
-        }
     }
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
@@ -139,6 +118,56 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
     }
+
+    val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+        state(IntakeWheelsStates.INTAKE) {
+            action {
+                left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
+                right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
+
+                    if(boxHeld()) {
+                        //turn on LED's
+                        cubeCount++
+
+                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.DEPLOYED)
+
+                        setState(IntakeWheelsStates.IDLE)
+                        foldingMachine.setState(IntakeFoldingStates.GRAB)
+
+                        Thread.sleep(250)
+
+                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
+                    }else{
+                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.RETRACTED)
+                        ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
+                        //elevator to get cube is button mashers responsibility
+                    }
+            }
+        }
+
+        state(IntakeWheelsStates.REVERSE) {
+            action {
+                left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
+                right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
+            }
+        }
+
+        state(IntakeWheelsStates.IDLE) {
+            action {
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
+            }
+        }
+
+        default {
+            action {
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
+            }
+        }
+    }
+
+
     test("Folding Machine"){
         //test folding
         foldingMachine.setState(IntakeFoldingStates.STOWED)
@@ -176,9 +205,16 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         leftCurrent + rightCurrent + 5.0 >= leftCurrent
     }
+
+    on (Events.TELEOP_ENABLED) {
+        foldingMachine.setState(IntakeFoldingStates.STOWED)
+    }
 }
 
 fun boxHeld(): Boolean {
     return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
            Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
+}
+fun voltageCompensation(desiredOutput : Double) : Double{
+    return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)
 }
