@@ -44,7 +44,6 @@ object DriveStates {
     const val CHEESY = "cheesy"
     const val CHEESY_CLOSED = "betterCheesy"
     const val TIP_CONTROL = "tipControl"
-    const val TIP_CONTROL = "tip_control"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -249,16 +248,10 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         }
 
         state(DriveStates.TIP_CONTROL) {
-
+            var correction = 0.0
             action {
-
-                Drivetrain.cheesy(
-                        ControlMode.PercentOutput,
-                        cheesyParameters,
-                        Math.rint(getPitch()/Constants.DrivetrainParameters.PITCH_CORRECTION_MIN),
-                        Math.rint(getPitch()/Constants.DrivetrainParameters.ROLL_CORRECTION_MIN),
-                        false
-                )
+                correction = getPitch() / Constants.DrivetrainParameters.TIP_CORRECTION_SCALAR
+                Drivetrain.arcade(ControlMode.PercentOutput, correction, 0.0)
             }
         }
 
