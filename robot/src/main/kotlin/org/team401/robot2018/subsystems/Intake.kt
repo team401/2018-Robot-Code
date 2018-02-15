@@ -67,11 +67,12 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         folding.configPeakOutputForward(Constants.IntakeParameters.FOLDING_PEAK_OUTPUT_FORWARD, 0)
         folding.configPeakOutputReverse(Constants.IntakeParameters.FOLDING_PEAK_OUTPUT_REVERSE, 0)
-        folding.enableCurrentLimit(true)
         folding.configContinuousCurrentLimit(Constants.IntakeParameters.FOLDING_CONTINUOUS_LIMIT, 0)
         folding.configPeakCurrentLimit(Constants.IntakeParameters.FOLDING_PEAK_LIMIT, 0)
         folding.configPeakCurrentDuration(Constants.IntakeParameters.FOLDING_PEAK_LIMIT_DUR, 0)
 
+        folding.enableCurrentLimit(true)
+        
         left.enableCurrentLimit(false)
         right.enableCurrentLimit(false)
 
@@ -119,15 +120,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
-        fun voltageCompensation(desiredOutput : Double) : Double{
-            return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)
-        }
-
         state(IntakeWheelsStates.INTAKE) {
             action {
                 left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
                 right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
-
 
                     if(boxHeld()) {
                         //turn on LED's
@@ -218,4 +214,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 fun boxHeld(): Boolean {
     return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
            Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
+}
+fun voltageCompensation(desiredOutput : Double) : Double{
+    return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)
 }
