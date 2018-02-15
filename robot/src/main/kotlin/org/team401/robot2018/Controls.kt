@@ -20,7 +20,9 @@ import org.team401.robot2018.subsystems.*
 
 
 val LeftStick = HumanControls.t16000m(0) {
+
     invertAxis(Axes.PITCH)
+    /*
     whenButton(Buttons.TRIGGER) {
         pressed {
             DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY)
@@ -29,11 +31,7 @@ val LeftStick = HumanControls.t16000m(0) {
             DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY_CLOSED)
         }
     }
-    whenButton(Buttons.STICK_BOTTOM){
-        pressed {
-            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("testAccel")
-        }
-    }
+    */
 
     /*
     whenButton(Buttons.TRIGGER) {
@@ -50,15 +48,16 @@ val LeftStick = HumanControls.t16000m(0) {
 
 val RightStick = HumanControls.t16000m(1) {
 //test masher code
-    /*
+
     whenButton(Buttons.TRIGGER){
         pressed {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.INTAKE)
+            //IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
             IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.INTAKE)
         }
         released {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
-            IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            //IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
     whenButton(Buttons.STICK_BOTTOM){
@@ -68,7 +67,7 @@ val RightStick = HumanControls.t16000m(1) {
         }
         released {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
-            IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            //IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
     whenButton(Buttons.STICK_LEFT){
@@ -81,7 +80,7 @@ val RightStick = HumanControls.t16000m(1) {
             IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
-    */
+
 
 }
 

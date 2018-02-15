@@ -6,6 +6,7 @@ import org.snakeskin.dsl.machine
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.Constants.DrivetrainParameters.PITCH_CORRECTION_MIN
 import org.team401.robot2018.Constants.DrivetrainParameters.ROLL_CORRECTION_MIN
+import org.team401.robot2018.vision.VisionDataClient
 
 /*
  * 2018-Robot-Code - Created on 1/30/18
@@ -29,7 +30,7 @@ val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOper
     }
 }
 
-val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent }) {
+val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent}) {
     pollAt(20)
 
     whenTriggered {
