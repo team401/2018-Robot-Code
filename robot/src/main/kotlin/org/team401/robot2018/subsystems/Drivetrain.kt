@@ -44,7 +44,6 @@ object DriveStates {
     const val CHEESY = "cheesy"
     const val CHEESY_CLOSED = "betterCheesy"
     const val TIP_CONTROL = "tipControl"
-    const val TIP_CONTROL = "tip_control"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -249,7 +248,22 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         }
 
         state(DriveStates.TIP_CONTROL) {
-
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2
+            )
             action {
 
                 Drivetrain.cheesy(
@@ -357,8 +371,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         Drivetrain.getCurrent(),
                         Drivetrain.getVelocity() * .0025566,
                         Drivetrain.shifterState)
-
-                Drivetrain.shiftUpdate(newState)
             }
         }
     }

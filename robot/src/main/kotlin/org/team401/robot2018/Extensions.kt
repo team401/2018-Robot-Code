@@ -1,6 +1,7 @@
 package org.team401.robot2018
 
 import com.ctre.phoenix.ParamEnum
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.ShifterState
@@ -49,12 +50,4 @@ fun Gearbox.getCurrent(vararg pdpIds: Int): Double {
     }
 
     return amps.average()
-}
-
-fun TankDrivetrain.shiftUpdate(state: AutoShifter.ShiftCommand) {
-    if (shifterState != state.state) {
-        shift(state.state)
-        println("Drivetrain Shifted: $state")
-        AutoShifter.update()
-    }
 }
