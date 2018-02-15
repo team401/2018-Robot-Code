@@ -42,6 +42,7 @@ object DriveStates {
     const val EXTERNAL_CONTROL = "nothing"
     const val OPEN_LOOP = "openloop"
     const val CHEESY = "cheesy"
+    const val CHEESY_CLOSED = "betterCheesy"
     const val TIP_CONTROL = "tipControl"
 }
 
@@ -114,23 +115,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
-        val cheesyParameters = CheesyDriveParameters(
-                0.65,
-                0.5,
-                4.0,
-                0.65,
-                3.5,
-                4.0,
-                5.0,
-                0.95,
-                1.3,
-                0.2,
-                0.1,
-                5.0,
-                3,
-                2
-        )
-
         //Empty state for when the drivetrain is being controlled by other processes
         state(DriveStates.EXTERNAL_CONTROL) {}
 
@@ -153,20 +137,98 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
+            var quickTurn = false
+            var pitch = 0.0
+            var roll = 0.0
+
+            fun cube(d: Double) = d*d*d
+
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2
+            )
+
+            val imuData = DoubleArray(3)
+
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
+                cheesyParameters.reset()
             }
             action {
+                quickTurn = RightStick.readButton { TRIGGER }
+                pitch = LeftStick.readAxis { PITCH }
+                roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
                         ControlMode.PercentOutput,
                         cheesyParameters,
-                        LeftStick.readAxis { PITCH },
-                        RightStick.readAxis { ROLL },
-                        RightStick.readButton { TRIGGER }
+                        pitch,
+                        if (quickTurn) cube(roll) else roll,
+                        quickTurn
                 )
+                println("${left.master.getSelectedSensorVelocity(0)}  ${right.master.getSelectedSensorVelocity(0)}")
             }
         }
+
+        state(DriveStates.CHEESY_CLOSED) {
+            var quickTurn = false
+            var pitch = 0.0
+            var roll = 0.0
+
+            fun cube(d: Double) = d*d*d
+
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2,
+                    4200.0
+            )
+
+            entry {
+                Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+                Drivetrain.setRampRate(.25, .25)
+                cheesyParameters.reset()
+            }
+
+            action {
+                quickTurn = RightStick.readButton { TRIGGER }
+                pitch = LeftStick.readAxis { PITCH }
+                roll = RightStick.readAxis { ROLL }
+                Drivetrain.cheesy(
+                        ControlMode.Velocity,
+                        cheesyParameters,
+                        pitch,
+                        if (quickTurn) cube(roll) else roll,
+                        quickTurn
+                )
+
+            }
+        }
+
 
         state("testAccel") {
             var startTime = 0L
