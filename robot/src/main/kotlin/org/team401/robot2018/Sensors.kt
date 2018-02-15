@@ -5,6 +5,7 @@ import org.snakeskin.dsl.Sensors
 import org.snakeskin.dsl.machine
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.Constants.DrivetrainParameters.PITCH_CORRECTION_MIN
+import org.team401.robot2018.Constants.DrivetrainParameters.ROLL_CORRECTION_MIN
 
 /*
  * 2018-Robot-Code - Created on 1/30/18
@@ -45,19 +46,43 @@ val CubeVisionSensor = Sensors.booleanSensor({visionDataClient.read().isCubePres
     }
 }
 
-var imuData = DoubleArray(3)
+fun getPitch(): Double {
+    var imuData = DoubleArray(3)
+    Drivetrain.imu.getYawPitchRoll(imuData)
+    return imuData[1]
+}
 
+fun getRoll(): Double {
+    var imuData = DoubleArray(3)
+    Drivetrain.imu.getYawPitchRoll(imuData)
+    return imuData[2]
+}
 
-val RobotTipSensor = Sensors.numericSensor({Drivetrain.imu.getYawPitchRoll(imuData); Math.abs(imuData[1])}) {
+val PitchSensor = Sensors.numericSensor({Math.abs(getPitch())}) {
     pollAt(20)
 
     whenAbove(PITCH_CORRECTION_MIN.toDouble()) {
 
-        //TODO
+        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
     }
 
     whenBelow(PITCH_CORRECTION_MIN.toDouble()) {
 
-        //TODO
+        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
     }
+}
+
+val RollSensor = Sensors.numericSensor({Math.abs(getRoll())}) {
+    pollAt(20)
+
+    whenAbove(ROLL_CORRECTION_MIN.toDouble()) {
+
+        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
+    }
+
+    whenBelow(ROLL_CORRECTION_MIN.toDouble()) {
+
+        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
+    }
+
 }
