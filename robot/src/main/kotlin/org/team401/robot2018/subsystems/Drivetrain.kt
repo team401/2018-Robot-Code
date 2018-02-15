@@ -27,7 +27,7 @@ import org.team401.robot2018.*
 /*
  * 2018-Robot-Code - Created on 1/13/18
  * Author: Cameron Earle
- * 
+ *
  * This code is licensed under the GNU GPL v3
  * You can find more info in the LICENSE file at project root
  */
@@ -42,7 +42,6 @@ object DriveStates {
     const val EXTERNAL_CONTROL = "nothing"
     const val OPEN_LOOP = "openloop"
     const val CHEESY = "cheesy"
-    const val CHEESY_CLOSED = "betterCheesy"
     const val TIP_CONTROL = "tipControl"
 }
 
@@ -52,6 +51,8 @@ object DriveShiftStates {
     const val LOW = "low"
     const val AUTO = "autoShifting"
 }
+
+data class ShiftCommand(val state: ShifterState, val reason: String = "")
 
 val Drivetrain = TankDrivetrain(Constants.DrivetrainParameters.WHEEL_RADIUS, Constants.DrivetrainParameters.WHEELBASE)
 
@@ -113,19 +114,28 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
+        val cheesyParameters = CheesyDriveParameters(
+                0.65,
+                0.5,
+                4.0,
+                0.65,
+                3.5,
+                4.0,
+                5.0,
+                0.95,
+                1.3,
+                0.2,
+                0.1,
+                5.0,
+                3,
+                2
+        )
+
         //Empty state for when the drivetrain is being controlled by other processes
-        state(DriveStates.EXTERNAL_CONTROL) {
-            entry {
-                Drivetrain.setRampRate(0.0, 0.0)
-            }
-        }
+        state(DriveStates.EXTERNAL_CONTROL) {}
 
         //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
-            var leftVelocity = 0
-            var rightVelocity = 0
-            var lastLeft = 0
-            var lastRight = 0
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
@@ -137,113 +147,24 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         LeftStick.readAxis { PITCH },
                         RightStick.readAxis { ROLL }
                 )
-                leftVelocity = left.master.getSelectedSensorVelocity(0)
-                rightVelocity = right.master.getSelectedSensorVelocity(0)
-
-                if(leftVelocity > lastLeft){
-                    lastLeft = leftVelocity
-                    println("${lastLeft}  ${lastRight}")
-                }
-                if(rightVelocity > lastRight){
-                    lastRight = rightVelocity
-                    println("${lastLeft}  ${lastRight}")
-                }
-
             }
 
         }
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
-            var quickTurn = false
-            var pitch = 0.0
-            var roll = 0.0
-
-            fun cube(d: Double) = d*d*d
-
-            val cheesyParameters = CheesyDriveParameters(
-                    0.65,
-                    0.5,
-                    4.0,
-                    0.65,
-                    3.5,
-                    4.0,
-                    5.0,
-                    0.95,
-                    1.3,
-                    0.2,
-                    0.1,
-                    5.0,
-                    3,
-                    2
-            )
-
-            val imuData = DoubleArray(3)
-
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
-                cheesyParameters.reset()
             }
             action {
-                quickTurn = RightStick.readButton { TRIGGER }
-                pitch = LeftStick.readAxis { PITCH }
-                roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
                         ControlMode.PercentOutput,
                         cheesyParameters,
-                        pitch,
-                        if (quickTurn) cube(roll) else roll,
-                        quickTurn
-                        )
-                println("${left.master.getSelectedSensorVelocity(0)}  ${right.master.getSelectedSensorVelocity(0)}")
-            }
-        }
-
-        state(DriveStates.CHEESY_CLOSED) {
-            var quickTurn = false
-            var pitch = 0.0
-            var roll = 0.0
-
-            fun cube(d: Double) = d*d*d
-
-            val cheesyParameters = CheesyDriveParameters(
-                    0.65,
-                    0.5,
-                    4.0,
-                    0.65,
-                    3.5,
-                    4.0,
-                    5.0,
-                    0.95,
-                    1.3,
-                    0.2,
-                    0.1,
-                    5.0,
-                    3,
-                    2,
-                    4200.0
-            )
-
-            entry {
-                Drivetrain.zero()
-                Drivetrain.setNeutralMode(NeutralMode.Coast)
-                Drivetrain.setRampRate(.25, .25)
-                cheesyParameters.reset()
-            }
-
-            action {
-                quickTurn = RightStick.readButton { TRIGGER }
-                pitch = LeftStick.readAxis { PITCH }
-                roll = RightStick.readAxis { ROLL }
-                Drivetrain.cheesy(
-                        ControlMode.Velocity,
-                        cheesyParameters,
-                        pitch,
-                        if (quickTurn) cube(roll) else roll,
-                        quickTurn
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER }
                 )
-
             }
         }
 
@@ -271,12 +192,14 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
             action {
                 //Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
+                println("running")
+
                 imu.getYawPitchRoll(yaw)
 
                 error = (desired - yaw[0])
 
-                left.set(ControlMode.PercentOutput, (-error/desired) * 1.1)
-                right.set(ControlMode.PercentOutput, (error/desired) * 1.1)
+                left.set(ControlMode.PercentOutput, -error/desired)
+                right.set(ControlMode.PercentOutput, error/desired)
 
                 readingLeft = Drivetrain.left.getPosition()
                 readingRight = Drivetrain.right.getPosition()
@@ -311,8 +234,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         state(DriveShiftStates.AUTO) {
 
-            data class ShiftCommand(val state: ShifterState, val reason: String = "")
-
             var lastShiftTime = System.currentTimeMillis()
 
             //currentTime and lastShiftTime in ms
@@ -343,7 +264,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         Drivetrain.getVelocity() * .0025566,
                         Drivetrain.shifterState)
 
-                Drivetrain.shiftUpdate(newState)
+                if (Drivetrain.shiftUpdate(newState)) update()
             }
         }
     }
@@ -378,12 +299,12 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     test("Drivetrain rightRear") { testMotor(rightRear, "rightRear") }
 
     on (Events.TELEOP_ENABLED) {
-        driveMachine.setState(DriveStates.CHEESY_CLOSED)
+        driveMachine.setState(DriveStates.CHEESY)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 
     on (Events.AUTO_ENABLED) {
-        driveMachine.setState(DriveStates.EXTERNAL_CONTROL)
+        driveMachine.setState("nothing")
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }
