@@ -9,8 +9,8 @@ import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
-import org.team401.robot2018.Constants.MJPEGParameters.ADDRESS
-import org.team401.robot2018.Constants.MJPEGParameters.PORT
+import org.team401.robot2018.Constants.Setup.MJPEGParameters.ADDRESS
+import org.team401.robot2018.Constants.Setup.MJPEGParameters.PORT
 import org.team401.robot2018.auto.motion.MotionProfileRunner
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
@@ -82,7 +82,7 @@ object TestAuto: AutoLoop() {
     //PowerUpAuto.publish()
 
     val mjpeg = StringArray()
-    mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
+    mjpeg.add(Constants.Setup.MJPEGParameters.FULL_ADDRESS)
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
     Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
