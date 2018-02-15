@@ -17,10 +17,13 @@ import org.team401.robot2018.auto.motion.PDVA
 object Constants {
 
     object Setup{
+
+        const val HEADING_GAIN = 0.15
+
         object PDVA{
-            const val P = 1/10
+            const val P = 1/10.0
             const val D = 0.0
-            const val V = 1/2500
+            const val V = 1/2500.0
             const val A = 0.0
         }
 

@@ -51,9 +51,9 @@ object TestAuto: AutoLoop() {
         done = false
         started = true
         runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
-                PDVA(p = 0.1, v = 1/1250.0),
-                PDVA(p = 0.1, v = 1/1250.0),
-                0.015,
+                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
+                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
+                Constants.Setup.HEADING_GAIN,
                 tuning = true)
 
         runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
@@ -75,7 +75,8 @@ object TestAuto: AutoLoop() {
     }
 }
 
-@Setup fun setup() {
+@org.snakeskin.annotation.Setup
+fun setup() {
     //AutoManager.auto = PowerUpAuto
     AutoManager.auto = TestAuto
 
