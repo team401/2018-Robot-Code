@@ -3,7 +3,6 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
@@ -59,10 +58,10 @@ object ElevatorKickerStates {
     const val STOW = "in"
 }
 
-val ELEVAOTR_CLAMP_MACHINE = "elevator_clamp"
+val ELEVATOR_CLAMP_MACHINE = "elevator_clamp"
 object  ElevatorClampStates{
-    const val DEPLOYED = "out"
-    const val RETRACTED = "in"
+    const val CLAMPED = "out"
+    const val UNCLAMPED = "in"
 }
 
 object Elevator {
@@ -281,13 +280,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    val elevatorClampMachine = stateMachine(ELEVAOTR_CLAMP_MACHINE){
-        state(ElevatorClampStates.DEPLOYED){
+    val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE){
+        state(ElevatorClampStates.CLAMPED){
             entry{
                 clamp.set(true)
             }
         }
-        state(ElevatorClampStates.RETRACTED){
+        state(ElevatorClampStates.UNCLAMPED){
             entry {
                 clamp.set(false)
             }
@@ -316,9 +315,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
     test("Clamp test"){
         //test clamp
-        elevatorClampMachine.setState(ElevatorClampStates.DEPLOYED)
+        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         Thread.sleep(1000)
-        elevatorClampMachine.setState(ElevatorClampStates.RETRACTED)
+        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         Thread.sleep(1000)
         elevatorClampMachine.setState("")
         Thread.sleep(1000)

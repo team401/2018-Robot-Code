@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
-import org.team401.robot2018.RightStick
 import org.team401.robot2018.PDP
 import org.team401.robot2018.Signals
 import org.team401.robot2018.pidf
@@ -129,7 +128,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                         //turn on LED's
                         cubeCount++
 
-                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.DEPLOYED)
+                        ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.CLAMPED)
 
                         setState(IntakeWheelsStates.IDLE)
                         foldingMachine.setState(IntakeFoldingStates.GRAB)
@@ -138,7 +137,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
                         Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
                     }else{
-                        ElevatorSubsystem.machine(ELEVAOTR_CLAMP_MACHINE).setState(ElevatorClampStates.RETRACTED)
+                        ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.UNCLAMPED)
                         ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
                         //elevator to get cube is button mashers responsibility
                     }

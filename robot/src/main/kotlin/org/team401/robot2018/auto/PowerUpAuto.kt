@@ -101,8 +101,9 @@ object PowerUpAuto: AutoLoop() {
         sequence.run {
             add(DelayStep(baseDelay))
 
+            add(Commands.ElevatorHolderClamp)
             add(Commands.DeployElevator)
-            add(DelayStep(Delays.ELEVATOR_DEPLOY)) //Wait for the elevator to deploy
+            add(DelayStep(Delays.ELEVATOR_DEPLOY)) //Wait for the elevator to start deploying
 
             when (target) {
                 AutoTarget.NONE -> {}
@@ -110,6 +111,7 @@ object PowerUpAuto: AutoLoop() {
                     add(mpStep(robotPos.toString(), "SWITCH_$switch", Commands.HomeElevator))
                     add(Commands.ElevatorToSwitch)
                     add(DelayStep(Delays.PRE_SCORE))
+                    add(Commands.ElevatorHolderUnclamp)
                     add(Commands.ElevatorKickerScore)
                     add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
                     add(Commands.ElevatorKickerRetract)
@@ -117,6 +119,7 @@ object PowerUpAuto: AutoLoop() {
                 AutoTarget.SCALE -> {
                     add(Commands.HoldElevator)
                     add(mpStep(robotPos.toString(), "SCALE_$scale"))
+                    add(Commands.ElevatorHolderUnclamp)
                     add(Commands.ElevatorKickerScore)
                     add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
                     add(Commands.ElevatorKickerRetract)
@@ -124,6 +127,7 @@ object PowerUpAuto: AutoLoop() {
                 AutoTarget.SCALE_SWITCH -> {
                     add(Commands.HoldElevator)
                     add(mpStep(robotPos.toString(), "SCALE_$scale"))
+                    add(Commands.ElevatorHolderUnclamp)
                     add(Commands.ElevatorKickerScore)
                     add(DelayStep(Delays.SCORE))
                     add(Commands.ElevatorKickerRetract)
