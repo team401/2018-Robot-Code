@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.ShifterState
 import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
+import org.team401.robot2018.subsystems.ShiftCommand
 
 /*
  * 2018-Robot-Code - Created on 1/17/18
@@ -50,4 +51,13 @@ fun Gearbox.getCurrent(vararg pdpIds: Int): Double {
     }
 
     return amps.average()
+}
+
+fun TankDrivetrain.shiftUpdate(state: ShiftCommand): Boolean {
+    if (shifterState != state.state) {
+        shift(state.state)
+        println("Drivetrain Shifted: $state")
+        return true
+    }
+    return false
 }

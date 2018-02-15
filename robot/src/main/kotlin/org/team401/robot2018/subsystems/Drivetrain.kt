@@ -27,7 +27,7 @@ import org.team401.robot2018.*
 /*
  * 2018-Robot-Code - Created on 1/13/18
  * Author: Cameron Earle
- * 
+ *
  * This code is licensed under the GNU GPL v3
  * You can find more info in the LICENSE file at project root
  */
@@ -52,6 +52,8 @@ object DriveShiftStates {
     const val LOW = "low"
     const val AUTO = "autoShifting"
 }
+
+data class ShiftCommand(val state: ShifterState, val reason: String = "")
 
 val Drivetrain = TankDrivetrain(Constants.DrivetrainParameters.WHEEL_RADIUS, Constants.DrivetrainParameters.WHEELBASE)
 
@@ -114,18 +116,10 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         //Empty state for when the drivetrain is being controlled by other processes
-        state(DriveStates.EXTERNAL_CONTROL) {
-            entry {
-                Drivetrain.setRampRate(0.0, 0.0)
-            }
-        }
+        state(DriveStates.EXTERNAL_CONTROL) {}
 
         //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
-            var leftVelocity = 0
-            var rightVelocity = 0
-            var lastLeft = 0
-            var lastRight = 0
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
@@ -137,18 +131,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         LeftStick.readAxis { PITCH },
                         RightStick.readAxis { ROLL }
                 )
-                leftVelocity = left.master.getSelectedSensorVelocity(0)
-                rightVelocity = right.master.getSelectedSensorVelocity(0)
-
-                if(leftVelocity > lastLeft){
-                    lastLeft = leftVelocity
-                    println("${lastLeft}  ${lastRight}")
-                }
-                if(rightVelocity > lastRight){
-                    lastRight = rightVelocity
-                    println("${lastLeft}  ${lastRight}")
-                }
-
             }
 
         }
@@ -195,8 +177,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         pitch,
                         if (quickTurn) cube(roll) else roll,
                         quickTurn
-                        )
-                println("${left.master.getSelectedSensorVelocity(0)}  ${right.master.getSelectedSensorVelocity(0)}")
+                )
             }
         }
 
@@ -276,48 +257,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             }
         }
 
-        state("testAccel") {
-            var startTime = 0L
-            var readingLeft = 0
-            var readingRight = 0
-
-            var error = 0.0
-            val desired = 360
-            val yaw = DoubleArray(3)
-
-            //timeout(1500, DriveStates.OPEN_LOOP)
-            entry {
-                startTime = System.currentTimeMillis()
-                readingLeft = 0
-                readingRight = 0
-                error = 0.0
-
-                left.setPosition(0)
-                right.setPosition(0)
-
-                imu.setYaw(0.0, 0)
-            }
-
-            action {
-                //Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
-                imu.getYawPitchRoll(yaw)
-
-                error = (desired - yaw[0])
-
-                left.set(ControlMode.PercentOutput, (-error/desired) * 1.1)
-                right.set(ControlMode.PercentOutput, (error/desired) * 1.1)
-
-                readingLeft = Drivetrain.left.getPosition()
-                readingRight = Drivetrain.right.getPosition()
-            }
-
-            exit {
-                System.out.println("${yaw[0]},$readingLeft,$readingRight")
-
-                Drivetrain.stop()
-            }
-        }
-
         default {
             entry {
                 Drivetrain.stop()
@@ -339,8 +278,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         }
 
         state(DriveShiftStates.AUTO) {
-
-            data class ShiftCommand(val state: ShifterState, val reason: String = "")
 
             var lastShiftTime = System.currentTimeMillis()
 
@@ -371,6 +308,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         Drivetrain.getCurrent(),
                         Drivetrain.getVelocity() * .0025566,
                         Drivetrain.shifterState)
+
+                if (Drivetrain.shiftUpdate(newState)) update()
             }
         }
     }
@@ -410,7 +349,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     }
 
     on (Events.AUTO_ENABLED) {
-        driveMachine.setState(DriveStates.EXTERNAL_CONTROL)
+        driveMachine.setState("nothing")
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }

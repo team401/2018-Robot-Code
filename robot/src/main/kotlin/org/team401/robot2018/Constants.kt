@@ -15,6 +15,25 @@ import org.team401.robot2018.auto.motion.PDVA
  * @version 1/13/18
  */
 object Constants {
+
+    object Setup{
+
+        const val HEADING_GAIN = 0.15
+
+        object PDVA{
+            const val P = 1/10.0
+            const val D = 0.0
+            const val V = 1/2500.0
+            const val A = 0.0
+        }
+
+        object MJPEGParameters {
+            const val ADDRESS = "10.4.1.3"
+            const val PORT = "1180"
+            const val FULL_ADDRESS = "mjpeg:https://${Constants.Setup.MJPEGParameters.ADDRESS}:${Constants.Setup.MJPEGParameters.PORT}/?action=stream"
+        }
+
+    }
     object MotorControllers {
         const val DRIVE_LEFT_REAR_CAN = 0
         const val DRIVE_LEFT_MIDR_CAN = 1
@@ -135,6 +154,35 @@ object Constants {
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
 
         const val PITCH_DIAMETER = 1.805 //in
+
+        object PIDF{
+            const val P = 0.5
+            const val I = 0.0
+            const val D = 0.0
+            const val F = 1/100.0
+        }
+
+        object KickerMachine{
+            const val EXTENDED = true
+            const val RETRACTED = false
+        }
+        object ClampMachine{
+            const val DEPLOYED = true
+            const val RETRACTED = false
+        }
+        object RachetMachine{
+            const val LOCKED = true
+            const val UNLOCKED = false
+        }
+        object ShifterMachine{
+            const val HIGH = true
+            const val LOW = false
+            const val HOLD = false
+        }
+        object DeployMachine{
+            const val LOCKED = false
+            const val UNLOCKED = true
+        }
     }
 
     object IntakeParameters {
@@ -183,10 +231,7 @@ object Constants {
         const val DEPLOY_TIMER = 5000L //ms
     }
 
-    object MJPEGParameters {
-        const val ADDRESS = "10.4.1.3"
-        const val PORT = "1180"
-    }
+
 
     object ReportingParameters {
         const val REPORTING_RATE = 100L //ms

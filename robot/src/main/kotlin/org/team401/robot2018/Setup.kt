@@ -9,8 +9,8 @@ import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
-import org.team401.robot2018.Constants.MJPEGParameters.ADDRESS
-import org.team401.robot2018.Constants.MJPEGParameters.PORT
+import org.team401.robot2018.Constants.Setup.MJPEGParameters.ADDRESS
+import org.team401.robot2018.Constants.Setup.MJPEGParameters.PORT
 import org.team401.robot2018.auto.motion.MotionProfileRunner
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
@@ -51,9 +51,9 @@ object TestAuto: AutoLoop() {
         done = false
         started = true
         runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
-                PDVA(p = 0.1, v = 1/1250.0),
-                PDVA(p = 0.1, v = 1/1250.0),
-                0.015,
+                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
+                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
+                Constants.Setup.HEADING_GAIN,
                 tuning = true)
 
         runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
@@ -75,14 +75,15 @@ object TestAuto: AutoLoop() {
     }
 }
 
-@Setup fun setup() {
+@org.snakeskin.annotation.Setup
+fun setup() {
     //AutoManager.auto = PowerUpAuto
     AutoManager.auto = TestAuto
 
     //PowerUpAuto.publish()
 
     val mjpeg = StringArray()
-    mjpeg.add("mjpeg:https://${Constants.MJPEGParameters.ADDRESS}:${Constants.MJPEGParameters.PORT}/?action=stream")
+    mjpeg.add(Constants.Setup.MJPEGParameters.FULL_ADDRESS)
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
 
     Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
