@@ -6,7 +6,6 @@ import org.team401.robot2018.Sequences
 import org.team401.robot2018.Signals
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.LambdaStep
-import org.team401.robot2018.auto.steps.SingleStep
 import org.team401.robot2018.auto.steps.StateStep
 import org.team401.robot2018.subsystems.*
 
@@ -44,4 +43,6 @@ object Commands {
     val ElevatorToScale = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_HIGH }
     val ElevatorKickerScore = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.KICK)
     val ElevatorKickerRetract = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.STOW)
+    val ElevatorHolderClamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)
+    val ElevatorHolderUnclamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.UNCLAMPED)
 }
