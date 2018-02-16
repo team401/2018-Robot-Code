@@ -128,14 +128,13 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
                 right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
 
-                println("Left current ${left.outputCurrent} Right current ${right.outputCurrent} pos ${folding.getSelectedSensorPosition(0)}")
-
                 if (boxHeld()){
                     counter++
                 }else{
                     counter = 0
                 }
-                if(boxHeld() && counter >= 30) {
+
+                if(boxHeld() && counter >= Constants.IntakeParameters.CUBE_HELD_COUNT) {
                     //turn on LED's
                     cubeCount++
 

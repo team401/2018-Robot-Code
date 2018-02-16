@@ -220,7 +220,7 @@ object Constants {
         const val LEFT_PEAK_LIMIT_DUR = 100
         const val RIGHT_PEAK_LIMIT_DUR = 100
 
-
+        const val CUBE_HELD_COUNT = 30
 
         object PIDF {
             const val P = 3.5
