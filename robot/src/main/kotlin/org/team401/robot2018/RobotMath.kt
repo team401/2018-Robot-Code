@@ -23,4 +23,14 @@ object RobotMath {
                         pitchDiameter: Double = Constants.ElevatorParameters.PITCH_DIAMETER,
                         ticksPerRev: Double = 4096.0) = inchesToTicks(feet * 12.0, pitchDiameter, ticksPerRev)
     }
+    object UnitConversions {        fun revolutionsToNativeUnits(rotations: Double, ticksPerRev: Double = 4096.0) = rotations * ticksPerRev
+
+        fun rpmToNativeUnits(rpm: Double, ticksPerRev: Double = 4096.0) = rpm * ticksPerRev / 600.0
+        fun rpmpsToNativeUnits(rpmps: Double, ticksPerRev: Double = 4096.0) = rpmps //TODO
+
+        fun nativeUnitsToRevolutions(native: Double, ticksPerRev: Double = 4096.0) = native / ticksPerRev
+        fun nativeUnitsToRpm(native: Double, ticksPerRev: Double = 4096.0) = native * 600.0 / ticksPerRev
+
+        fun degreesToCTREDumbUnit(degrees: Double) = degrees * 64.0 //Because that makes sense
+    }
 }
