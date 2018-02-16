@@ -22,6 +22,13 @@ import org.team401.robot2018.subsystems.*
 val LeftStick = HumanControls.t16000m(0) {
 
     invertAxis(Axes.PITCH)
+    whenButton(Buttons.STICK_BOTTOM){
+        pressed {
+            IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.INTAKE)
+            IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
+        }
+    }
+
     /*
     whenButton(Buttons.TRIGGER) {
         pressed {
@@ -57,7 +64,9 @@ val RightStick = HumanControls.t16000m(1) {
         }
         released {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
-            //IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            if(IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).getState() != IntakeFoldingStates.STOWED){
+                IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            }
         }
     }
     whenButton(Buttons.STICK_BOTTOM){
@@ -67,7 +76,7 @@ val RightStick = HumanControls.t16000m(1) {
         }
         released {
             IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.IDLE)
-            //IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
+            IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
     whenButton(Buttons.STICK_LEFT){
@@ -80,6 +89,7 @@ val RightStick = HumanControls.t16000m(1) {
             IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
         }
     }
+
 
 
 }
