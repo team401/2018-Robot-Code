@@ -67,16 +67,16 @@ object Reporting {
             Drivetrain.imu.getYawPitchRoll(yawPitchRoll)
             yaw = yawPitchRoll[0]
             pitch = yawPitchRoll[1]
-            driveLeftVelocity = UnitConversions.nativeUnitsToRpm(Drivetrain.left.getVelocity().toDouble())
-            driveRightVelocity = UnitConversions.nativeUnitsToRpm(Drivetrain.right.getVelocity().toDouble())
-            driveLeftPosition = UnitConversions.nativeUnitsToRevolutions(Drivetrain.left.getPosition().toDouble())
-            driveRightPosition = UnitConversions.nativeUnitsToRevolutions(Drivetrain.right.getPosition().toDouble())
+            driveLeftVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Drivetrain.left.getVelocity().toDouble())
+            driveRightVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Drivetrain.right.getVelocity().toDouble())
+            driveLeftPosition = RobotMath.UnitConversions.nativeUnitsToRevolutions(Drivetrain.left.getPosition().toDouble())
+            driveRightPosition = RobotMath.UnitConversions.nativeUnitsToRevolutions(Drivetrain.right.getPosition().toDouble())
             driveLeftAmps = Drivetrain.left.getCurrent()
             driveRightAmps = Drivetrain.right.getCurrent()
             vbus = PDP.voltage
             totalAmps = PDP.totalCurrent
-            intakePos = UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
-            intakeVelocity = UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
+            intakePos = RobotMath.UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
+            intakeVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
             intakeAmps = Intake.folding.outputCurrent
             intakeLeftAmps = Intake.left.outputCurrent
             intakeRightAmps = Intake.right.outputCurrent

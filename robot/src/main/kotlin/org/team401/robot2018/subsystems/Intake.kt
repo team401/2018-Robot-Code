@@ -7,7 +7,7 @@ import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.team401.robot2018.Constants
 import org.team401.robot2018.PDP
-import org.team401.robot2018.Signals
+import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.pidf
 
 /*

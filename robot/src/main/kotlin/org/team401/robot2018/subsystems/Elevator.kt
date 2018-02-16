@@ -7,7 +7,9 @@ import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
+import org.snakeskin.publish.Publisher
 import org.team401.robot2018.*
+
 //import org.team401.robot2018.MasherBox
 
 /*
@@ -73,6 +75,11 @@ object Elevator {
     lateinit var clamp: Solenoid
 }
 
+object Signals {
+    var elevatorPosition by Publisher(0.0)
+    var elevatorHomed by Publisher(false)
+}
+
 val ElevatorSubsystem: Subsystem = buildSubsystem {
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
     val slave1 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
@@ -109,6 +116,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
         master.configForwardSoftLimitEnable(true, 10)
+
+
     }
 
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {

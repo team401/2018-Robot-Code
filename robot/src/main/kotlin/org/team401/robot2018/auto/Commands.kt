@@ -3,7 +3,6 @@ package org.team401.robot2018.auto
 import org.snakeskin.dsl.machine
 import org.team401.robot2018.Constants
 import org.team401.robot2018.Sequences
-import org.team401.robot2018.Signals
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StateStep
