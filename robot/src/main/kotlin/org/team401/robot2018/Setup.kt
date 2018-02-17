@@ -1,9 +1,9 @@
 package org.team401.robot2018
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.sun.xml.internal.fastinfoset.util.StringArray
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistributionPanel
+import org.snakeskin.annotation.PostStartup
 import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
@@ -82,12 +82,12 @@ fun setup() {
 
     //PowerUpAuto.publish()
 
-    val mjpeg = StringArray()
-    mjpeg.add(Constants.Setup.MJPEGParameters.FULL_ADDRESS)
-    NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
+    val mjpeg = Array<String>(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
+    NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
 
-    Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
+    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick)
     Sensors.add(VisionStopSensor)
-    Reporting.start()
 }
+
+@PostStartup private fun startReporting() = Reporting.start()

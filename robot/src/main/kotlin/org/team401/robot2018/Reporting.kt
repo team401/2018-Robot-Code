@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.ShifterState
 import org.snakeskin.dsl.Publisher
 import org.snakeskin.factory.ExecutorFactory
+import org.snakeskin.logic.Timer
 import org.team401.robot2018.subsystems.Drivetrain
 import org.team401.robot2018.subsystems.Elevator
 import org.team401.robot2018.subsystems.Intake
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit
  */
 object Reporting {
     private val executor = ExecutorFactory.getExecutor("reporting")
+    private val timer = Timer()
 
     class Report {
         var yaw by Publisher(0.0)
@@ -58,44 +60,55 @@ object Reporting {
         var elevatorRatchet by Publisher(false)
         var rungsDeploy by Publisher("locked")
     }
-    
-    fun update() {
-        val report = Report()
 
-        report.run {
-            val yawPitchRoll = DoubleArray(3)
-            Drivetrain.imu.getYawPitchRoll(yawPitchRoll)
-            yaw = yawPitchRoll[0]
-            pitch = yawPitchRoll[1]
-            driveLeftVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Drivetrain.left.getVelocity().toDouble())
-            driveRightVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Drivetrain.right.getVelocity().toDouble())
-            driveLeftPosition = RobotMath.UnitConversions.nativeUnitsToRevolutions(Drivetrain.left.getPosition().toDouble())
-            driveRightPosition = RobotMath.UnitConversions.nativeUnitsToRevolutions(Drivetrain.right.getPosition().toDouble())
-            driveLeftAmps = Drivetrain.left.getCurrent()
-            driveRightAmps = Drivetrain.right.getCurrent()
-            vbus = PDP.voltage
-            totalAmps = PDP.totalCurrent
-            intakePos = RobotMath.UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
-            intakeVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
-            intakeAmps = Intake.folding.outputCurrent
-            intakeLeftAmps = Intake.left.outputCurrent
-            intakeRightAmps = Intake.right.outputCurrent
-            elevatorVelocity = Elevator.gearbox.getVelocity().toDouble()
-            elevatorPosition = Elevator.gearbox.getPosition().toDouble()
-            elevatorAmps = Elevator.gearbox.getCurrent(
-                    Constants.PDPChannels.ELEVATOR_SLAVE_1_PDP,
-                    Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
-                    Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
-                    )
-            kicker = Elevator.kicker.get()
-            clamp = Elevator.clamp.get()
-            elevatorLowerLimit = (Elevator.gearbox.master as TalonSRX).sensorCollection.isRevLimitSwitchClosed
-            driveShift = Drivetrain.shifterState.toString().toLowerCase()
-            elevatorShift = if (Elevator.shifter.get()) "high" else "low"
-            elevatorDeploy = if (Elevator.deployer.get()) "unlocked" else "locked"
-            elevatorRatchet = Elevator.ratchet.get()
-            rungsDeploy = if (Rungs.deployer.get()) "unlocked" else "locked"
-        }
+    fun update() {
+        timer.start()
+
+        val r = Report()
+
+        val yawPitchRoll = DoubleArray(3)
+        Drivetrain.imu.getYawPitchRoll(yawPitchRoll)
+        r.yaw = yawPitchRoll[0]
+        r.pitch = yawPitchRoll[1]
+        r.driveLeftVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Drivetrain.left.getVelocity().toDouble())
+        r.driveRightVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Drivetrain.right.getVelocity().toDouble())
+        r.driveLeftPosition = RobotMath.UnitConversions.nativeUnitsToRevolutions(Drivetrain.left.getPosition().toDouble())
+        r.driveRightPosition = RobotMath.UnitConversions.nativeUnitsToRevolutions(Drivetrain.right.getPosition().toDouble())
+        r.driveLeftAmps = Drivetrain.left.getCurrent()
+        r.driveRightAmps = Drivetrain.right.getCurrent()
+        r.vbus = PDP.voltage
+        r.totalAmps = PDP.totalCurrent
+        /*
+        intakePos = RobotMath.UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
+        intakeVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
+        intakeAmps = Intake.folding.outputCurrent
+        intakeLeftAmps = Intake.left.outputCurrent
+        intakeRightAmps = Intake.right.outputCurrent
+        */
+
+        //TODO SAD
+        r.intakePos = 0.0
+        r.intakeVelocity = 0.0
+        r.intakeAmps = 0.0
+        r.intakeLeftAmps = 0.0
+        r.intakeRightAmps = 0.0
+
+        r.elevatorVelocity = Elevator.gearbox.getVelocity().toDouble()
+        r.elevatorPosition = Elevator.gearbox.getPosition().toDouble()
+        r.elevatorAmps = Elevator.gearbox.getCurrent(
+                Constants.PDPChannels.ELEVATOR_SLAVE_1_PDP,
+                Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
+                Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
+        )
+
+        r.kicker = Elevator.kicker.get()
+        r.clamp = Elevator.clamp.get()
+        r.elevatorLowerLimit = (Elevator.gearbox.master as TalonSRX).sensorCollection.isRevLimitSwitchClosed
+        r.driveShift = Drivetrain.shifterState.toString().toLowerCase()
+        r.elevatorShift = if (Elevator.shifter.get()) "high" else "low"
+        r.elevatorDeploy = if (Elevator.deployer.get()) "unlocked" else "locked"
+        r.elevatorRatchet = Elevator.ratchet.get()
+        r.rungsDeploy = if (Rungs.deployer.get()) "unlocked" else "locked"
     }
 
     fun start() {

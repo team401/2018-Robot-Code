@@ -24,7 +24,7 @@ deploy {
     artifacts {
         javaArtifact("vision2018") {
             predeploy << { execute "/home/$JETSON_USER/vision2018/stop.sh"}
-            postdeploy << { if (project.hasProperty('deployDebug') && deployDebug) { execute "/home/$JETSON_USER/vision2018/debug.sh"} else { execute "/home/$JETSON_USER/vision2018/start.sh"} }
+            postdeploy << { if (Boolean.parseBoolean(System.getProperty("deployDebug") ?: "false")) { execute "/home/$JETSON_USER/vision2018/debug.sh"} else { execute "/home/$JETSON_USER/vision2018/start.sh"} }
             targets << "jetson"
             jar = "jar"
         }
