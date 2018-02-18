@@ -125,6 +125,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
         master.configForwardSoftLimitEnable(true, 10)
 
+        //for testing
+        master.configPeakOutputForward(0.25,0)
+        master.configPeakOutputReverse(-0.25,0)
+
 
     }
 
