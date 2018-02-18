@@ -120,6 +120,8 @@ object Constants {
         val LEFT_PDVA = PDVA()
         val RIGHT_PDVA = PDVA()
 
+        val HEADING_GAIN = 0.01
+
         const val TIP_CORRECTION_SCALAR = 10 //fixme (testme)
 
         const val PITCH_CORRECTION_MIN = 10 //fixme (testme)

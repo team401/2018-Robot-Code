@@ -6,6 +6,7 @@ import org.team401.robot2018.Sequences
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StateStep
+import org.team401.robot2018.auto.steps.WaitForStep
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -33,6 +34,10 @@ object Commands {
         }
 
         override fun exit() {}
+    }
+
+    val WaitForDeploy = WaitForStep {
+        ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).getState() == ElevatorDeployStates.DEPLOYED
     }
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
