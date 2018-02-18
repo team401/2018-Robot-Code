@@ -10,7 +10,7 @@ import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.event.Events
 import org.snakeskin.logic.LockingDelegate
 import org.snakeskin.publish.Publisher
-import org.team401.robot2018.MasherBox
+import org.team401.robot2018.Gamepad
 import org.team401.robot2018.PDP
 import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.etc.RobotMath
@@ -125,6 +125,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
         master.configForwardSoftLimitEnable(true, 10)
 
+        master.setSelectedSensorPosition(0, 0, 0)
 
     }
 
@@ -167,7 +168,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             action {
-                gearbox.set(ControlMode.PercentOutput, MasherBox.readAxis { PITCH_BLUE })
+                gearbox.set(ControlMode.PercentOutput, Gamepad.readAxis { LEFT_Y })
             }
         }
 
@@ -279,7 +280,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                position += RobotMath.Elevator.inchesToTicks((MasherBox.readAxis { PITCH_BLUE } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
+                position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
                 posSetpoint(position)
@@ -374,7 +375,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
-        elevatorMachine.setState(ElevatorStates.MANUAL_ADJUSTMENT)
+        elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
+        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+        elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
 
     }
     test("Kicker test") {

@@ -109,7 +109,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
 
         Drivetrain.setNeutralMode(NeutralMode.Coast)
-
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {

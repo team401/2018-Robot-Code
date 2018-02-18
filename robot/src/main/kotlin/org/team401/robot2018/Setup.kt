@@ -3,6 +3,7 @@ package org.team401.robot2018
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import org.snakeskin.annotation.PostStartup
+import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.dsl.Publisher
@@ -15,10 +16,7 @@ import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
 import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
 import org.team401.robot2018.etc.Reporting
-import org.team401.robot2018.subsystems.Drivetrain
-import org.team401.robot2018.subsystems.DrivetrainSubsystem
-import org.team401.robot2018.subsystems.ElevatorSubsystem
-import org.team401.robot2018.subsystems.RungsSubsystem
+import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 import org.team401.robot2018.vision.VisionDataClient
 
@@ -36,9 +34,7 @@ import org.team401.robot2018.vision.VisionDataClient
  */
 
 val Vision = VisionController("10.4.1.3")
-
 val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
-
 val PDP = PowerDistributionPanel()
 
 object TestAuto: AutoLoop() {
@@ -79,7 +75,7 @@ object TestAuto: AutoLoop() {
     }
 }
 
-@org.snakeskin.annotation.Setup
+@Setup
 fun setup() {
     //AutoManager.auto = PowerUpAuto
     AutoManager.auto = TestAuto
@@ -89,8 +85,8 @@ fun setup() {
     val mjpeg = Array<String>(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
 
-    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, RungsSubsystem)
-    Controllers.add(LeftStick, RightStick)
+    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Controllers.add(LeftStick, RightStick, Gamepad)
     Sensors.add(VisionStopSensor)
 }
 
