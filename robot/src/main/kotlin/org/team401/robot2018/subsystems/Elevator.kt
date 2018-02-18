@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
+import org.snakeskin.logic.LockingDelegate
 import org.snakeskin.publish.Publisher
 import org.team401.robot2018.*
 
@@ -34,11 +35,19 @@ object ElevatorDeployStates {
 
 val ELEVATOR_MACHINE = "elevator"
 object ElevatorStates {
-    const val SIGNAL_CONTROL = "signal"
     const val OPEN_LOOP_CONTROL = "openloop"
     const val MANUAL_ADJUSTMENT = "closedloop"
     const val HOLD_POS_UNKNOWN = "pos_lock"
     const val HOMING = "homing"
+
+    const val POS_HOMED = "homePos"
+    const val POS_COLLECTION = "ground"
+    const val POS_DRIVE = "hold"
+    const val POS_SWITCH = "switch"
+    const val POS_SCALE_LOW = "scale_low"
+    const val POS_SCALE = "scale"
+    const val POS_SCALE_HIGH = "scale_high"
+    const val POS_MAX = "max"
 }
 
 val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
@@ -73,11 +82,8 @@ object Elevator {
     lateinit var ratchet: Solenoid
     lateinit var kicker: Solenoid
     lateinit var clamp: Solenoid
-}
 
-object Signals {
-    var elevatorPosition by Publisher(0.0)
-    var elevatorHomed by Publisher(false)
+    var homed by LockingDelegate(false)
 }
 
 val ElevatorSubsystem: Subsystem = buildSubsystem {
@@ -107,11 +113,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         master.setSelectedSensorPosition(0, 0, 0)
         master.configMotionCruiseVelocity(2046, 0)
         master.configMotionAcceleration(1023, 0)
-        master.config_kP(0, Constants.ElevatorParameters.PIDF.P, 0)
-        master.config_kI(0, Constants.ElevatorParameters.PIDF.I, 0)
-        master.config_kD(0, Constants.ElevatorParameters.PIDF.D, 0)
-        master.config_kF(0, Constants.ElevatorParameters.PIDF.F, 0)
-
+        master.pidf(Constants.ElevatorParameters.PIDF)
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
@@ -149,21 +151,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
 
+    fun notDeployed() = elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED
+
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
-        /**
-         * Takes the elevator to the position specified by its control signal
-         */
-        fun toSignal() {
-            gearbox.set(ControlMode.MotionMagic, Signals.elevatorPosition)
-        }
-
-        state(ElevatorStates.SIGNAL_CONTROL) {
-            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
-
-            action {
-                toSignal()
-            }
-        }
+        fun mmSetpoint(setpoint: Number) = gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+        fun posSetpoint(setpoint: Number) = gearbox.set(ControlMode.Position, setpoint.toDouble())
 
         state(ElevatorStates.OPEN_LOOP_CONTROL) {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
@@ -173,14 +165,67 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
 
-        state(ElevatorStates.MANUAL_ADJUSTMENT) {
-            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED}
+        state(ElevatorStates.POS_HOMED) {
+            rejectIf (::notDeployed)
 
-            var adjustment: Double
-            action {
-                adjustment = Constants.ElevatorParameters.MANUAL_RATE * MasherBox.readAxis { PITCH_BLUE }
-                Signals.elevatorPosition += adjustment
-                toSignal()
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.HOMINIG_SENSOR_POSITION)
+            }
+        }
+
+        state(ElevatorStates.POS_COLLECTION) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.ZERO_POS)
+            }
+        }
+
+        state(ElevatorStates.POS_DRIVE) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
+            }
+        }
+
+        state(ElevatorStates.POS_SWITCH) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
+            }
+        }
+
+        state(ElevatorStates.POS_SCALE_LOW) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.SCALE_POS_LOW)
+            }
+        }
+
+        state(ElevatorStates.POS_SCALE) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
+            }
+        }
+
+        state (ElevatorStates.POS_SCALE_HIGH) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.SCALE_POS_HIGH)
+            }
+        }
+
+        state (ElevatorStates.POS_MAX) {
+            rejectIf (::notDeployed)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.MAX_POS)
             }
         }
 
@@ -199,29 +244,44 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             entry {
                 master.configZeroPosOnReverseLimit(true)
-                Signals.elevatorHomed = false
+                Elevator.homed = false
             }
 
             var sensorData: SensorCollection
             action {
                 sensorData = master.sensorCollection
-                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE)
-                if (sensorData.isRevLimitSwitchClosed) {
-                    gearbox.stop()
-                    Signals.elevatorPosition = 0.0
-                    Signals.elevatorHomed = true
-                    setState(ElevatorStates.SIGNAL_CONTROL)
+                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
+                if (sensorData.isRevLimitSwitchClosed) { //If the limit is triggered
+                    gearbox.stop() //Stop the motors
+                    Elevator.homed = true //Tell others that we are homed
+                    setState(ElevatorStates.POS_HOMED) //Kick into the homed position state
                 }
             }
 
             exit {
-                master.configZeroPosOnReverseLimit(false)
+                master.configZeroPosOnReverseLimit(false, 1000) //Disable zero on home, and wait up to a second for this to finish
+                //Set our position to the actual position of the system, where the homing sensor is, and wait for this to finish
+                master.setSelectedSensorPosition(Constants.ElevatorParameters.HOMINIG_SENSOR_POSITION, 0, 1000)
+            }
+        }
+
+        state(ElevatorStates.MANUAL_ADJUSTMENT) {
+            var position = 0
+
+            entry {
+                position = gearbox.getPosition()
+            }
+
+            action {
+                position += RobotMath.Elevator.inchesToTicks((MasherBox.readAxis { PITCH_BLUE } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
+                if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
+                if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
+                posSetpoint(position)
             }
         }
     }
 
     val elevatorShifterMachine = stateMachine(ELEVATOR_SHIFTER_MACHINE) {
-
         state(ElevatorShifterStates.RUN) {
             entry {
                 shifter.set(Constants.ElevatorParameters.ShifterMachine.HIGH)
@@ -289,7 +349,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE){
+    val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE) {
         state(ElevatorClampStates.CLAMPED){
             entry{
                 clamp.set(true)
@@ -307,11 +367,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    on (Events.TELEOP_ENABLED){
+    on (Events.TELEOP_ENABLED) {
         elevatorMachine.setState(ElevatorStates.MANUAL_ADJUSTMENT)
 
     }
-    test("Kicker test"){
+    test("Kicker test") {
         //test kicker
         elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
         Thread.sleep(1000)
@@ -322,7 +382,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         true
     }
-    test("Clamp test"){
+    test("Clamp test") {
         //test clamp
         elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         Thread.sleep(1000)
@@ -333,7 +393,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         true
     }
-    test("Ratchet test"){
+    test("Ratchet test") {
         //test ratchet
         elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
         Thread.sleep(1000)
@@ -344,7 +404,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         true
     }
-    test("Shifter test"){
+    test("Shifter test") {
         //test shifter
         elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
         Thread.sleep(1000)
@@ -357,12 +417,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         true
     }
-    test("Elevator test"){
+    test("Elevator test") {
         //test elevator
         elevatorMachine.setState(ElevatorStates.HOMING)
         Thread.sleep(2000)
-        elevatorMachine.setState(ElevatorStates.SIGNAL_CONTROL)
-        Signals.elevatorPosition = Constants.ElevatorParameters.MAX_POS
+        elevatorMachine.setState(ElevatorStates.POS_MAX)
 
         var masterPower by Publisher(0.0)
         var slave1Power by Publisher(0.0)
@@ -375,13 +434,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         slave3Power = PDP.getCurrent(7)
 
         Thread.sleep(2000)
-        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_HIGH
+        elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
         Thread.sleep(2000)
-        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS
+        elevatorMachine.setState(ElevatorStates.POS_SCALE)
         Thread.sleep(2000)
-        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_LOW
+        elevatorMachine.setState(ElevatorStates.POS_SCALE_LOW)
         Thread.sleep(2000)
-        Signals.elevatorPosition = Constants.ElevatorParameters.HOME_POS
+        elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
         Thread.sleep(2000)
         elevatorMachine.setState("")
         Thread.sleep(1000)

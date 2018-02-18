@@ -111,7 +111,24 @@ object Reporting {
         r.rungsDeploy = if (Rungs.deployer.get()) "unlocked" else "locked"
     }
 
+    private fun publishLimits() {
+        SmartDashboard.putNumber("driveMinVelocity", Constants.DrivetrainParameters.MIN_VELOCITY)
+        SmartDashboard.putNumber("driveMaxVelocity", Constants.DrivetrainParameters.MAX_VELOCITY)
+        SmartDashboard.putNumber("maxDriveAmps", Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS.toDouble())
+
+        SmartDashboard.putNumber("intakeMinVelocity", Constants.IntakeParameters.FOLDING_MIN_VELOCITY)
+        SmartDashboard.putNumber("intakeMaxVelocity", Constants.IntakeParameters.FOLDING_MAX_VELOCITY)
+        SmartDashboard.putNumber("maxIntakeAmps", Constants.IntakeParameters.FOLDING_CONTINUOUS_LIMIT.toDouble())
+        SmartDashboard.putNumber("maxIntakeLeftAmps", Constants.IntakeParameters.LEFT_CONTINUOUS_LIMIT.toDouble())
+        SmartDashboard.putNumber("maxIntakeRightAmps", Constants.IntakeParameters.RIGHT_CONTINUOUS_LIMIT.toDouble())
+
+        SmartDashboard.putNumber("elevatorMinVelocity", Constants.ElevatorParameters.MIN_VELOCITY)
+        SmartDashboard.putNumber("elevatorMaxVelocity", Constants.ElevatorParameters.MAX_VELOCITY)
+        SmartDashboard.putNumber("maxElevatorAmps", Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS.toDouble())
+    }
+
     fun start() {
+        publishLimits()
         executor.scheduleAtFixedRate(this::update, 0L, Constants.ReportingParameters.REPORTING_RATE, TimeUnit.MILLISECONDS)
     }
 }

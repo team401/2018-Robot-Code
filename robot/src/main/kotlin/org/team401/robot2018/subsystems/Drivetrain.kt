@@ -78,20 +78,10 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     fun shift(state: ShifterState) {
         when (state) {
             ShifterState.HIGH -> {
-                Drivetrain.setCurrentLimit(
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS_HIGH,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK_HIGH,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT_HIGH
-                )
                 Drivetrain.high()
             }
 
             ShifterState.LOW -> {
-                Drivetrain.setCurrentLimit(
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS_LOW,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK_LOW,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT_LOW
-                )
                 Drivetrain.low()
             }
         }
@@ -108,6 +98,12 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         //right.master.pidf(f = .22133,p = .15)
 
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
+        Drivetrain.setCurrentLimit(
+                Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS,
+                Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK,
+                Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT
+        )
+
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
 
         Drivetrain.setNeutralMode(NeutralMode.Coast)

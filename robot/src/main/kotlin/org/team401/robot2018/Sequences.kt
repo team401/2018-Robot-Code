@@ -21,24 +21,4 @@ object Sequences {
         ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE).setState(ElevatorShifterStates.HOLD_CARRIAGE)
         ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
     }
-
-    fun elevatorToBottom() {
-        Signals.elevatorPosition = Constants.ElevatorParameters.HOME_POS
-    }
-
-    fun elevatorToSwitch() {
-        Signals.elevatorPosition = Constants.ElevatorParameters.SWITCH_POS
-    }
-
-    fun elevatorToScale() {
-        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS
-    }
-
-    fun elevatorToScaleLow() {
-        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_LOW
-    }
-
-    fun elevatorToScaleHigh() {
-        Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_HIGH
-    }
 }

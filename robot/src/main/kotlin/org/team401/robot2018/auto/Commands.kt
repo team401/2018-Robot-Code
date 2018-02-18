@@ -29,7 +29,7 @@ object Commands {
         }
 
         override fun action() {
-            done = Signals.elevatorHomed
+            done = Elevator.homed
         }
 
         override fun exit() {}
@@ -37,9 +37,9 @@ object Commands {
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
 
-    val ElevatorToGround = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.HOME_POS }
-    val ElevatorToSwitch = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.SWITCH_POS }
-    val ElevatorToScale = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_HIGH }
+    val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
+    val ElevatorToSwitch = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
+    val ElevatorToScale = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SCALE_HIGH)
     val ElevatorKickerScore = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.KICK)
     val ElevatorKickerRetract = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.STOW)
     val ElevatorHolderClamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)

@@ -23,6 +23,7 @@ object RobotMath {
                         pitchDiameter: Double = Constants.ElevatorParameters.PITCH_DIAMETER,
                         ticksPerRev: Double = 4096.0) = inchesToTicks(feet * 12.0, pitchDiameter, ticksPerRev)
     }
+
     object UnitConversions {
         fun revolutionsToNativeUnits(rotations: Double, ticksPerRev: Double = 4096.0) = rotations * ticksPerRev
 

@@ -37,6 +37,10 @@ fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 
     config_kF(slot, f, timeout)
 }
 
+fun IMotorControllerEnhanced.pidf(pidf: Constants.PIDF) {
+    pidf(pidf.P, pidf.I, pidf.D, pidf.F)
+}
+
 fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)
 
 fun Gearbox.getCurrent(vararg pdpIds: Int): Double {

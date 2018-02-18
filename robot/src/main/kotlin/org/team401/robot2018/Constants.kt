@@ -15,8 +15,14 @@ import org.team401.robot2018.auto.motion.PDVA
  * @version 1/13/18
  */
 object Constants {
+    interface PIDF {
+        val P: Double
+        val I: Double
+        val D: Double
+        val F: Double
+    }
 
-    object Setup{
+    object Setup {
 
         const val HEADING_GAIN = 0.15
 
@@ -92,6 +98,9 @@ object Constants {
         const val SPEED_SPLIT = 3.5 //f/s
         //above should be some value between the low gear speed and the high gear speed
 
+        const val MIN_VELOCITY = -500.0 //RPM, negative
+        const val MAX_VELOCITY = 500.0 //RPM, positive
+
         const val WHEEL_RADIUS = 2.0 //in
         const val WHEELBASE = 0.0 //in
 
@@ -99,13 +108,9 @@ object Constants {
         const val INVERT_RIGHT = false
         const val INVERT_SHIFTER = true
 
-        const val CURRENT_LIMIT_CONTINUOUS_HIGH = 30 //A
-        const val CURRENT_LIMIT_PEAK_HIGH = 40 //A
-        const val CURRENT_LIMIT_TIMEOUT_HIGH = 100 //ms
-        
-        const val CURRENT_LIMIT_CONTINUOUS_LOW = 30 //A
-        const val CURRENT_LIMIT_PEAK_LOW = 40 //A
-        const val CURRENT_LIMIT_TIMEOUT_LOW = 100 //ms
+        const val CURRENT_LIMIT_CONTINUOUS = 30 //A
+        const val CURRENT_LIMIT_PEAK = 40 //A
+        const val CURRENT_LIMIT_TIMEOUT = 100 //ms
 
         const val DOWNSHIFT_CURRENT = 30 //A
 
@@ -141,27 +146,31 @@ object Constants {
         const val DEPLOY_TIMER = 5000L //ms
 
         const val HOMING_RATE = -.1 //percent vbus
+        const val HOMINIG_SENSOR_POSITION = 0 //ticks
 
-        const val MANUAL_RATE = 4096/4.0 //ticks / 20 ms
+        const val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
+        const val MIN_VELOCITY = -400.0 //RPM, negative
+        const val MAX_VELOCITY = 400.0 //RPM, positive
+
         const val MAX_POS = 40960.0 //ticks
 
-        const val HOME_POS = 0.0 //ticks
-        const val CUBE_POS = HOME_POS + 0.0 //ticks
-        const val SWITCH_POS = HOME_POS + 0.0 //ticks
-        const val SCALE_POS = HOME_POS + 0.0 //ticks
+        const val ZERO_POS = 0.0 //ticks
+        const val CUBE_POS = ZERO_POS + 0.0 //ticks
+        const val SWITCH_POS = ZERO_POS + 0.0 //ticks
+        const val SCALE_POS = ZERO_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
 
         const val PITCH_DIAMETER = 1.805 //in
 
-        object PIDF{
-            const val P = 0.5
-            const val I = 0.0
-            const val D = 0.0
-            const val F = 1/100.0
+        object PIDF: Constants.PIDF {
+            override val P = 0.5
+            override val I = 0.0
+            override val D = 0.0
+            override val F = 1/100.0
         }
 
         object KickerMachine{
@@ -190,6 +199,9 @@ object Constants {
     object IntakeParameters {
         const val INTAKE_RATE = 1.0
         const val REVERSE_RATE = -0.7
+
+        const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
+        const val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
         const val STOWED_POS = 650.0
         const val INTAKE_POS = 2400.0

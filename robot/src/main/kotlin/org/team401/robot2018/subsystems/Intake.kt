@@ -124,19 +124,20 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
                 right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
 
+
                     if(boxHeld()) {
                         //turn on LED's
                         cubeCount++
 
                         ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.CLAMPED)
 
-                        setState(IntakeWheelsStates.IDLE)
-                        foldingMachine.setState(IntakeFoldingStates.GRAB)
-
                         Thread.sleep(250)
 
-                        Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
-                    }else{
+                        ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.POS_DRIVE)
+
+                        setState(IntakeWheelsStates.IDLE)
+                        foldingMachine.setState(IntakeFoldingStates.GRAB)
+                    } else{
                         ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.UNCLAMPED)
                         ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
                         //elevator to get cube is button mashers responsibility
