@@ -127,6 +127,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         master.setSelectedSensorPosition(0, 0, 0)
 
+        master.configPeakOutputForward(.1, 0)
+        master.configPeakOutputReverse(-.1, 0)
+
     }
 
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
@@ -161,8 +164,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     fun notDeployed() = elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
-        fun mmSetpoint(setpoint: Number) = gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
         fun posSetpoint(setpoint: Number) = gearbox.set(ControlMode.Position, setpoint.toDouble())
+        fun mmSetpoint(setpoint: Number) = posSetpoint(setpoint)//gearbox.set(ControlMode.MotionMagic, setpoint.toDouble()) //TODO (fixme)
 
         state(ElevatorStates.OPEN_LOOP_CONTROL) {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
