@@ -1,19 +1,18 @@
 package org.team401.robot2018
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import org.snakeskin.annotation.PostStartup
-import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
 import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
-import org.team401.robot2018.Constants.Setup.MJPEGParameters.ADDRESS
-import org.team401.robot2018.Constants.Setup.MJPEGParameters.PORT
-import org.team401.robot2018.auto.motion.MotionProfileRunner
+import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
+import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
+import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.etc.Reporting
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 import org.team401.robot2018.vision.VisionDataClient

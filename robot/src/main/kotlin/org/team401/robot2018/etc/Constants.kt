@@ -1,4 +1,4 @@
-package org.team401.robot2018
+package org.team401.robot2018.etc
 
 import org.team401.robot2018.auto.motion.PDVA
 
@@ -36,7 +36,7 @@ object Constants {
         object MJPEGParameters {
             const val ADDRESS = "10.4.1.3"
             const val PORT = "1180"
-            const val FULL_ADDRESS = "mjpeg:https://${Constants.Setup.MJPEGParameters.ADDRESS}:${Constants.Setup.MJPEGParameters.PORT}/?action=stream"
+            const val FULL_ADDRESS = "mjpeg:https://${ADDRESS}:${PORT}/?action=stream"
         }
 
     }

@@ -1,12 +1,11 @@
-package org.team401.robot2018
+package org.team401.robot2018.etc
 
 import com.ctre.phoenix.ParamEnum
-import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import org.snakeskin.ShifterState
 import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
+import org.team401.robot2018.PDP
 import org.team401.robot2018.subsystems.ShiftCommand
 
 /*

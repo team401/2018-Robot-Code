@@ -1,10 +1,7 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.Constants
-import org.team401.robot2018.Sequences
 import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StateStep
 import org.team401.robot2018.auto.steps.WaitForStep
 import org.team401.robot2018.subsystems.*
@@ -23,7 +20,7 @@ import org.team401.robot2018.subsystems.*
  */
 
 object Commands {
-    val DeployElevator = LambdaStep(Sequences::deployElevator)
+    val DeployElevator = StateStep(ElevatorSubsystem, ELEVATOR_DEPLOY_MACHINE, ElevatorDeployStates.DEPLOY)
     val HomeElevator = object : AutoStep() {
         override fun entry() {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)

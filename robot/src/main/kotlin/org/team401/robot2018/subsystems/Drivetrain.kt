@@ -6,12 +6,9 @@ import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
-import edu.wpi.first.wpilibj.PIDController
-import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.ShifterState
-import org.snakeskin.SnakeskinConstants
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
@@ -24,6 +21,9 @@ import org.team401.robot2018.RightStick
 //import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.RightStick
 import org.team401.robot2018.*
+import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.etc.getCurrent
+import org.team401.robot2018.etc.shiftUpdate
 
 /*
  * 2018-Robot-Code - Created on 1/13/18

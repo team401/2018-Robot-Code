@@ -1,19 +1,14 @@
-package org.team401.robot2018
+package org.team401.robot2018.etc
 
-import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import edu.wpi.first.wpilibj.PowerDistributionPanel
-import edu.wpi.first.wpilibj.Sendable
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import org.snakeskin.ShifterState
 import org.snakeskin.dsl.Publisher
 import org.snakeskin.factory.ExecutorFactory
 import org.snakeskin.logic.Timer
+import org.team401.robot2018.PDP
 import org.team401.robot2018.subsystems.Drivetrain
 import org.team401.robot2018.subsystems.Elevator
-import org.team401.robot2018.subsystems.Intake
 import org.team401.robot2018.subsystems.Rungs
-import java.lang.reflect.Field
 import java.util.concurrent.TimeUnit
 
 /*

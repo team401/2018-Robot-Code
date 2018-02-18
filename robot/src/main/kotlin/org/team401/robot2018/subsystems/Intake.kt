@@ -5,10 +5,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
-import org.team401.robot2018.Constants
+import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.PDP
-import org.team401.robot2018.subsystems.*
-import org.team401.robot2018.pidf
+import org.team401.robot2018.etc.pidf
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
