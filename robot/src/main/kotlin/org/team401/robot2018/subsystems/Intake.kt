@@ -122,15 +122,23 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
+            var counter = 0
+            entry {
+                counter = 0
+            }
             action {
                 left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
                 right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
 
-                    if(boxHeld()) {
-                        //turn on LED's
-                        cubeCount++
+                if (boxHeld()){
+                    counter++
+                }else{
+                    counter = 0
+                }
 
-                        ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.CLAMPED)
+                if(boxHeld() && counter >= Constants.IntakeParameters.CUBE_HELD_COUNT) {
+                    //turn on LED's
+                    cubeCount++
 
                         Thread.sleep(250)
 
@@ -209,12 +217,13 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     on (Events.TELEOP_ENABLED) {
         foldingMachine.setState(IntakeFoldingStates.STOWED)
+        intakeMachine.setState(IntakeWheelsStates.IDLE)
     }
 }
 
 fun boxHeld(): Boolean {
-    return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT &&
-           Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT
+    return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_L &&
+           Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_R
 }
 fun voltageCompensation(desiredOutput : Double) : Double{
     return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)

@@ -205,11 +205,12 @@ object Constants {
         const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         const val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        const val STOWED_POS = 650.0
-        const val INTAKE_POS = 2400.0
+        const val STOWED_POS = 750.0
+        const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
-        const val HAVE_CUBE_CURRENT = 0.0
+        const val HAVE_CUBE_CURRENT_L = 10.0
+        const val HAVE_CUBE_CURRENT_R = 6.0
         const val VOLTAGE_LIMIT = 1.0 //Percent vbus
 
         const val INVERT_LEFT = true
@@ -233,7 +234,7 @@ object Constants {
         const val LEFT_PEAK_LIMIT_DUR = 100
         const val RIGHT_PEAK_LIMIT_DUR = 100
 
-
+        const val CUBE_HELD_COUNT = 30
 
         object PIDF {
             const val P = 3.5
