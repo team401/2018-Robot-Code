@@ -16,6 +16,7 @@ import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
 import org.snakeskin.event.Events
+import org.snakeskin.logic.scalars.CubicScalar
 import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
@@ -72,8 +73,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     val imu = PigeonIMU(leftRear)
 
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
-
-    val pdp = PowerDistributionPanel(0)
 
     fun shift(state: ShifterState) {
         when (state) {
@@ -133,57 +132,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
-            var quickTurn = false
-            var pitch = 0.0
-            var roll = 0.0
-
-            fun cube(d: Double) = d*d*d
-
-            val cheesyParameters = CheesyDriveParameters(
-                    0.65,
-                    0.5,
-                    4.0,
-                    0.65,
-                    3.5,
-                    4.0,
-                    5.0,
-                    0.95,
-                    1.3,
-                    0.2,
-                    0.1,
-                    5.0,
-                    3,
-                    2
-            )
-
-            val imuData = DoubleArray(3)
-
-            entry {
-                Drivetrain.zero()
-                Drivetrain.setNeutralMode(NeutralMode.Coast)
-                cheesyParameters.reset()
-            }
-            action {
-                quickTurn = LeftStick.readButton { TRIGGER }
-                pitch = LeftStick.readAxis { PITCH }
-                roll = RightStick.readAxis { ROLL }
-                Drivetrain.cheesy(
-                        ControlMode.PercentOutput,
-                        cheesyParameters,
-                        pitch,
-                        if (quickTurn) cube(roll) else roll,
-                        quickTurn
-                )
-            }
-        }
-
-        state(DriveStates.CHEESY_CLOSED) {
-            var quickTurn = false
-            var pitch = 0.0
-            var roll = 0.0
-
-            fun cube(d: Double) = d*d*d
-
             val cheesyParameters = CheesyDriveParameters(
                     0.65,
                     0.5,
@@ -199,7 +147,43 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                     5.0,
                     3,
                     2,
-                    4200.0
+                    quickTurnScalar = CubicScalar
+            )
+
+            entry {
+                Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+                cheesyParameters.reset()
+            }
+            action {
+                Drivetrain.cheesy(
+                        ControlMode.PercentOutput,
+                        cheesyParameters,
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER }
+                )
+            }
+        }
+
+        state(DriveStates.CHEESY_CLOSED) {
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2,
+                    4200.0,
+                    quickTurnScalar = CubicScalar
             )
 
             entry {
@@ -210,22 +194,18 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             }
 
             action {
-                quickTurn = RightStick.readButton { TRIGGER }
-                pitch = LeftStick.readAxis { PITCH }
-                roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
                         ControlMode.Velocity,
                         cheesyParameters,
-                        pitch,
-                        if (quickTurn) cube(roll) else roll,
-                        quickTurn
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER}
                 )
-
             }
         }
 
         state(DriveStates.TIP_CONTROL) {
-            var correction = 0.0
+            var correction: Double
             action {
                 correction = getPitch() / Constants.DrivetrainParameters.TIP_CORRECTION_SCALAR
                 Drivetrain.arcade(ControlMode.PercentOutput, correction, 0.0)
