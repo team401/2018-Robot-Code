@@ -5,15 +5,20 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel
 import org.snakeskin.annotation.PostStartup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
-import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
-import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
-import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
+import org.snakeskin.registry.Controllers
+import org.snakeskin.registry.Sensors
+import org.snakeskin.registry.Subsystems
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
+import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
 import org.team401.robot2018.etc.Reporting
-import org.team401.robot2018.subsystems.*
+import org.team401.robot2018.subsystems.Drivetrain
+import org.team401.robot2018.subsystems.DrivetrainSubsystem
+import org.team401.robot2018.subsystems.ElevatorSubsystem
+import org.team401.robot2018.subsystems.RungsSubsystem
 import org.team401.robot2018.vision.VisionController
 import org.team401.robot2018.vision.VisionDataClient
 

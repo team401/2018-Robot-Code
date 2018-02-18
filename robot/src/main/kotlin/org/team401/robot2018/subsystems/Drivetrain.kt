@@ -1,5 +1,9 @@
 package org.team401.robot2018.subsystems
 
+//import org.team401.robot2018.MasherBox
+
+//import org.team401.robot2018.LeftStick
+//import org.team401.robot2018.RightStick
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
@@ -10,20 +14,19 @@ import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.ShifterState
 import org.snakeskin.component.Gearbox
-import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
+import org.snakeskin.dsl.CheesyDriveParameters
+import org.snakeskin.dsl.Subsystem
+import org.snakeskin.dsl.buildSubsystem
+import org.snakeskin.dsl.cheesy
 import org.snakeskin.event.Events
 import org.snakeskin.logic.scalars.CubicScalar
 import org.team401.robot2018.LeftStick
-//import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
-
-//import org.team401.robot2018.LeftStick
-//import org.team401.robot2018.RightStick
-import org.team401.robot2018.*
 import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.etc.getCurrent
 import org.team401.robot2018.etc.shiftUpdate
+import org.team401.robot2018.getPitch
 
 /*
  * 2018-Robot-Code - Created on 1/13/18

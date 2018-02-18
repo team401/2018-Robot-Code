@@ -2,7 +2,6 @@ package org.team401.robot2018
 
 import org.snakeskin.dsl.HumanControls
 import org.snakeskin.dsl.machine
-import org.snakeskin.logic.scalars.SquareScalar
 import org.team401.robot2018.subsystems.*
 
 /*

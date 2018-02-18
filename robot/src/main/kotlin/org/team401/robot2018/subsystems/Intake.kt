@@ -3,10 +3,13 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import org.snakeskin.dsl.*
+import org.snakeskin.dsl.Publisher
+import org.snakeskin.dsl.Subsystem
+import org.snakeskin.dsl.buildSubsystem
+import org.snakeskin.dsl.machine
 import org.snakeskin.event.Events
-import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.PDP
+import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.etc.pidf
 
 /*
@@ -122,7 +125,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             action {
                 left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
                 right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
-
 
                     if(boxHeld()) {
                         //turn on LED's

@@ -3,9 +3,9 @@ package org.team401.robot2018
 import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.Sensors
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.etc.Constants.DrivetrainParameters.PITCH_CORRECTION_MIN
 import org.team401.robot2018.etc.Constants.DrivetrainParameters.ROLL_CORRECTION_MIN
+import org.team401.robot2018.subsystems.*
 
 /*
  * 2018-Robot-Code - Created on 1/30/18
