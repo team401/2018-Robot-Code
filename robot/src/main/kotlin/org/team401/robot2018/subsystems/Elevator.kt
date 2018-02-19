@@ -46,7 +46,6 @@ object ElevatorStates {
     const val GO_TO_DRIVE = "goToDrive"
     const val GO_TO_COLLECTION = "goToCollection"
 
-    const val POS_HOMED = "homePos"
     const val POS_COLLECTION = "ground"
     const val POS_DRIVE = "hold"
     const val POS_SWITCH = "switch"
@@ -126,8 +125,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         //master.pidf(Constants.ElevatorParameters.PIDF)
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
-        master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
-        master.configForwardSoftLimitEnable(false, 10)
 
         master.setSelectedSensorPosition(0, 0, 0)
 
@@ -193,14 +190,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 if (Intake.stowed() || Intake.atGrab()) {
                     setState(ElevatorStates.POS_COLLECTION)
                 }
-            }
-        }
-
-        state(ElevatorStates.POS_HOMED) {
-            rejectIf (::notDeployed)
-
-            entry {
-                mmSetpoint(Constants.ElevatorParameters.HOMINIG_SENSOR_POSITION)
             }
         }
 
@@ -285,26 +274,36 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.HOMING) {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
+            var homingCounter = 0
+            var current: Double
+
             entry {
-                master.configZeroPosOnReverseLimit(true)
                 Elevator.homed = false
+                homingCounter = 0
             }
 
-            var sensorData: SensorCollection
             action {
-                sensorData = master.sensorCollection
-                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
-                if (sensorData.isRevLimitSwitchClosed) { //If the limit is triggered
-                    gearbox.stop() //Stop the motors
-                    Elevator.homed = true //Tell others that we are homed
-                    setState(ElevatorStates.POS_HOMED) //Kick into the homed position state
-                }
-            }
+                current = gearbox.getCurrent(
+                        Constants.PDPChannels.ELEVATOR_SLAVE_1_PDP,
+                        Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
+                        Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
+                )
 
-            exit {
-                master.configZeroPosOnReverseLimit(false, 1000) //Disable zero on home, and wait up to a second for this to finish
-                //Set our position to the actual position of the system, where the homing sensor is, and wait for this to finish
-                master.setSelectedSensorPosition(Constants.ElevatorParameters.HOMINIG_SENSOR_POSITION, 0, 1000)
+                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
+
+                if (current > Constants.ElevatorParameters.HOMING_CURRENT) {
+                    homingCounter++
+                } else {
+                    homingCounter = 0
+                }
+
+                if (homingCounter > Constants.ElevatorParameters.HOMING_COUNT) {
+                    gearbox.stop()
+                    gearbox.setPosition(0)
+                    Elevator.homed = true
+                    setState(ElevatorStates.POS_COLLECTION)
+
+                }
             }
         }
 
