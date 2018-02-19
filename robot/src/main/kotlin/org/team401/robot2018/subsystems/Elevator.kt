@@ -446,7 +446,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorKickerMachine.setState("")
         Thread.sleep(1000)
 
-        true
+        false
     }
     test("Clamp test") {
         //test clamp
@@ -457,7 +457,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorClampMachine.setState("")
         Thread.sleep(1000)
 
-        true
+        false
     }
     test("Ratchet test") {
         //test ratchet
@@ -468,7 +468,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorRatchetMachine.setState("")
         Thread.sleep(1000)
 
-        true
+        false
     }
     test("Shifter test") {
         //test shifter
@@ -479,7 +479,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         elevatorShifterMachine.setState("")
         Thread.sleep(1000)
 
-        true
+        false
     }
     test("Elevator test") {
         //test elevator
