@@ -100,6 +100,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val gearbox = Gearbox(master, slave1, slave2, slave3)
 
+    gearbox.setInverted(true)
+    master.setSensorPhase(true)
+
     val shifter = Solenoid(Constants.Pneumatics.ELEVATOR_SHIFTER_SOLENOID)
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
     val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
@@ -116,19 +119,18 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         
         gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
-        master.setSelectedSensorPosition(0, 0, 0)
-        master.configMotionCruiseVelocity(2046, 0)
-        master.configMotionAcceleration(1023, 0)
-        master.pidf(Constants.ElevatorParameters.PIDF)
+        master.configMotionCruiseVelocity(21680, 0)
+        master.configMotionAcceleration(43360, 0)
+        //master.pidf(Constants.ElevatorParameters.PIDF)
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
         master.configForwardSoftLimitThreshold(Constants.ElevatorParameters.MAX_POS.toInt(), 10)
-        master.configForwardSoftLimitEnable(true, 10)
+        master.configForwardSoftLimitEnable(false, 10)
 
         master.setSelectedSensorPosition(0, 0, 0)
 
-        master.configPeakOutputForward(.1, 0)
-        master.configPeakOutputReverse(-.1, 0)
+        master.configPeakOutputForward(1.0, 0)
+        master.configPeakOutputReverse(-1.0, 0)
 
     }
 
@@ -165,13 +167,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         fun posSetpoint(setpoint: Number) = gearbox.set(ControlMode.Position, setpoint.toDouble())
-        fun mmSetpoint(setpoint: Number) = posSetpoint(setpoint)//gearbox.set(ControlMode.MotionMagic, setpoint.toDouble()) //TODO (fixme)
+        fun mmSetpoint(setpoint: Number) = gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
 
         state(ElevatorStates.OPEN_LOOP_CONTROL) {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             action {
-                gearbox.set(ControlMode.PercentOutput, Gamepad.readAxis { LEFT_Y })
+                gearbox.set(ControlMode.PercentOutput, 0.0)
             }
         }
 
@@ -197,6 +199,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             entry {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
             }
+            action {
+                println("UP: " + master.getSelectedSensorPosition(0))
+            }
         }
 
         state(ElevatorStates.POS_SWITCH) {
@@ -204,6 +209,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
+            }
+
+            action {
+                println("DOWN: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -289,6 +298,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 posSetpoint(position)
             }
         }
+
+        default {
+            action {
+                println("RESTING: " + master.getSelectedSensorPosition(0))
+            }
+        }
     }
 
     val elevatorShifterMachine = stateMachine(ELEVATOR_SHIFTER_MACHINE) {
@@ -362,12 +377,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE) {
         state(ElevatorClampStates.CLAMPED){
             entry{
-                clamp.set(true)
+                clamp.set(false)
             }
         }
         state(ElevatorClampStates.UNCLAMPED){
             entry {
-                clamp.set(false)
+                clamp.set(true)
             }
         }
         default {
@@ -378,11 +393,23 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
+
+        while (elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED) {
+            Thread.sleep(1)
+        }
+
         elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
+        elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
+
+        println(elevatorMachine.getState())
+
+        master.setSelectedSensorPosition(0, 0, 0)
 
     }
+
     test("Kicker test") {
         //test kicker
         elevatorKickerMachine.setState(ElevatorKickerStates.KICK)

@@ -89,7 +89,7 @@ object Constants {
         const val ELEVATOR_KICKER_SOLENOID = 6
         const val ELEVATOR_CLAMP_SOLENOID = 5
 
-        const val RUNGS_DEPLOY_SOLENOID = 0
+        const val RUNGS_DEPLOY_SOLENOID = 7
     }
 
     object DrivetrainParameters {
@@ -160,8 +160,8 @@ object Constants {
         const val MAX_POS = 40960.0 //ticks
 
         const val ZERO_POS = 0.0 //ticks
-        const val CUBE_POS = ZERO_POS + 0.0 //ticks
-        const val SWITCH_POS = ZERO_POS + 0.0 //ticks
+        const val CUBE_POS = ZERO_POS + 58000.0 //ticks
+        const val SWITCH_POS = ZERO_POS + 6000.0 //ticks
         const val SCALE_POS = ZERO_POS + 0.0 //ticks
         const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
         const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
@@ -205,7 +205,7 @@ object Constants {
         const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         const val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        const val STOWED_POS = 750.0
+        const val STOWED_POS = 790.0
         const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
@@ -214,7 +214,7 @@ object Constants {
         const val VOLTAGE_LIMIT = 1.0 //Percent vbus
 
         const val INVERT_LEFT = true
-        const val INVERT_RIGHT = true
+        const val INVERT_RIGHT = false
 
         const val INTAKE_VOLTAGE = 12.0
 

@@ -50,10 +50,14 @@ val Gamepad = HumanControls.f310(2) {
     whenHatChanged(Hats.D_PAD) {
         when (it) {
             Direction.CENTER -> {}
+            /*
             Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
             Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
             Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
             Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE_LOW)
+            */
+            Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+            Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
         }
     }
 
@@ -110,6 +114,17 @@ val Gamepad = HumanControls.f310(2) {
 
         released {
             elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
+        }
+    }
+
+    whenButton(Buttons.LEFT_BUMPER) {
+        pressed {
+            //elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+        }
+
+        released {
+            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         }
     }
 

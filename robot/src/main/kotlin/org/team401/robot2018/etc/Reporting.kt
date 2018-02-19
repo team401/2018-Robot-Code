@@ -8,6 +8,7 @@ import org.snakeskin.logic.Timer
 import org.team401.robot2018.PDP
 import org.team401.robot2018.subsystems.Drivetrain
 import org.team401.robot2018.subsystems.Elevator
+import org.team401.robot2018.subsystems.Intake
 import org.team401.robot2018.subsystems.Rungs
 import java.util.concurrent.TimeUnit
 
@@ -73,20 +74,12 @@ object Reporting {
         r.driveRightAmps = Drivetrain.right.getCurrent()
         r.vbus = PDP.voltage
         r.totalAmps = PDP.totalCurrent
-        /*
-        intakePos = RobotMath.UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
-        intakeVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
-        intakeAmps = Intake.folding.outputCurrent
-        intakeLeftAmps = Intake.left.outputCurrent
-        intakeRightAmps = Intake.right.outputCurrent
-        */
 
-        //TODO SAD
-        r.intakePos = 0.0
-        r.intakeVelocity = 0.0
-        r.intakeAmps = 0.0
-        r.intakeLeftAmps = 0.0
-        r.intakeRightAmps = 0.0
+        r.intakePos = RobotMath.UnitConversions.nativeUnitsToRevolutions(Intake.folding.getSelectedSensorPosition(0).toDouble())
+        r.intakeVelocity = RobotMath.UnitConversions.nativeUnitsToRpm(Intake.folding.getSelectedSensorVelocity(0).toDouble())
+        r.intakeAmps = Intake.folding.outputCurrent
+        r.intakeLeftAmps = Intake.left.outputCurrent
+        r.intakeRightAmps = Intake.right.outputCurrent
 
         r.elevatorVelocity = Elevator.gearbox.getVelocity().toDouble()
         r.elevatorPosition = Elevator.gearbox.getPosition().toDouble()
