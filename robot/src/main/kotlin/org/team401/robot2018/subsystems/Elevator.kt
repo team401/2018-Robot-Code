@@ -29,14 +29,14 @@ import org.team401.robot2018.etc.*
  * @version 1/15/18
  */
 
-val ELEVATOR_DEPLOY_MACHINE = "elevator_deploy"
+const val ELEVATOR_DEPLOY_MACHINE = "elevator_deploy"
 object ElevatorDeployStates {
     const val STOWED = "stowed"
     const val DEPLOY = "deploy"
     const val DEPLOYED = "deployed"
 }
 
-val ELEVATOR_MACHINE = "elevator"
+const val ELEVATOR_MACHINE = "elevator"
 object ElevatorStates {
     const val OPEN_LOOP_CONTROL = "openloop"
     const val MANUAL_ADJUSTMENT = "closedloop"
@@ -55,26 +55,26 @@ object ElevatorStates {
     const val POS_MAX = "max"
 }
 
-val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
+const val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
 object ElevatorShifterStates {
     const val RUN = "high"
     const val CLIMB = "low"
     const val HOLD_CARRIAGE = "hold_carriage"
 }
 
-val ELEVATOR_RATCHET_MACHINE = "elevator_ratchet"
+const val ELEVATOR_RATCHET_MACHINE = "elevator_ratchet"
 object ElevatorRatchetStates {
     const val LOCKED = "locked"
     const val UNLOCKED = "unlocked"
 }
 
-val ELEVATOR_KICKER_MACHINE = "elevator_kicker"
+const val ELEVATOR_KICKER_MACHINE = "elevator_kicker"
 object ElevatorKickerStates {
     const val KICK = "out"
     const val STOW = "in"
 }
 
-val ELEVATOR_CLAMP_MACHINE = "elevator_clamp"
+const val ELEVATOR_CLAMP_MACHINE = "elevator_clamp"
 object  ElevatorClampStates{
     const val CLAMPED = "out"
     const val UNCLAMPED = "in"
@@ -288,6 +288,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                         Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
                         Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
                 )
+
+                println("Elevator Current: " + current)
 
                 gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
 

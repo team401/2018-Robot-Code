@@ -18,7 +18,7 @@ import org.team401.robot2018.etc.Constants
  * @version 1/15/18
  */
 
-val RUNGS_MACHINE = "rungs"
+const val RUNGS_MACHINE = "rungs"
 object RungsStates {
     const val STOWED = "stowed"
     const val DEPLOY = "deploy"
