@@ -29,7 +29,7 @@ val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOper
     }
 }
 
-
+/*
 val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent}) {
     pollAt(20)
 
@@ -46,6 +46,7 @@ val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent})
         else IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.GRAB)
     }
 }
+*/
 
 fun getPitch(): Double {
     var imuData = DoubleArray(3)

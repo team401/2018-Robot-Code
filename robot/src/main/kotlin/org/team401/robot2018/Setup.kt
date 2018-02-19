@@ -34,7 +34,7 @@ import org.team401.robot2018.vision.VisionDataClient
  */
 
 val Vision = VisionController("10.4.1.3")
-val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
+//val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 val PDP = PowerDistributionPanel()
 
 object TestAuto: AutoLoop() {
