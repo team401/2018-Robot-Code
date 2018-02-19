@@ -147,7 +147,7 @@ object Constants {
     object ElevatorParameters {
         const val DEPLOY_TIMER = 5000L //ms
 
-        const val HOMING_RATE = -.25 //percent vbus
+        const val HOMING_RATE = -.5 //percent vbus
 
         const val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
 

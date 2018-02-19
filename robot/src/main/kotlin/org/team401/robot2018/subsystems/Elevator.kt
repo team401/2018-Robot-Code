@@ -57,9 +57,8 @@ object ElevatorStates {
 
 const val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
 object ElevatorShifterStates {
-    const val RUN = "high"
-    const val CLIMB = "low"
-    const val HOLD_CARRIAGE = "hold_carriage"
+    const val HIGH = "high"
+    const val LOW = "low"
 }
 
 const val ELEVATOR_RATCHET_MACHINE = "elevator_ratchet"
@@ -163,6 +162,26 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     fun notDeployed() = elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED
+
+    val elevatorShifterMachine = stateMachine(ELEVATOR_SHIFTER_MACHINE) {
+        state(ElevatorShifterStates.HIGH) {
+            entry {
+                shifter.set(Constants.ElevatorParameters.ShifterMachine.HIGH)
+            }
+        }
+
+        state(ElevatorShifterStates.LOW) {
+            entry {
+                shifter.set(Constants.ElevatorParameters.ShifterMachine.LOW)
+            }
+        }
+
+        default {
+            entry {
+                shifter.set(false)
+            }
+        }
+    }
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         fun posSetpoint(setpoint: Number) = gearbox.set(ControlMode.Position, setpoint.toDouble())
@@ -280,6 +299,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             entry {
                 Elevator.homed = false
                 homingCounter = 0
+                elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
             }
 
             action {
@@ -304,8 +324,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                     gearbox.setPosition(0)
                     Elevator.homed = true
                     setState(ElevatorStates.POS_COLLECTION)
-
                 }
+            }
+
+            exit {
+                elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
             }
         }
 
@@ -327,32 +350,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         default {
             action {
                 println("RESTING: " + master.getSelectedSensorPosition(0))
-            }
-        }
-    }
-
-    val elevatorShifterMachine = stateMachine(ELEVATOR_SHIFTER_MACHINE) {
-        state(ElevatorShifterStates.RUN) {
-            entry {
-                shifter.set(Constants.ElevatorParameters.ShifterMachine.HIGH)
-            }
-        }
-
-        state(ElevatorShifterStates.CLIMB) {
-            entry {
-                shifter.set(Constants.ElevatorParameters.ShifterMachine.LOW)
-            }
-        }
-
-        state(ElevatorShifterStates.HOLD_CARRIAGE) {
-            entry {
-                shifter.set(Constants.ElevatorParameters.ShifterMachine.HOLD)
-            }
-        }
-
-        default {
-            entry {
-                shifter.set(false)
             }
         }
     }
@@ -424,7 +421,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             Thread.sleep(1)
         }
 
-        elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
+        elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
         elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
@@ -475,11 +472,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
     test("Shifter test") {
         //test shifter
-        elevatorShifterMachine.setState(ElevatorShifterStates.RUN)
+        elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
         Thread.sleep(1000)
-        elevatorShifterMachine.setState(ElevatorShifterStates.CLIMB)
-        Thread.sleep(1000)
-        elevatorShifterMachine.setState(ElevatorShifterStates.HOLD_CARRIAGE)
+        elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
         Thread.sleep(1000)
         elevatorShifterMachine.setState("")
         Thread.sleep(1000)
