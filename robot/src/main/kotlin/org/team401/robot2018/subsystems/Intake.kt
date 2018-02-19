@@ -117,6 +117,9 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             entry {
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
+            action{
+                println("Pos ${folding.getSelectedSensorPosition(0)}")
+            }
         }
     }
 
@@ -136,6 +139,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                     counter = 0
                 }
 
+                /*
                 if(boxHeld() && counter >= Constants.IntakeParameters.CUBE_HELD_COUNT) {
                     //turn on LED's
                     cubeCount++
@@ -151,6 +155,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                         ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
                         //elevator to get cube is button mashers responsibility
                     }
+                    */
             }
         }
 
@@ -217,6 +222,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     on (Events.TELEOP_ENABLED) {
         foldingMachine.setState(IntakeFoldingStates.STOWED)
+        //foldingMachine.setState("default")
         intakeMachine.setState(IntakeWheelsStates.IDLE)
     }
 }

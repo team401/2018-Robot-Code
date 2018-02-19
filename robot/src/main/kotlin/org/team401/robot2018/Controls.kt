@@ -50,14 +50,14 @@ val Gamepad = HumanControls.f310(2) {
     whenHatChanged(Hats.D_PAD) {
         when (it) {
             Direction.CENTER -> {}
-            /*
+
             Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
             Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
             Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
-            Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE_LOW)
-            */
-            Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
-            Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
+            Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE)
+
+           // Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+           // Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
         }
     }
 
@@ -107,6 +107,7 @@ val Gamepad = HumanControls.f310(2) {
 
     //Scoring
     whenButton(Buttons.RIGHT_BUMPER) {
+        /*
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
@@ -115,16 +116,17 @@ val Gamepad = HumanControls.f310(2) {
         released {
             elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
         }
+        */
+
+        pressed{
+            elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        }
     }
 
     whenButton(Buttons.LEFT_BUMPER) {
         pressed {
             //elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
-            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
-        }
-
-        released {
-            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+            elevatorClampMachine.toggle(ElevatorClampStates.CLAMPED, ElevatorClampStates.UNCLAMPED)
         }
     }
 

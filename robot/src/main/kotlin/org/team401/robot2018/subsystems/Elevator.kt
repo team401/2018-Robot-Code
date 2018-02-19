@@ -120,7 +120,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
         master.configMotionCruiseVelocity(21680, 0)
-        master.configMotionAcceleration(43360, 0)
+        master.configMotionAcceleration(21680, 0)
         //master.pidf(Constants.ElevatorParameters.PIDF)
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
@@ -174,6 +174,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
+                println("OPENLOOP: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -189,7 +190,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf (::notDeployed)
 
             entry {
-                mmSetpoint(Constants.ElevatorParameters.ZERO_POS)
+                mmSetpoint(Constants.ElevatorParameters.COLLECTION_POS)
             }
         }
 
@@ -229,6 +230,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
+            }
+
+            action {
+                println("SCALE: " + master.getSelectedSensorPosition(0))
+
             }
         }
 

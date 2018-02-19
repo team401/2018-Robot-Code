@@ -160,11 +160,12 @@ object Constants {
         const val MAX_POS = 40960.0 //ticks
 
         const val ZERO_POS = 0.0 //ticks
-        const val CUBE_POS = ZERO_POS + 58000.0 //ticks
-        const val SWITCH_POS = ZERO_POS + 6000.0 //ticks
-        const val SCALE_POS = ZERO_POS + 0.0 //ticks
-        const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
-        const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
+        const val COLLECTION_POS = ZERO_POS + 500.0
+        const val CUBE_POS = ZERO_POS + 6000.0 //ticks
+        const val SWITCH_POS = ZERO_POS + 17500.0 //ticks
+        const val SCALE_POS = ZERO_POS + 48800 //ticks
+        const val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
+        const val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
 
         const val PITCH_DIAMETER = 1.805 //in
 
@@ -199,13 +200,13 @@ object Constants {
     }
 
     object IntakeParameters {
-        const val INTAKE_RATE = 1.0
+        const val INTAKE_RATE = .7
         const val REVERSE_RATE = -0.7
 
         const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         const val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        const val STOWED_POS = 790.0
+        const val STOWED_POS = 730.0
         const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
