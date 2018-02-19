@@ -1,6 +1,7 @@
 package org.team401.robot2018.etc
 
 import com.ctre.phoenix.ParamEnum
+import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.component.Gearbox
@@ -40,6 +41,10 @@ fun IMotorControllerEnhanced.pidf(pidf: Constants.PIDF) {
     pidf(pidf.P, pidf.I, pidf.D, pidf.F)
 }
 
+fun IMotorControllerEnhanced.voltageCompensation(desiredOutput : Double, nominal: Double) {
+    set(ControlMode.PercentOutput, desiredOutput * (nominal/ PDP.voltage))
+}
+
 fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)
 
 fun Gearbox.getCurrent(vararg pdpIds: Int): Double {
@@ -64,3 +69,5 @@ fun TankDrivetrain.shiftUpdate(state: ShiftCommand): Boolean {
     }
     return false
 }
+
+fun Double.withinTolerance(other: Double, tolerance: Double) = Math.abs(this - other) < tolerance

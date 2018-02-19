@@ -201,6 +201,7 @@ object Constants {
 
     object IntakeParameters {
         const val INTAKE_RATE = .7
+        const val RETAIN_RATE = .25
         const val REVERSE_RATE = -0.7
 
         const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
@@ -210,9 +211,8 @@ object Constants {
         const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
-        const val HAVE_CUBE_CURRENT_L = 10.0
-        const val HAVE_CUBE_CURRENT_R = 6.0
-        const val VOLTAGE_LIMIT = 1.0 //Percent vbus
+        const val HAVE_CUBE_CURRENT_INTAKE = 8.0
+        const val HAVE_CUBE_CURRENT_HOLD = 8.0
 
         const val INVERT_LEFT = true
         const val INVERT_RIGHT = false
@@ -235,7 +235,9 @@ object Constants {
         const val LEFT_PEAK_LIMIT_DUR = 100
         const val RIGHT_PEAK_LIMIT_DUR = 100
 
-        const val CUBE_HELD_COUNT = 30
+        const val INRUSH_COUNT = 30
+        const val CUBE_HELD_TIME = 300L
+        const val HAVE_CUBE_CLAMP_DELAY = 500L
 
         object PIDF {
             const val P = 3.5

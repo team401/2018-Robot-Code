@@ -12,10 +12,7 @@ import org.snakeskin.logic.LockingDelegate
 import org.snakeskin.publish.Publisher
 import org.team401.robot2018.Gamepad
 import org.team401.robot2018.PDP
-import org.team401.robot2018.etc.Constants
-import org.team401.robot2018.etc.RobotMath
-import org.team401.robot2018.etc.configZeroPosOnReverseLimit
-import org.team401.robot2018.etc.pidf
+import org.team401.robot2018.etc.*
 
 //import org.team401.robot2018.MasherBox
 
@@ -45,6 +42,8 @@ object ElevatorStates {
     const val MANUAL_ADJUSTMENT = "closedloop"
     const val HOLD_POS_UNKNOWN = "pos_lock"
     const val HOMING = "homing"
+
+    const val GO_TO_DRIVE = "goToDrive"
 
     const val POS_HOMED = "homePos"
     const val POS_COLLECTION = "ground"
@@ -175,6 +174,14 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
                 println("OPENLOOP: " + master.getSelectedSensorPosition(0))
+            }
+        }
+
+        state(ElevatorStates.GO_TO_DRIVE) {
+            action {
+                if (Intake.stowed()) {
+                    setState(ElevatorStates.POS_DRIVE)
+                }
             }
         }
 
@@ -414,6 +421,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         master.setSelectedSensorPosition(0, 0, 0)
 
+    }
+
+    on (RobotEvents.HAVE_CUBE) {
+        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+        elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
     }
 
     test("Kicker test") {

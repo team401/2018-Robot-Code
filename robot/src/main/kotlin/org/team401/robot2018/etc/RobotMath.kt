@@ -1,5 +1,7 @@
 package org.team401.robot2018.etc
 
+import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+
 /*
  * 2018-Robot-Code - Created on 2/9/18
  * Author: Cameron Earle
@@ -32,4 +34,6 @@ object RobotMath {
 
         fun degreesToCTREDumbUnit(degrees: Double) = degrees * 64.0 //Because that makes sense
     }
+
+    fun averageCurrent(vararg motors: IMotorControllerEnhanced): Double = motors.map { it.outputCurrent }.average()
 }
