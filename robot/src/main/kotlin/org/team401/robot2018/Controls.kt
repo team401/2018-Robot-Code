@@ -149,4 +149,10 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
     */
+
+    whenButton(Buttons.BACK) { //TODO test homing
+        pressed {
+            elevatorMachine.setState(ElevatorStates.HOMING)
+        }
+    }
 }

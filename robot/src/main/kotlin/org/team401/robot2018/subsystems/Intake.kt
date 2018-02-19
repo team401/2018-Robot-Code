@@ -21,7 +21,7 @@ import org.team401.robot2018.etc.*
  * @version 1/15/18
  */
 
-val INTAKE_WHEELS_MACHINE = "intake"
+const val INTAKE_WHEELS_MACHINE = "intake"
 object IntakeWheelsStates {
     const val INTAKE = "intake"
     const val REVERSE = "reverse"
@@ -30,7 +30,7 @@ object IntakeWheelsStates {
     const val HAVE_CUBE = "haveCube"
 }
 
-val INTAKE_FOLDING_MACHINE = "intake_folding"
+const val INTAKE_FOLDING_MACHINE = "intake_folding"
 object IntakeFoldingStates {
     const val GRAB = "wide"
     const val INTAKE = "out"
