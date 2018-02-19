@@ -44,6 +44,7 @@ object ElevatorStates {
     const val HOMING = "homing"
 
     const val GO_TO_DRIVE = "goToDrive"
+    const val GO_TO_COLLECTION = "goToCollection"
 
     const val POS_HOMED = "homePos"
     const val POS_COLLECTION = "ground"
@@ -89,6 +90,8 @@ object Elevator {
     lateinit var clamp: Solenoid
 
     var homed by LockingDelegate(false)
+
+    fun atCollection() = gearbox.master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.COLLECTION_POS, 1000.0)
 }
 
 val ElevatorSubsystem: Subsystem = buildSubsystem {
@@ -179,8 +182,16 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorStates.GO_TO_DRIVE) {
             action {
-                if (Intake.stowed()) {
+                if (Intake.stowed() || Intake.atGrab()) {
                     setState(ElevatorStates.POS_DRIVE)
+                }
+            }
+        }
+
+        state(ElevatorStates.GO_TO_COLLECTION) {
+            action {
+                if (Intake.stowed() || Intake.atGrab()) {
+                    setState(ElevatorStates.POS_COLLECTION)
                 }
             }
         }

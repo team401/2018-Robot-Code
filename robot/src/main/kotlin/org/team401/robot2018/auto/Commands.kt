@@ -37,6 +37,10 @@ object Commands {
         ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).getState() == ElevatorDeployStates.DEPLOYED
     }
 
+    val WaitForHasCube = WaitForStep {
+        ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
+    }
+
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
 
     val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)

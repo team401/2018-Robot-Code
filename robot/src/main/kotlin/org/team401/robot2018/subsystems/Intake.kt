@@ -35,6 +35,7 @@ object IntakeFoldingStates {
     const val GRAB = "wide"
     const val INTAKE = "out"
     const val STOWED = "in"
+    const val GO_TO_INTAKE = "goToIntake"
 }
 
 object Intake {
@@ -43,6 +44,7 @@ object Intake {
     lateinit var right: TalonSRX
 
     fun stowed() = folding.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.IntakeParameters.STOWED_POS, 100.0)
+    fun atGrab() = folding.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.IntakeParameters.GRAB_POS, 100.0)
 }
 
 var cubeCount = 0
@@ -97,6 +99,14 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         state(IntakeFoldingStates.GRAB) {
             entry {
                 folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
+            }
+        }
+
+        state(IntakeFoldingStates.GO_TO_INTAKE) {
+            action {
+                if (Elevator.atCollection()) {
+                    setState(IntakeFoldingStates.INTAKE)
+                }
             }
         }
 

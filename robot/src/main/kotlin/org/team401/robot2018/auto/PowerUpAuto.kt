@@ -147,6 +147,7 @@ object PowerUpAuto: AutoLoop() {
                     add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator)) //Drive and home
                     add(Commands.ElevatorToGround) //Bring the elevator to the ground
                     //TODO Intake (will include box acquisition and elevator clamping)
+                    //add(Commands.WaitForHasCube)
                     add(Commands.ElevatorToSwitch) //Elevator to the switch scoring position
                     add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
                     add(Commands.ElevatorKickerScore) //Kick the box out
