@@ -80,6 +80,7 @@ object PowerUpAuto: AutoLoop() {
      * Builds a motion profile step group for the left and
      * right sides of the drivetrain using the given entry and end
      */
+    /*
     private fun mpStep(start: String, end: String, vararg otherActions: AutoStep): StepGroup {
         val leftMaster = Drivetrain.left.master
         val rightMaster = Drivetrain.right.master
@@ -104,6 +105,11 @@ object PowerUpAuto: AutoLoop() {
 
         return StepGroup(steps)
     }
+    */
+    private fun mpStep(start: String, end: String, vararg otherActions: AutoStep): StepGroup {
+        return StepGroup()
+    }
+
 
     private const val TURN_AROUND_GAIN = 0.01
     private const val TURN_AROUND_ERROR = 1.0
@@ -134,6 +140,7 @@ object PowerUpAuto: AutoLoop() {
             add(DelayStep(baseDelay)) //Wait an initial amount of time
 
             add(Commands.IntakeToStow) //Stow the intake back
+            add(Commands.ElevatorHigh) //High gear
             add(Commands.HoldElevator) //Hold the carriage in place
             add(Commands.ElevatorHolderClamp) //Clamp down on the box
 

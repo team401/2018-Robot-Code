@@ -10,6 +10,7 @@ import org.snakeskin.dsl.Publisher
 import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
+import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.etc.Constants
@@ -38,18 +39,20 @@ val Vision = VisionController("10.4.1.3")
 val PDP = PowerDistributionPanel()
 
 object TestAuto: AutoLoop() {
-    var posLeft by Publisher(0.0)
-    var posRight by Publisher(0.0)
-
     override val rate = 10L
 
     lateinit var runner: RioProfileRunner
+    lateinit var turn: GyroTurn
 
     var started = false
 
     override fun entry() {
         done = false
         started = true
+        turn = GyroTurn(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, -180.0, 0.01, .1, 1.0, 0.5)
+        turn.entry()
+
+        /*
         runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
                 PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
                 PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
@@ -58,19 +61,21 @@ object TestAuto: AutoLoop() {
 
         runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
         runner.entry()
+        */
+
     }
 
     override fun action() {
-        runner.action()
+        turn.action()
 
-        if (runner.done) {
+        if (turn.done) {
             done = true
         }
     }
 
     override fun exit() {
         if (started) {
-            runner.exit()
+            turn.exit()
         }
     }
 }

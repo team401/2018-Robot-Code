@@ -51,6 +51,8 @@ object Commands {
     val ElevatorHolderClamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)
     val ElevatorHolderUnclamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.UNCLAMPED)
 
+    val ElevatorHigh = StateStep(ElevatorSubsystem, ELEVATOR_SHIFTER_MACHINE, ElevatorShifterStates.HIGH)
+
     val IntakeToStow = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.STOWED)
     val IntakeToGrab = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GRAB)
     val IntakeToIntake = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GO_TO_INTAKE)
