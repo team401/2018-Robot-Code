@@ -199,9 +199,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.CLIMB) {
-
-            rejectIf (::notDeployed)
-
             entry {
                 elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
             }
@@ -331,7 +328,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 if (homingCounter > Constants.ElevatorParameters.HOMING_COUNT) {
                     gearbox.setPosition(0)
                     Elevator.homed = true
-                    setState(ElevatorStates.POS_COLLECTION)
+                    setState(ElevatorStates.POS_DRIVE)
                 }
             }
         }
@@ -417,6 +414,27 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 clamp.set(false)
             }
         }
+    }
+
+    on (Events.TELEOP_ENABLED) {
+        if (notDeployed()) { //If we aren't deployed
+            elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
+            while (notDeployed()) { //Wait for deploy to finish
+                Thread.sleep(10)
+            }
+        }
+
+        if (!Elevator.homed) { //If we aren't homed
+            elevatorMachine.setState(ElevatorStates.HOMING) //Home
+        } else {
+            elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
+            elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
+        }
+
+        //Always put all machines in a known state on enable
+        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+        elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
     }
 
     on (RobotEvents.HAVE_CUBE) {

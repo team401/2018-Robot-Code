@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
+import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
@@ -104,10 +105,35 @@ object PowerUpAuto: AutoLoop() {
         return StepGroup(steps)
     }
 
+    private const val TURN_AROUND_GAIN = 0.01
+    private const val TURN_AROUND_ERROR = 1.0
+    private const val TURN_AROUND_MAX = 1.0
+
+    private fun turnAroundCCW() = GyroTurn(
+            Drivetrain.left.master,
+            Drivetrain.right.master,
+            Drivetrain.imu,
+            180.0,
+            TURN_AROUND_GAIN,
+            TURN_AROUND_ERROR,
+            TURN_AROUND_MAX
+    )
+
+    private fun turnAroundCW() = GyroTurn(
+            Drivetrain.left.master,
+            Drivetrain.right.master,
+            Drivetrain.imu,
+            -180.0,
+            TURN_AROUND_GAIN,
+            TURN_AROUND_ERROR,
+            TURN_AROUND_MAX
+    )
+
     private fun assembleAuto() {
         sequence.run {
             add(DelayStep(baseDelay)) //Wait an initial amount of time
 
+            add(Commands.IntakeToStow) //Stow the intake back
             add(Commands.HoldElevator) //Hold the carriage in place
             add(Commands.ElevatorHolderClamp) //Clamp down on the box
 
@@ -129,26 +155,18 @@ object PowerUpAuto: AutoLoop() {
             add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
             add(Commands.ElevatorKickerRetract) //Retract the kicker
 
-            when (target) {
-                AutoTarget.SCALE_SWITCH -> {
-                    add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator))
-                    //TODO intake
-                    add(Commands.ElevatorToSwitch)
-                    add(Commands.ElevatorKickerScore)
-                    add(DelayStep(Delays.SCORE))
-                    add(Commands.ElevatorKickerRetract)
-                }
-                else -> {}
-            }
-
             //Pass 3 (SCALE_SWITCH final scoring sequence)
             when (target) {
                 AutoTarget.SCALE_SWITCH -> {
+                    add(turnAroundCCW()) //Turn around from scale
+                    add(Commands.IntakeToGrab) //Set up intake for cube grabbing
                     add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator)) //Drive and home
                     add(Commands.ElevatorToGround) //Bring the elevator to the ground
-                    //TODO Intake (will include box acquisition and elevator clamping)
-                    //add(Commands.WaitForHasCube)
+                    add(Commands.IntakeWheelsRun) //Turn on intake wheels
+                    add(Commands.IntakeToIntake) //Intake the cube
+                    add(Commands.WaitForHasCube) //Wait for the cube to be taken in
                     add(Commands.ElevatorToSwitch) //Elevator to the switch scoring position
+                    add(mpStep("SWITCH_CUBE", "SWITCH_WALL")) //Drive the remaining distance to the switch wall
                     add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
                     add(Commands.ElevatorKickerScore) //Kick the box out
                     add(DelayStep(Delays.SCORE)) //Wait for the cube to leave the robot
