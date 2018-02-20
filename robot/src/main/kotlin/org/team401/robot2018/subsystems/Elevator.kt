@@ -10,6 +10,7 @@ import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.event.Events
 import org.snakeskin.logic.LockingDelegate
 import org.snakeskin.publish.Publisher
+import org.team401.robot2018.ClimbStick
 import org.team401.robot2018.Gamepad
 import org.team401.robot2018.PDP
 import org.team401.robot2018.etc.*
@@ -42,6 +43,7 @@ object ElevatorStates {
     const val MANUAL_ADJUSTMENT = "closedloop"
     const val HOLD_POS_UNKNOWN = "pos_lock"
     const val HOMING = "homing"
+    const val CLIMB = "climb"
 
     const val GO_TO_DRIVE = "goToDrive"
     const val GO_TO_COLLECTION = "goToCollection"
@@ -192,7 +194,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
-                println("OPENLOOP: " + master.getSelectedSensorPosition(0))
+                //println("OPENLOOP: " + master.getSelectedSensorPosition(0))
+            }
+        }
+
+        state(ElevatorStates.CLIMB) {
+
+            rejectIf (::notDeployed)
+
+            entry {
+                elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+            }
+
+            action {
+                gearbox.set(ControlMode.PercentOutput, ClimbStick.readAxis { PITCH })
             }
         }
 
@@ -227,7 +242,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
             }
             action {
-                println("UP: " + master.getSelectedSensorPosition(0))
+                //println("UP: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -239,7 +254,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                println("DOWN: " + master.getSelectedSensorPosition(0))
+                //println("DOWN: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -259,7 +274,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                println("SCALE: " + master.getSelectedSensorPosition(0))
+                //println("SCALE: " + master.getSelectedSensorPosition(0))
 
             }
         }
@@ -286,7 +301,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                gearbox.set(ControlMode.Position, 0.0)
+                mmSetpoint(0.0)
             }
         }
 
@@ -294,41 +309,30 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             var homingCounter = 0
-            var current: Double
+            var velocity: Int
 
             entry {
                 Elevator.homed = false
                 homingCounter = 0
-                elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+                elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
             }
 
             action {
-                current = gearbox.getCurrent(
-                        Constants.PDPChannels.ELEVATOR_SLAVE_1_PDP,
-                        Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
-                        Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
-                )
+                velocity = master.getSelectedSensorVelocity(0)
+                println("Elevator Velocity: " + velocity)
+                gearbox.set(ControlMode.PercentOutput, 0.0) //Run down at the homing rate
 
-                println("Elevator Current: " + current)
-
-                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
-
-                if (current > Constants.ElevatorParameters.HOMING_CURRENT) {
+                if (velocity == 0) {
                     homingCounter++
                 } else {
                     homingCounter = 0
                 }
 
                 if (homingCounter > Constants.ElevatorParameters.HOMING_COUNT) {
-                    gearbox.stop()
                     gearbox.setPosition(0)
                     Elevator.homed = true
                     setState(ElevatorStates.POS_COLLECTION)
                 }
-            }
-
-            exit {
-                elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
             }
         }
 
@@ -349,7 +353,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         default {
             action {
-                println("RESTING: " + master.getSelectedSensorPosition(0))
+                //println("RESTING: " + master.getSelectedSensorPosition(0))
+                gearbox.set(ControlMode.PercentOutput, 0.0)
             }
         }
     }
@@ -412,24 +417,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 clamp.set(false)
             }
         }
-    }
-
-    on (Events.TELEOP_ENABLED) {
-        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
-
-        while (elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED) {
-            Thread.sleep(1)
-        }
-
-        elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
-        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
-        elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
-
-        println(elevatorMachine.getState())
-
-        master.setSelectedSensorPosition(0, 0, 0)
-
     }
 
     on (RobotEvents.HAVE_CUBE) {

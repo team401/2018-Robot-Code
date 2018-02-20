@@ -84,8 +84,8 @@ object Constants {
         const val SHIFTER_SOLENOID = 2
 
         const val ELEVATOR_SHIFTER_SOLENOID = 3
-        const val ELEVATOR_DEPLOY_SOLENOID = 1
-        const val ELEVATOR_RATCHET_SOLENOID = 4
+        const val ELEVATOR_DEPLOY_SOLENOID = 4
+        const val ELEVATOR_RATCHET_SOLENOID = 0
         const val ELEVATOR_KICKER_SOLENOID = 6
         const val ELEVATOR_CLAMP_SOLENOID = 5
 
@@ -145,9 +145,9 @@ object Constants {
     }
 
     object ElevatorParameters {
-        const val DEPLOY_TIMER = 5000L //ms
+        const val DEPLOY_TIMER = 3500L //ms
 
-        const val HOMING_RATE = -.5 //percent vbus
+        const val HOMING_RATE = -.1 //percent vbus
 
         const val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
 
@@ -169,7 +169,6 @@ object Constants {
         const val PITCH_DIAMETER = 1.805 //in
 
         const val HOMING_COUNT = 10
-        const val HOMING_CURRENT = 10.0 //amps
 
         object PIDF: Constants.PIDF {
             override val P = 0.5
@@ -209,12 +208,12 @@ object Constants {
         const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         const val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        const val STOWED_POS = 730.0
+        const val STOWED_POS = 780.0
         const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
-        const val HAVE_CUBE_CURRENT_INTAKE = 8.0
-        const val HAVE_CUBE_CURRENT_HOLD = 8.0
+        const val HAVE_CUBE_CURRENT_INTAKE = 5.0
+        const val HAVE_CUBE_CURRENT_HOLD = 1.0
 
         const val INVERT_LEFT = true
         const val INVERT_RIGHT = false
