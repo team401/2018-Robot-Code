@@ -14,17 +14,29 @@ package org.team401.robot2018.auto.steps
  */
 
 class SubSequence(vararg val steps: AutoStep): AutoStep() {
-
+    private var idx = 0
 
     override fun entry() {
-
+        done = false
+        idx = 0
     }
 
     override fun action() {
-
+        if (idx < steps.size) {
+            steps[idx].tick()
+            if (steps[idx].doContinue()) {
+                idx++
+            }
+        } else {
+            done = true
+        }
     }
 
     override fun exit() {
-
+        steps.forEach {
+            if (it.state != AutoStep.State.CONTINUE) {
+                it.exit()
+            }
+        }
     }
 }
