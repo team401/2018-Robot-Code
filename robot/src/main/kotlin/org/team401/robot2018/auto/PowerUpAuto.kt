@@ -10,6 +10,7 @@ import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StepGroup
+import org.team401.robot2018.auto.steps.SubSequence
 import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.subsystems.Drivetrain
 
@@ -135,12 +136,11 @@ object PowerUpAuto: AutoLoop() {
 
     private fun assembleAuto() {
         sequence.run {
-            add(Commands.DeployElevator)
-            add(Commands.WaitForDeploy)
+            add(Commands.IntakeToStow)
             add(Commands.ElevatorHigh)
-            add(Commands.HomeElevator)
-            add(Commands.ElevatorToScale) //Change this to match the height of the desired target
-            add(mpStep("DS_RIGHT", "SWITCH_RIGHT")) //Change this to run the appropriate profile
+            add(Commands.HoldElevator)
+            add(mpStep("DS_RIGHT", "SCALE_RIGHT", SubSequence(Commands.DeployElevator, Commands.WaitForDeploy, Commands.ScaleAfterUnfold)))
+            add(Commands.ElevatorHolderUnclamp)
 
             /*
             add(DelayStep(baseDelay)) //Wait an initial amount of time

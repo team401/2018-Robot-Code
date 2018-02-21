@@ -411,6 +411,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
+        /*
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
@@ -424,6 +425,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
             elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
         }
+        */
 
         //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
