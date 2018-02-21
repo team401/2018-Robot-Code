@@ -3,6 +3,7 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.Subsystem
@@ -10,7 +11,6 @@ import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.event.Events
 import org.snakeskin.logic.LockingDelegate
 import org.snakeskin.publish.Publisher
-import org.team401.robot2018.ClimbStick
 import org.team401.robot2018.Gamepad
 import org.team401.robot2018.PDP
 import org.team401.robot2018.etc.*
@@ -43,7 +43,6 @@ object ElevatorStates {
     const val MANUAL_ADJUSTMENT = "closedloop"
     const val HOLD_POS_UNKNOWN = "pos_lock"
     const val HOMING = "homing"
-    const val CLIMB = "climb"
 
     const val GO_TO_DRIVE = "goToDrive"
     const val GO_TO_COLLECTION = "goToCollection"
@@ -85,7 +84,7 @@ object Elevator {
     lateinit var gearbox: Gearbox
     lateinit var shifter: Solenoid
     lateinit var deployer: Solenoid
-    lateinit var ratchet: Solenoid
+    lateinit var ratchet: Servo
     lateinit var kicker: Solenoid
     lateinit var clamp: Solenoid
 
@@ -107,9 +106,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val shifter = Solenoid(Constants.Pneumatics.ELEVATOR_SHIFTER_SOLENOID)
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
-    val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
     val kicker = Solenoid(Constants.Pneumatics.ELEVATOR_KICKER_SOLENOID)
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
+
+    val ratchet = Servo(Constants.ElevatorParameters.RATCHET_SERVO_PORT)
 
     setup {
         Elevator.gearbox = gearbox
@@ -195,16 +195,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
                 //println("OPENLOOP: " + master.getSelectedSensorPosition(0))
-            }
-        }
-
-        state(ElevatorStates.CLIMB) {
-            entry {
-                elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
-            }
-
-            action {
-                gearbox.set(ControlMode.PercentOutput, ClimbStick.readAxis { PITCH })
             }
         }
 
@@ -360,19 +350,19 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                ratchet.set(Constants.ElevatorParameters.RachetMachine.LOCKED)
+                ratchet.set(Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS)
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                ratchet.set(Constants.ElevatorParameters.RachetMachine.UNLOCKED)
+                ratchet.set(Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS)
             }
         }
 
         default {
             entry {
-                ratchet.set(false)
+                ratchet.set(0.0)
             }
         }
     }
@@ -417,6 +407,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
+        /*
+
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
@@ -430,6 +422,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
             elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
         }
+
+        */
 
         //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)

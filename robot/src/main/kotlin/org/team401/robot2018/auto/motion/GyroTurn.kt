@@ -35,7 +35,9 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
     private var error = 0.0
 
     override fun entry() {
-        imu.setYaw(0.0, 0)
+        done = false
+        imu.setYaw(0.0, 1000)
+        Thread.sleep(100)
 
         imuData[0] = 0.0
         imuData[1] = 0.0
@@ -43,13 +45,17 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
 
         output = 0.0
         error = 0.0
+
+        println("ENTERED")
     }
 
     override fun action() {
         imu.getYawPitchRoll(imuData)
         error = targetDegrees - imuData[0]
+        println("Error: " + error + "  YAW: " + imuData[0])
 
         if (!error.withinTolerance(0.0, allowedError)) {
+            println("NOT WITHIN TOLERANCE")
             output = gain * error + (feedForward * Math.signum(error))
             if (output > maxOutput) output = maxOutput
             if (output < -maxOutput) output = -maxOutput
@@ -57,6 +63,7 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
             leftController.set(ControlMode.PercentOutput, -output)
             rightController.set(ControlMode.PercentOutput, output)
         } else {
+            println("WITHIN TOLERANCE")
             done = true
         }
     }
@@ -64,5 +71,6 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
     override fun exit() {
         leftController.set(ControlMode.PercentOutput, 0.0)
         rightController.set(ControlMode.PercentOutput, 0.0)
+        println("EXITED")
     }
 }

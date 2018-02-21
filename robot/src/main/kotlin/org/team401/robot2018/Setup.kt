@@ -49,7 +49,7 @@ object TestAuto: AutoLoop() {
     override fun entry() {
         done = false
         started = true
-        turn = GyroTurn(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, -180.0, 0.01, .1, 1.0, 0.5)
+        turn = GyroTurn(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, -180.0, 0.0024, .02, 2.0, 1.0)
         turn.entry()
 
         /*
@@ -70,6 +70,7 @@ object TestAuto: AutoLoop() {
 
         if (turn.done) {
             done = true
+            println("TURN DONE")
         }
     }
 

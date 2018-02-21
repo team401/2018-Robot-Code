@@ -85,7 +85,6 @@ object Constants {
 
         const val ELEVATOR_SHIFTER_SOLENOID = 3
         const val ELEVATOR_DEPLOY_SOLENOID = 4
-        const val ELEVATOR_RATCHET_SOLENOID = 0
         const val ELEVATOR_KICKER_SOLENOID = 6
         const val ELEVATOR_CLAMP_SOLENOID = 5
 
@@ -165,6 +164,10 @@ object Constants {
         const val SCALE_POS = ZERO_POS + 48800 //ticks
         const val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         const val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
+
+        const val RATCHET_SERVO_PORT = 0
+        const val RATCHET_UNLOCKED_SERVO_POS = 0.0
+        const val RATCHET_LOCKED_SERVO_POS = 1.0
 
         const val PITCH_DIAMETER = 1.805 //in
 

@@ -31,12 +31,6 @@ val LeftStick = HumanControls.t16000m(0) {
             driveShiftMachine.setState(DriveShiftStates.HIGH)
         }
     }
-
-    whenButton(Buttons.STICK_BOTTOM) {
-        pressed {
-            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.CLIMB)
-        }
-    }
 }
 
 val RightStick = HumanControls.t16000m(1) {
@@ -171,5 +165,3 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
 }
-
-val ClimbStick = HumanControls.attack3(3)

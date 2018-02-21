@@ -150,6 +150,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
     private val imuValue = DoubleArray(3)
 
     override fun entry() {
+        done = false
         left.reset()
         right.reset()
 
