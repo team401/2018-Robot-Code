@@ -42,6 +42,7 @@ object ElevatorStates {
     const val OPEN_LOOP_CONTROL = "openloop"
     const val MANUAL_ADJUSTMENT = "closedloop"
     const val HOLD_POS_UNKNOWN = "pos_lock"
+    const val SCALE_POS_UNKNOWN = "scaleStart"
     const val HOMING = "homing"
 
     const val GO_TO_DRIVE = "goToDrive"
@@ -285,10 +286,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.HOLD_POS_UNKNOWN) {
             entry {
                 gearbox.setPosition(0)
-            }
-
-            action {
                 mmSetpoint(0.0)
+            }
+        }
+
+        state(ElevatorStates.SCALE_POS_UNKNOWN) {
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.UNKNOWN_SCALE_POS)
             }
         }
 
@@ -407,8 +411,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
-        /*
-
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
@@ -422,8 +424,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
             elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
         }
-
-        */
 
         //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)

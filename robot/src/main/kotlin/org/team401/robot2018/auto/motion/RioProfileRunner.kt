@@ -167,6 +167,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
         left.zero(0)
         right.zero(0)
+        Thread.sleep(100)
     }
 
     override fun action() {

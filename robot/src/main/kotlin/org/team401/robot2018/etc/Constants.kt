@@ -116,10 +116,10 @@ object Constants {
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
 
-        val LEFT_PDVA = PDVA()
-        val RIGHT_PDVA = PDVA()
+        val LEFT_PDVA = PDVA(1/19.0, 0/3.0, 1/1200.0, 0.0)
+        val RIGHT_PDVA = PDVA(1/19.0, 0/3.0, 1/1200.0, 0.0)
 
-        val HEADING_GAIN = 0.01
+        val HEADING_GAIN = 0.0025
 
         const val TIP_CORRECTION_SCALAR = 10 //fixme (testme)
 
@@ -164,6 +164,8 @@ object Constants {
         const val SCALE_POS = ZERO_POS + 48800 //ticks
         const val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         const val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
+
+        const val UNKNOWN_SCALE_POS = 25000.0
 
         const val RATCHET_SERVO_PORT = 0
         const val RATCHET_UNLOCKED_SERVO_POS = 0.0

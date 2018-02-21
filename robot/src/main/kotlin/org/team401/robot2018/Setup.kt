@@ -10,6 +10,7 @@ import org.snakeskin.dsl.Publisher
 import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
+import org.team401.robot2018.auto.PowerUpAuto
 import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
@@ -83,8 +84,8 @@ object TestAuto: AutoLoop() {
 
 @Setup
 fun setup() {
-    //AutoManager.auto = PowerUpAuto
-    AutoManager.auto = TestAuto
+    AutoManager.auto = PowerUpAuto
+    //AutoManager.auto = TestAuto
 
     //PowerUpAuto.publish()
 
