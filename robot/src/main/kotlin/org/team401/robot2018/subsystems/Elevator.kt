@@ -3,6 +3,7 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
+import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.Subsystem
@@ -41,6 +42,7 @@ object ElevatorStates {
     const val OPEN_LOOP_CONTROL = "openloop"
     const val MANUAL_ADJUSTMENT = "closedloop"
     const val HOLD_POS_UNKNOWN = "pos_lock"
+    const val SCALE_POS_UNKNOWN = "scaleStart"
     const val HOMING = "homing"
 
     const val GO_TO_DRIVE = "goToDrive"
@@ -83,7 +85,7 @@ object Elevator {
     lateinit var gearbox: Gearbox
     lateinit var shifter: Solenoid
     lateinit var deployer: Solenoid
-    lateinit var ratchet: Solenoid
+    lateinit var ratchet: Servo
     lateinit var kicker: Solenoid
     lateinit var clamp: Solenoid
 
@@ -105,9 +107,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val shifter = Solenoid(Constants.Pneumatics.ELEVATOR_SHIFTER_SOLENOID)
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
-    val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
     val kicker = Solenoid(Constants.Pneumatics.ELEVATOR_KICKER_SOLENOID)
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
+
+    val ratchet = Servo(Constants.ElevatorParameters.RATCHET_SERVO_PORT)
 
     setup {
         Elevator.gearbox = gearbox
@@ -192,7 +195,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
-                println("OPENLOOP: " + master.getSelectedSensorPosition(0))
+                //println("OPENLOOP: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -227,7 +230,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
             }
             action {
-                println("UP: " + master.getSelectedSensorPosition(0))
+                //println("UP: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -239,7 +242,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                println("DOWN: " + master.getSelectedSensorPosition(0))
+                //println("DOWN: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -259,7 +262,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                println("SCALE: " + master.getSelectedSensorPosition(0))
+                //println("SCALE: " + master.getSelectedSensorPosition(0))
 
             }
         }
@@ -283,10 +286,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.HOLD_POS_UNKNOWN) {
             entry {
                 gearbox.setPosition(0)
+                mmSetpoint(0.0)
             }
+        }
 
-            action {
-                gearbox.set(ControlMode.Position, 0.0)
+        state(ElevatorStates.SCALE_POS_UNKNOWN) {
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.UNKNOWN_SCALE_POS)
             }
         }
 
@@ -294,41 +300,30 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
 
             var homingCounter = 0
-            var current: Double
+            var velocity: Int
 
             entry {
                 Elevator.homed = false
                 homingCounter = 0
-                elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+                elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
             }
 
             action {
-                current = gearbox.getCurrent(
-                        Constants.PDPChannels.ELEVATOR_SLAVE_1_PDP,
-                        Constants.PDPChannels.ELEVATOR_SLAVE_2_PDP,
-                        Constants.PDPChannels.ELEVATOR_SLAVE_3_PDP
-                )
+                velocity = master.getSelectedSensorVelocity(0)
+                println("Elevator Velocity: " + velocity)
+                gearbox.set(ControlMode.PercentOutput, 0.0) //Run down at the homing rate
 
-                println("Elevator Current: " + current)
-
-                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
-
-                if (current > Constants.ElevatorParameters.HOMING_CURRENT) {
+                if (velocity == 0) {
                     homingCounter++
                 } else {
                     homingCounter = 0
                 }
 
                 if (homingCounter > Constants.ElevatorParameters.HOMING_COUNT) {
-                    gearbox.stop()
                     gearbox.setPosition(0)
                     Elevator.homed = true
-                    setState(ElevatorStates.POS_COLLECTION)
+                    setState(ElevatorStates.POS_DRIVE)
                 }
-            }
-
-            exit {
-                elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
             }
         }
 
@@ -349,7 +344,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         default {
             action {
-                println("RESTING: " + master.getSelectedSensorPosition(0))
+                //println("RESTING: " + master.getSelectedSensorPosition(0))
+                gearbox.set(ControlMode.PercentOutput, 0.0)
             }
         }
     }
@@ -358,19 +354,19 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                ratchet.set(Constants.ElevatorParameters.RachetMachine.LOCKED)
+                ratchet.set(Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS)
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                ratchet.set(Constants.ElevatorParameters.RachetMachine.UNLOCKED)
+                ratchet.set(Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS)
             }
         }
 
         default {
             entry {
-                ratchet.set(false)
+                ratchet.set(0.0)
             }
         }
     }
@@ -415,21 +411,24 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
-        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
-
-        while (elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED) {
-            Thread.sleep(1)
+        if (notDeployed()) { //If we aren't deployed
+            elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
+            while (notDeployed()) { //Wait for deploy to finish
+                Thread.sleep(10)
+            }
         }
 
-        elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
+        if (!Elevator.homed) { //If we aren't homed
+            elevatorMachine.setState(ElevatorStates.HOMING) //Home
+        } else {
+            elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
+            elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
+        }
+
+        //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
-
-        println(elevatorMachine.getState())
-
-        master.setSelectedSensorPosition(0, 0, 0)
-
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
     }
 
     on (RobotEvents.HAVE_CUBE) {

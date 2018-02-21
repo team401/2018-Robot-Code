@@ -4,9 +4,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
+import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
+import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StepGroup
 import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.subsystems.Drivetrain
@@ -70,9 +72,9 @@ object PowerUpAuto: AutoLoop() {
      * Gets various info from SmartDashboard
      */
     private fun fetchSD() {
-        robotPos = robotPosSelector.selected
-        target = autoTargetSelector.selected
-        baseDelay = SmartDashboard.getNumber("baseDelay", 0.0).toLong()
+        robotPos = RobotPosition.DS_MID//robotPosSelector.selected
+        target = AutoTarget.SCALE_SWITCH//autoTargetSelector.selected
+        baseDelay = 0L//SmartDashboard.getNumber("baseDelay", 0.0).toLong()
     }
 
     /**
@@ -94,8 +96,8 @@ object PowerUpAuto: AutoLoop() {
         )
 
         step.loadPoints(
-                "$start-${end}_L.csv",
-                "$start-${end}_R.csv"
+                "/home/lvuser/profiles/$start-${end}_L.csv",
+                "/home/lvuser/profiles/$start-${end}_R.csv"
         )
 
         val steps = arrayListOf<AutoStep>(step)
@@ -104,10 +106,47 @@ object PowerUpAuto: AutoLoop() {
         return StepGroup(steps)
     }
 
+
+    private const val TURN_AROUND_GAIN = 0.0024
+    private const val TURN_AROUND_F = 0.2
+    private const val TURN_AROUND_ERROR = 2.0
+    private const val TURN_AROUND_MAX = 1.0
+
+    private fun turnAroundCCW() = GyroTurn(
+            Drivetrain.left.master,
+            Drivetrain.right.master,
+            Drivetrain.imu,
+            180.0,
+            TURN_AROUND_GAIN,
+            TURN_AROUND_F,
+            TURN_AROUND_ERROR,
+            TURN_AROUND_MAX
+    )
+
+    private fun turnAroundCW() = GyroTurn(
+            Drivetrain.left.master,
+            Drivetrain.right.master,
+            Drivetrain.imu,
+            -180.0,
+            TURN_AROUND_GAIN,
+            TURN_AROUND_ERROR,
+            TURN_AROUND_MAX
+    )
+
     private fun assembleAuto() {
         sequence.run {
+            add(Commands.DeployElevator)
+            add(Commands.WaitForDeploy)
+            add(Commands.ElevatorHigh)
+            add(Commands.HomeElevator)
+            add(Commands.ElevatorToScale) //Change this to match the height of the desired target
+            add(mpStep("DS_RIGHT", "SWITCH_RIGHT")) //Change this to run the appropriate profile
+
+            /*
             add(DelayStep(baseDelay)) //Wait an initial amount of time
 
+            add(Commands.IntakeToStow) //Stow the intake back
+            add(Commands.ElevatorHigh) //High gear
             add(Commands.HoldElevator) //Hold the carriage in place
             add(Commands.ElevatorHolderClamp) //Clamp down on the box
 
@@ -129,26 +168,19 @@ object PowerUpAuto: AutoLoop() {
             add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
             add(Commands.ElevatorKickerRetract) //Retract the kicker
 
-            when (target) {
-                AutoTarget.SCALE_SWITCH -> {
-                    add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator))
-                    //TODO intake
-                    add(Commands.ElevatorToSwitch)
-                    add(Commands.ElevatorKickerScore)
-                    add(DelayStep(Delays.SCORE))
-                    add(Commands.ElevatorKickerRetract)
-                }
-                else -> {}
-            }
-
             //Pass 3 (SCALE_SWITCH final scoring sequence)
             when (target) {
                 AutoTarget.SCALE_SWITCH -> {
+                    //add(turnAroundCCW()) //Turn around from scale
+                    add(Commands.IntakeToGrab) //Set up intake for cube grabbing
                     add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator)) //Drive and home
                     add(Commands.ElevatorToGround) //Bring the elevator to the ground
-                    //TODO Intake (will include box acquisition and elevator clamping)
-                    //add(Commands.WaitForHasCube)
+                    add(Commands.IntakeWheelsRun) //Turn on intake wheels
+                    add(Commands.IntakeToIntake) //Intake the cube
+                    add(Commands.WaitForHasCube) //Wait for the cube to be taken in
+                    add(LambdaStep { println("got cube") })
                     add(Commands.ElevatorToSwitch) //Elevator to the switch scoring position
+                    //add(mpStep("SWITCH_CUBE", "SWITCH_WALL")) //Drive the remaining distance to the switch wall
                     add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
                     add(Commands.ElevatorKickerScore) //Kick the box out
                     add(DelayStep(Delays.SCORE)) //Wait for the cube to leave the robot
@@ -156,6 +188,7 @@ object PowerUpAuto: AutoLoop() {
                 }
                 else -> {}
             }
+            */
 
         }
     }

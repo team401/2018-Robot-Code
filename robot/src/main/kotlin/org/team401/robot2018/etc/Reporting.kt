@@ -95,7 +95,7 @@ object Reporting {
         r.driveShift = Drivetrain.shifterState.toString().toLowerCase()
         r.elevatorShift = if (Elevator.shifter.get()) "high" else "low"
         r.elevatorDeploy = if (Elevator.deployer.get()) "unlocked" else "locked"
-        r.elevatorRatchet = Elevator.ratchet.get()
+        r.elevatorRatchet = Elevator.ratchet.get() == Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
         r.rungsDeploy = if (Rungs.deployer.get()) "unlocked" else "locked"
     }
 

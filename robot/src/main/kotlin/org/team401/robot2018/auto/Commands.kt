@@ -42,6 +42,7 @@ object Commands {
     }
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
+    val ScaleAfterUnfold = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
 
     val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
     val ElevatorToSwitch = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
@@ -50,4 +51,14 @@ object Commands {
     val ElevatorKickerRetract = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.STOW)
     val ElevatorHolderClamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)
     val ElevatorHolderUnclamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.UNCLAMPED)
+
+    val ElevatorHigh = StateStep(ElevatorSubsystem, ELEVATOR_SHIFTER_MACHINE, ElevatorShifterStates.HIGH)
+
+    val IntakeToStow = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.STOWED)
+    val IntakeToGrab = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GRAB)
+    val IntakeToIntake = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GO_TO_INTAKE)
+
+    val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
+    val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
+
 }

@@ -45,6 +45,7 @@ val Gamepad = HumanControls.f310(2) {
     val intakeWheels = IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE)
     val rungsMachine = RungsSubsystem.machine(RUNGS_MACHINE)
     val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
+    val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
 
     //Elevator setpoints
     whenHatChanged(Hats.D_PAD) {
@@ -64,6 +65,7 @@ val Gamepad = HumanControls.f310(2) {
     //Intake control
     whenButton(Buttons.A) {
         pressed {
+            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeFolding.setState(IntakeFoldingStates.INTAKE)
             intakeWheels.setState(IntakeWheelsStates.REVERSE)
         }
@@ -75,6 +77,7 @@ val Gamepad = HumanControls.f310(2) {
 
     whenButton(Buttons.B) {
         pressed {
+            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
             elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
             Thread.sleep(100)
@@ -89,6 +92,7 @@ val Gamepad = HumanControls.f310(2) {
 
     whenButton(Buttons.Y) {
         pressed {
+            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeWheels.setState(IntakeWheelsStates.IDLE)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
         }
@@ -96,6 +100,7 @@ val Gamepad = HumanControls.f310(2) {
 
     whenButton(Buttons.X) {
         pressed {
+            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeWheels.setState(IntakeWheelsStates.IDLE)
             intakeFolding.setState(IntakeFoldingStates.STOWED)
         }
@@ -110,7 +115,6 @@ val Gamepad = HumanControls.f310(2) {
 
     //Scoring
     whenButton(Buttons.RIGHT_BUMPER) {
-        /*
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
@@ -118,11 +122,6 @@ val Gamepad = HumanControls.f310(2) {
 
         released {
             elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        }
-        */
-
-        pressed{
-            elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
         }
     }
 
@@ -133,7 +132,7 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
 
-    /*
+
     //TODO FUTURE NOT NOW NO THANKS
 
     //Climbing and rungs
@@ -143,6 +142,7 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
 
+    /*
     whenButton(Buttons.START) {
         pressed {
 
@@ -150,9 +150,18 @@ val Gamepad = HumanControls.f310(2) {
     }
     */
 
-    whenButton(Buttons.BACK) { //TODO test homing
+    whenButton(Buttons.START) { //TODO test homing
         pressed {
+            elevatorMachine.setState(ElevatorStates.HOLD_POS_UNKNOWN)
+            elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY)
+
+            while (elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED) {
+                Thread.sleep(1)
+            }
+
             elevatorMachine.setState(ElevatorStates.HOMING)
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+            elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
         }
     }
 }

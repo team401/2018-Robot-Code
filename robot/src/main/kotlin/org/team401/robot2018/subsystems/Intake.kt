@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
+import org.snakeskin.logic.History
 import org.team401.robot2018.PDP
 import org.team401.robot2018.etc.*
 
@@ -105,6 +106,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         state(IntakeFoldingStates.GO_TO_INTAKE) {
             action {
                 if (Elevator.atCollection()) {
+                    Thread.sleep(100)
                     setState(IntakeFoldingStates.INTAKE)
                 }
             }
@@ -127,7 +129,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
             action{
-                println("Pos ${folding.getSelectedSensorPosition(0)}")
+                //println("Intake Position: ${folding.getSelectedSensorPosition(0)}")
             }
         }
     }
@@ -142,6 +144,8 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             action {
                 left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
                 right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+
+                println("Intake Current: " + RobotMath.averageCurrent(left, right))
 
                 if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
                     inrushCounter++
@@ -159,6 +163,9 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             action {
                 left.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
                 right.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+
+                println("Got Current: " + RobotMath.averageCurrent(left, right))
+
 
                 if (RobotMath.averageCurrent(left, right) < Constants.IntakeParameters.HAVE_CUBE_CURRENT_HOLD) {
                     setState(IntakeWheelsStates.INTAKE)
