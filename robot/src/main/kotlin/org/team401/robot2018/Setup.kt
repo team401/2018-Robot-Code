@@ -39,49 +39,6 @@ val Vision = VisionController("10.4.1.3")
 //val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 val PDP = PowerDistributionPanel()
 
-object TestAuto: AutoLoop() {
-    override val rate = 10L
-
-    lateinit var runner: RioProfileRunner
-    lateinit var turn: GyroTurn
-
-    var started = false
-
-    override fun entry() {
-        done = false
-        started = true
-        turn = GyroTurn(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, -180.0, 0.0024, .02, 2.0, 1.0)
-        turn.entry()
-
-        /*
-        runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
-                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
-                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
-                Constants.Setup.HEADING_GAIN,
-                tuning = true)
-
-        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
-        runner.entry()
-        */
-
-    }
-
-    override fun action() {
-        turn.action()
-
-        if (turn.done) {
-            done = true
-            println("TURN DONE")
-        }
-    }
-
-    override fun exit() {
-        if (started) {
-            turn.exit()
-        }
-    }
-}
-
 @Setup
 fun setup() {
     AutoManager.auto = PowerUpAuto

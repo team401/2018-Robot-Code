@@ -27,8 +27,7 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
                val targetDegrees: Double,
                val gain: Double,
                val feedForward: Double,
-               val allowedError: Double,
-               val maxOutput: Double = 1.0): TankMotionStep() {
+               val allowedError: Double): TankMotionStep() {
 
     private val imuData = DoubleArray(3)
     private var output = 0.0
@@ -45,25 +44,18 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
 
         output = 0.0
         error = 0.0
-
-        println("ENTERED")
     }
 
     override fun action() {
         imu.getYawPitchRoll(imuData)
         error = targetDegrees - imuData[0]
-        println("Error: " + error + "  YAW: " + imuData[0])
 
         if (!error.withinTolerance(0.0, allowedError)) {
-            println("NOT WITHIN TOLERANCE")
             output = gain * error + (feedForward * Math.signum(error))
-            if (output > maxOutput) output = maxOutput
-            if (output < -maxOutput) output = -maxOutput
 
-            leftController.set(ControlMode.PercentOutput, -output)
-            rightController.set(ControlMode.PercentOutput, output)
+            leftController.set(ControlMode.PercentOutput, output)
+            rightController.set(ControlMode.PercentOutput, -output)
         } else {
-            println("WITHIN TOLERANCE")
             done = true
         }
     }
@@ -71,6 +63,5 @@ class GyroTurn(override val leftController: IMotorControllerEnhanced,
     override fun exit() {
         leftController.set(ControlMode.PercentOutput, 0.0)
         rightController.set(ControlMode.PercentOutput, 0.0)
-        println("EXITED")
     }
 }

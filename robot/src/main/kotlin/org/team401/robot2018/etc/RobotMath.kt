@@ -33,6 +33,8 @@ object RobotMath {
         fun nativeUnitsToRpm(native: Double, ticksPerRev: Double = 4096.0) = native * 600.0 / ticksPerRev
 
         fun degreesToCTREDumbUnit(degrees: Double) = degrees * 64.0 //Because that makes sense
+
+        fun inchesToTicks(inches: Double, radius: Double, ticksPerRev: Double = 4096.0) = (ticksPerRev * inches) / (2 * Math.PI * radius)
     }
 
     fun averageCurrent(vararg motors: IMotorControllerEnhanced): Double = motors.map { it.outputCurrent }.average()

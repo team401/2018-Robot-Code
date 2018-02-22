@@ -111,7 +111,6 @@ object PowerUpAuto: AutoLoop() {
     private const val TURN_AROUND_GAIN = 0.0024
     private const val TURN_AROUND_F = 0.2
     private const val TURN_AROUND_ERROR = 2.0
-    private const val TURN_AROUND_MAX = 1.0
 
     private fun turnAroundCCW() = GyroTurn(
             Drivetrain.left.master,
@@ -120,8 +119,7 @@ object PowerUpAuto: AutoLoop() {
             180.0,
             TURN_AROUND_GAIN,
             TURN_AROUND_F,
-            TURN_AROUND_ERROR,
-            TURN_AROUND_MAX
+            TURN_AROUND_ERROR
     )
 
     private fun turnAroundCW() = GyroTurn(
@@ -130,8 +128,8 @@ object PowerUpAuto: AutoLoop() {
             Drivetrain.imu,
             -180.0,
             TURN_AROUND_GAIN,
-            TURN_AROUND_ERROR,
-            TURN_AROUND_MAX
+            TURN_AROUND_F,
+            TURN_AROUND_ERROR
     )
 
     private fun assembleAuto() {
