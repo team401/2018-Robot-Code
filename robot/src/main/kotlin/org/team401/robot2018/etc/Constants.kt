@@ -1,4 +1,4 @@
-package org.team401.robot2018
+package org.team401.robot2018.etc
 
 import org.team401.robot2018.auto.motion.PDVA
 
@@ -15,8 +15,14 @@ import org.team401.robot2018.auto.motion.PDVA
  * @version 1/13/18
  */
 object Constants {
+    interface PIDF {
+        val P: Double
+        val I: Double
+        val D: Double
+        val F: Double
+    }
 
-    object Setup{
+    object Setup {
 
         const val HEADING_GAIN = 0.15
 
@@ -30,7 +36,7 @@ object Constants {
         object MJPEGParameters {
             const val ADDRESS = "10.4.1.3"
             const val PORT = "1180"
-            const val FULL_ADDRESS = "mjpeg:https://${Constants.Setup.MJPEGParameters.ADDRESS}:${Constants.Setup.MJPEGParameters.PORT}/?action=stream"
+            const val FULL_ADDRESS = "mjpeg:https://${ADDRESS}:${PORT}/?action=stream"
         }
 
     }
@@ -78,12 +84,11 @@ object Constants {
         const val SHIFTER_SOLENOID = 2
 
         const val ELEVATOR_SHIFTER_SOLENOID = 3
-        const val ELEVATOR_DEPLOY_SOLENOID = 0
-        const val ELEVATOR_RATCHET_SOLENOID = 4
+        const val ELEVATOR_DEPLOY_SOLENOID = 4
         const val ELEVATOR_KICKER_SOLENOID = 6
         const val ELEVATOR_CLAMP_SOLENOID = 5
 
-        const val RUNGS_DEPLOY_SOLENOID = 0
+        const val RUNGS_DEPLOY_SOLENOID = 7
     }
 
     object DrivetrainParameters {
@@ -92,6 +97,9 @@ object Constants {
         const val SPEED_SPLIT = 3.5 //f/s
         //above should be some value between the low gear speed and the high gear speed
 
+        const val MIN_VELOCITY = -500.0 //RPM, negative
+        const val MAX_VELOCITY = 500.0 //RPM, positive
+
         const val WHEEL_RADIUS = 2.0 //in
         const val WHEELBASE = 0.0 //in
 
@@ -99,21 +107,19 @@ object Constants {
         const val INVERT_RIGHT = false
         const val INVERT_SHIFTER = true
 
-        const val CURRENT_LIMIT_CONTINUOUS_HIGH = 30 //A
-        const val CURRENT_LIMIT_PEAK_HIGH = 40 //A
-        const val CURRENT_LIMIT_TIMEOUT_HIGH = 100 //ms
-        
-        const val CURRENT_LIMIT_CONTINUOUS_LOW = 30 //A
-        const val CURRENT_LIMIT_PEAK_LOW = 40 //A
-        const val CURRENT_LIMIT_TIMEOUT_LOW = 100 //ms
+        const val CURRENT_LIMIT_CONTINUOUS = 30 //A
+        const val CURRENT_LIMIT_PEAK = 40 //A
+        const val CURRENT_LIMIT_TIMEOUT = 100 //ms
 
         const val DOWNSHIFT_CURRENT = 30 //A
 
         const val CLOSED_LOOP_RAMP = 0.0
         const val OPEN_LOOP_RAMP = .25
 
-        val LEFT_PDVA = PDVA()
-        val RIGHT_PDVA = PDVA()
+        val LEFT_PDVA = PDVA(1/19.0, 0/3.0, 1/1200.0, 0.0)
+        val RIGHT_PDVA = PDVA(1/19.0, 0/3.0, 1/1200.0, 0.0)
+
+        val HEADING_GAIN = 0.0025
 
         const val TIP_CORRECTION_SCALAR = 10 //fixme (testme)
 
@@ -138,30 +144,42 @@ object Constants {
     }
 
     object ElevatorParameters {
-        const val DEPLOY_TIMER = 5000L //ms
+        const val DEPLOY_TIMER = 3500L //ms
 
         const val HOMING_RATE = -.1 //percent vbus
 
-        const val MANUAL_RATE = 4096/4.0 //ticks / 20 ms
+        const val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
 
         const val CURRENT_LIMIT_CONTINUOUS = 30 //A
 
+        const val MIN_VELOCITY = -400.0 //RPM, negative
+        const val MAX_VELOCITY = 400.0 //RPM, positive
+
         const val MAX_POS = 40960.0 //ticks
 
-        const val HOME_POS = 0.0 //ticks
-        const val CUBE_POS = HOME_POS + 0.0 //ticks
-        const val SWITCH_POS = HOME_POS + 0.0 //ticks
-        const val SCALE_POS = HOME_POS + 0.0 //ticks
-        const val SCALE_POS_HIGH = SCALE_POS + 0.0 //ticks
-        const val SCALE_POS_LOW = SCALE_POS - 0.0 //ticks
+        const val ZERO_POS = 0.0 //ticks
+        const val COLLECTION_POS = ZERO_POS + 500.0
+        const val CUBE_POS = ZERO_POS + 6000.0 //ticks
+        const val SWITCH_POS = ZERO_POS + 17500.0 //ticks
+        const val SCALE_POS = ZERO_POS + 48800 //ticks
+        const val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
+        const val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
+
+        const val UNKNOWN_SCALE_POS = 25000.0
+
+        const val RATCHET_SERVO_PORT = 0
+        const val RATCHET_UNLOCKED_SERVO_POS = 0.0
+        const val RATCHET_LOCKED_SERVO_POS = 1.0
 
         const val PITCH_DIAMETER = 1.805 //in
 
-        object PIDF{
-            const val P = 0.5
-            const val I = 0.0
-            const val D = 0.0
-            const val F = 1/100.0
+        const val HOMING_COUNT = 10
+
+        object PIDF: Constants.PIDF {
+            override val P = 0.5
+            override val I = 0.0
+            override val D = 0.0
+            override val F = 1/100.0
         }
 
         object KickerMachine{
@@ -188,19 +206,22 @@ object Constants {
     }
 
     object IntakeParameters {
-        const val INTAKE_RATE = 1.0
+        const val INTAKE_RATE = .7
+        const val RETAIN_RATE = .25
         const val REVERSE_RATE = -0.7
 
-        const val STOWED_POS = 750.0
+        const val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
+        const val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
+
+        const val STOWED_POS = 780.0
         const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
-        const val HAVE_CUBE_CURRENT_L = 10.0
-        const val HAVE_CUBE_CURRENT_R = 6.0
-        const val VOLTAGE_LIMIT = 1.0 //Percent vbus
+        const val HAVE_CUBE_CURRENT_INTAKE = 5.0
+        const val HAVE_CUBE_CURRENT_HOLD = 1.0
 
         const val INVERT_LEFT = true
-        const val INVERT_RIGHT = true
+        const val INVERT_RIGHT = false
 
         const val INTAKE_VOLTAGE = 12.0
 
@@ -220,7 +241,9 @@ object Constants {
         const val LEFT_PEAK_LIMIT_DUR = 100
         const val RIGHT_PEAK_LIMIT_DUR = 100
 
-        const val CUBE_HELD_COUNT = 30
+        const val INRUSH_COUNT = 30
+        const val CUBE_HELD_TIME = 300L
+        const val HAVE_CUBE_CLAMP_DELAY = 500L
 
         object PIDF {
             const val P = 3.5

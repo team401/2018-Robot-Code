@@ -36,7 +36,7 @@ class StepGroup(): AutoStep() {
                 it.action()
             }
         }
-        if (steps.all { it.done }) {
+        if (steps.all { it.done } || steps.size == 0) {
             done = true
         }
     }

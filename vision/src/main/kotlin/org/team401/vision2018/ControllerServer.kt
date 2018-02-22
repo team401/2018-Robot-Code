@@ -5,13 +5,9 @@ import org.team401.snakeeyes.service.Server
 import org.team401.snakeeyes.view.View
 import org.zeromq.ZMQ
 import java.io.File
-import java.net.InetSocketAddress
-import java.net.ServerSocket
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledFuture
 
 /*
  * 2018-Robot-Code - Created on 1/18/18

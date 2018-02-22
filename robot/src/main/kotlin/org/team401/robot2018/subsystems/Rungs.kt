@@ -1,9 +1,9 @@
 package org.team401.robot2018.subsystems
 
 import edu.wpi.first.wpilibj.Solenoid
-import org.snakeskin.dsl.*
-import org.snakeskin.event.Events
-import org.team401.robot2018.Constants
+import org.snakeskin.dsl.Subsystem
+import org.snakeskin.dsl.buildSubsystem
+import org.team401.robot2018.etc.Constants
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -18,7 +18,7 @@ import org.team401.robot2018.Constants
  * @version 1/15/18
  */
 
-val RUNGS_MACHINE = "rungs"
+const val RUNGS_MACHINE = "rungs"
 object RungsStates {
     const val STOWED = "stowed"
     const val DEPLOY = "deploy"
@@ -68,7 +68,7 @@ val RungsSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-    test("Rungs"){
+    test("Rungs") {
         rungsMachine.setState(RungsStates.STOWED)
         Thread.sleep(1000)
 

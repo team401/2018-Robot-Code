@@ -3,7 +3,7 @@ package org.team401.robot2018.auto.motion
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
-import org.team401.robot2018.UnitConversions
+import org.team401.robot2018.etc.RobotMath
 import java.io.File
 
 /*
@@ -94,7 +94,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         fun calculate(index: Int): Boolean {
             saturated = false
             currentWaypoint = points[index]
-            sensor = UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
+            sensor = RobotMath.UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
 
             error = currentWaypoint.position - sensor
             value =
@@ -150,6 +150,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
     private val imuValue = DoubleArray(3)
 
     override fun entry() {
+        done = false
         left.reset()
         right.reset()
 
@@ -163,9 +164,10 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imuValue[1] = 0.0
         imuValue[2] = 0.0
 
-        imu.setYaw(UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
+        imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
         left.zero(0)
         right.zero(0)
+        Thread.sleep(100)
     }
 
     override fun action() {

@@ -1,28 +1,32 @@
 package org.team401.robot2018.subsystems
 
+//import org.team401.robot2018.MasherBox
+
+//import org.team401.robot2018.LeftStick
+//import org.team401.robot2018.RightStick
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.NeutralMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
-import edu.wpi.first.wpilibj.PIDController
-import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Solenoid
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.ShifterState
-import org.snakeskin.SnakeskinConstants
 import org.snakeskin.component.Gearbox
-import org.snakeskin.dsl.*
 import org.snakeskin.component.TankDrivetrain
+import org.snakeskin.dsl.CheesyDriveParameters
+import org.snakeskin.dsl.Subsystem
+import org.snakeskin.dsl.buildSubsystem
+import org.snakeskin.dsl.cheesy
 import org.snakeskin.event.Events
+import org.snakeskin.logic.scalars.CubicScalar
 import org.team401.robot2018.LeftStick
-//import org.team401.robot2018.MasherBox
 import org.team401.robot2018.RightStick
-
-//import org.team401.robot2018.LeftStick
-//import org.team401.robot2018.RightStick
-import org.team401.robot2018.*
+import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.etc.getCurrent
+import org.team401.robot2018.etc.shiftUpdate
+import org.team401.robot2018.getPitch
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -73,25 +77,13 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 
-    val pdp = PowerDistributionPanel(0)
-
     fun shift(state: ShifterState) {
         when (state) {
             ShifterState.HIGH -> {
-                Drivetrain.setCurrentLimit(
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS_HIGH,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK_HIGH,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT_HIGH
-                )
                 Drivetrain.high()
             }
 
             ShifterState.LOW -> {
-                Drivetrain.setCurrentLimit(
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS_LOW,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK_LOW,
-                        Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT_LOW
-                )
                 Drivetrain.low()
             }
         }
@@ -108,10 +100,15 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         //right.master.pidf(f = .22133,p = .15)
 
         Drivetrain.init(left, right, imu, shifter, Constants.DrivetrainParameters.INVERT_LEFT, Constants.DrivetrainParameters.INVERT_RIGHT, Constants.DrivetrainParameters.INVERT_SHIFTER)
+        Drivetrain.setCurrentLimit(
+                Constants.DrivetrainParameters.CURRENT_LIMIT_CONTINUOUS,
+                Constants.DrivetrainParameters.CURRENT_LIMIT_PEAK,
+                Constants.DrivetrainParameters.CURRENT_LIMIT_TIMEOUT
+        )
+
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
 
         Drivetrain.setNeutralMode(NeutralMode.Coast)
-
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
@@ -137,57 +134,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         //Totally our own control scheme and definitely not stolen from anywhere like team 254...
         state(DriveStates.CHEESY) {
-            var quickTurn = false
-            var pitch = 0.0
-            var roll = 0.0
-
-            fun cube(d: Double) = d*d*d
-
-            val cheesyParameters = CheesyDriveParameters(
-                    0.65,
-                    0.5,
-                    4.0,
-                    0.65,
-                    3.5,
-                    4.0,
-                    5.0,
-                    0.95,
-                    1.3,
-                    0.2,
-                    0.1,
-                    5.0,
-                    3,
-                    2
-            )
-
-            val imuData = DoubleArray(3)
-
-            entry {
-                Drivetrain.zero()
-                Drivetrain.setNeutralMode(NeutralMode.Coast)
-                cheesyParameters.reset()
-            }
-            action {
-                quickTurn = LeftStick.readButton { TRIGGER }
-                pitch = LeftStick.readAxis { PITCH }
-                roll = RightStick.readAxis { ROLL }
-                Drivetrain.cheesy(
-                        ControlMode.PercentOutput,
-                        cheesyParameters,
-                        pitch,
-                        if (quickTurn) cube(roll) else roll,
-                        quickTurn
-                )
-            }
-        }
-
-        state(DriveStates.CHEESY_CLOSED) {
-            var quickTurn = false
-            var pitch = 0.0
-            var roll = 0.0
-
-            fun cube(d: Double) = d*d*d
-
             val cheesyParameters = CheesyDriveParameters(
                     0.65,
                     0.5,
@@ -203,7 +149,43 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                     5.0,
                     3,
                     2,
-                    4200.0
+                    quickTurnScalar = CubicScalar
+            )
+
+            entry {
+                Drivetrain.zero()
+                Drivetrain.setNeutralMode(NeutralMode.Coast)
+                cheesyParameters.reset()
+            }
+            action {
+                Drivetrain.cheesy(
+                        ControlMode.PercentOutput,
+                        cheesyParameters,
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER }
+                )
+            }
+        }
+
+        state(DriveStates.CHEESY_CLOSED) {
+            val cheesyParameters = CheesyDriveParameters(
+                    0.65,
+                    0.5,
+                    4.0,
+                    0.65,
+                    3.5,
+                    4.0,
+                    5.0,
+                    0.95,
+                    1.3,
+                    0.2,
+                    0.1,
+                    5.0,
+                    3,
+                    2,
+                    4200.0,
+                    quickTurnScalar = CubicScalar
             )
 
             entry {
@@ -214,22 +196,18 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             }
 
             action {
-                quickTurn = RightStick.readButton { TRIGGER }
-                pitch = LeftStick.readAxis { PITCH }
-                roll = RightStick.readAxis { ROLL }
                 Drivetrain.cheesy(
                         ControlMode.Velocity,
                         cheesyParameters,
-                        pitch,
-                        if (quickTurn) cube(roll) else roll,
-                        quickTurn
+                        LeftStick.readAxis { PITCH },
+                        RightStick.readAxis { ROLL },
+                        RightStick.readButton { TRIGGER}
                 )
-
             }
         }
 
         state(DriveStates.TIP_CONTROL) {
-            var correction = 0.0
+            var correction: Double
             action {
                 correction = getPitch() / Constants.DrivetrainParameters.TIP_CORRECTION_SCALAR
                 Drivetrain.arcade(ControlMode.PercentOutput, correction, 0.0)

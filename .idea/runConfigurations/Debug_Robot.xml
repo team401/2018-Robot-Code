@@ -1,12 +1,15 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Debug Robot" type="Remote" factoryName="Remote">
+    <module name="robot_main" />
     <option name="USE_SOCKET_TRANSPORT" value="true" />
     <option name="SERVER_MODE" value="false" />
     <option name="SHMEM_ADDRESS" value="javadebug" />
-    <option name="HOST" value="localhost" />
+    <option name="HOST" value="10.4.1.2" />
     <option name="PORT" value="8348" />
-    <method>
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="build deploy" externalProjectPath="$PROJECT_DIR$/robot" vmOptions="" scriptParameters="-DdeployDebug=true" />
-    </method>
+    <RunnerSettings RunnerId="Debug">
+      <option name="DEBUG_PORT" value="8348" />
+      <option name="LOCAL" value="false" />
+    </RunnerSettings>
+    <method />
   </configuration>
 </component>

@@ -1,12 +1,9 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.Constants
-import org.team401.robot2018.Sequences
-import org.team401.robot2018.Signals
 import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StateStep
+import org.team401.robot2018.auto.steps.WaitForStep
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -23,26 +20,45 @@ import org.team401.robot2018.subsystems.*
  */
 
 object Commands {
-    val DeployElevator = LambdaStep(Sequences::deployElevator)
+    val DeployElevator = StateStep(ElevatorSubsystem, ELEVATOR_DEPLOY_MACHINE, ElevatorDeployStates.DEPLOY)
     val HomeElevator = object : AutoStep() {
         override fun entry() {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
 
         override fun action() {
-            done = Signals.elevatorHomed
+            done = Elevator.homed
         }
 
         override fun exit() {}
     }
 
-    val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
+    val WaitForDeploy = WaitForStep {
+        ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).getState() == ElevatorDeployStates.DEPLOYED
+    }
 
-    val ElevatorToGround = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.HOME_POS }
-    val ElevatorToSwitch = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.SWITCH_POS }
-    val ElevatorToScale = LambdaStep { Signals.elevatorPosition = Constants.ElevatorParameters.SCALE_POS_HIGH }
+    val WaitForHasCube = WaitForStep {
+        ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
+    }
+
+    val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
+    val ScaleAfterUnfold = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
+
+    val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
+    val ElevatorToSwitch = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
+    val ElevatorToScale = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SCALE_HIGH)
     val ElevatorKickerScore = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.KICK)
     val ElevatorKickerRetract = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.STOW)
     val ElevatorHolderClamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)
     val ElevatorHolderUnclamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.UNCLAMPED)
+
+    val ElevatorHigh = StateStep(ElevatorSubsystem, ELEVATOR_SHIFTER_MACHINE, ElevatorShifterStates.HIGH)
+
+    val IntakeToStow = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.STOWED)
+    val IntakeToGrab = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GRAB)
+    val IntakeToIntake = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GO_TO_INTAKE)
+
+    val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
+    val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
+
 }

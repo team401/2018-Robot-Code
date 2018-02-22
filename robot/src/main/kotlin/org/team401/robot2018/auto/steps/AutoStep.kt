@@ -12,7 +12,7 @@ package org.team401.robot2018.auto.steps
  * @author Cameron Earle
  * @version 1/15/18
  */
-abstract class AutoStep(var done: Boolean = false) {
+abstract class AutoStep(override var done: Boolean = false): IAutoStep {
     enum class State {
         ENTRY,
         ACTION,
@@ -22,13 +22,13 @@ abstract class AutoStep(var done: Boolean = false) {
 
     var state = State.ENTRY; private set
 
-    fun reset() {
+    override fun reset() {
         state = State.ENTRY
     }
 
     fun doContinue() = state == State.CONTINUE
 
-    fun tick() {
+    override fun tick() {
         when (state) {
             State.ENTRY -> {
                 entry()
@@ -48,7 +48,7 @@ abstract class AutoStep(var done: Boolean = false) {
         }
     }
 
-    abstract fun entry()
-    abstract fun exit()
-    abstract fun action()
+    override abstract fun entry()
+    override abstract fun exit()
+    override abstract fun action()
 }

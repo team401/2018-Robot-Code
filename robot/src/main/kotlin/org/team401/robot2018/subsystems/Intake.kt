@@ -5,10 +5,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
-import org.team401.robot2018.Constants
+import org.snakeskin.logic.History
 import org.team401.robot2018.PDP
-import org.team401.robot2018.Signals
-import org.team401.robot2018.pidf
+import org.team401.robot2018.etc.*
 
 /*
  * 2018-Robot-Code - Created on 1/15/18
@@ -23,24 +22,30 @@ import org.team401.robot2018.pidf
  * @version 1/15/18
  */
 
-val INTAKE_WHEELS_MACHINE = "intake"
+const val INTAKE_WHEELS_MACHINE = "intake"
 object IntakeWheelsStates {
     const val INTAKE = "intake"
     const val REVERSE = "reverse"
     const val IDLE = "idle"
+    const val GOT_CUBE = "gotem"
+    const val HAVE_CUBE = "haveCube"
 }
 
-val INTAKE_FOLDING_MACHINE = "intake_folding"
+const val INTAKE_FOLDING_MACHINE = "intake_folding"
 object IntakeFoldingStates {
     const val GRAB = "wide"
     const val INTAKE = "out"
     const val STOWED = "in"
+    const val GO_TO_INTAKE = "goToIntake"
 }
 
 object Intake {
     lateinit var folding: TalonSRX
     lateinit var left: TalonSRX
     lateinit var right: TalonSRX
+
+    fun stowed() = folding.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.IntakeParameters.STOWED_POS, 100.0)
+    fun atGrab() = folding.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.IntakeParameters.GRAB_POS, 100.0)
 }
 
 var cubeCount = 0
@@ -51,7 +56,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
     val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
-
 
     setup {
         Intake.folding = folding
@@ -99,6 +103,15 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
 
+        state(IntakeFoldingStates.GO_TO_INTAKE) {
+            action {
+                if (Elevator.atCollection()) {
+                    Thread.sleep(100)
+                    setState(IntakeFoldingStates.INTAKE)
+                }
+            }
+        }
+
         state(IntakeFoldingStates.INTAKE) {
             entry {
                 folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
@@ -115,42 +128,62 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             entry {
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
+            action{
+                //println("Intake Position: ${folding.getSelectedSensorPosition(0)}")
+            }
         }
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE) {
-            var counter = 0
+            var inrushCounter = 0
             entry {
-                counter = 0
+                inrushCounter = 0
             }
+
             action {
-                left.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
-                right.set(ControlMode.PercentOutput, voltageCompensation(Constants.IntakeParameters.INTAKE_RATE))
+                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                if (boxHeld()){
-                    counter++
-                }else{
-                    counter = 0
+                println("Intake Current: " + RobotMath.averageCurrent(left, right))
+
+                if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
+                    inrushCounter++
+                } else {
+                    if (RobotMath.averageCurrent(left, right) >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_INTAKE) {
+                        setState(IntakeWheelsStates.GOT_CUBE)
+                    }
                 }
+            }
+        }
 
-                if(boxHeld() && counter >= Constants.IntakeParameters.CUBE_HELD_COUNT) {
-                    //turn on LED's
-                    cubeCount++
+        state(IntakeWheelsStates.GOT_CUBE) {
+            timeout(Constants.IntakeParameters.CUBE_HELD_TIME, IntakeWheelsStates.HAVE_CUBE)
 
-                    ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.CLAMPED)
+            action {
+                left.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                    setState(IntakeWheelsStates.IDLE)
-                    foldingMachine.setState(IntakeFoldingStates.STOWED)
+                println("Got Current: " + RobotMath.averageCurrent(left, right))
 
-                    Thread.sleep(250)
 
-                    Signals.elevatorPosition = Constants.ElevatorParameters.CUBE_POS
-                }else{
-                    ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE).setState(ElevatorClampStates.UNCLAMPED)
-                    ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE).setState(ElevatorKickerStates.STOW)
-                    //elevator to get cube is button mashers responsibility
+                if (RobotMath.averageCurrent(left, right) < Constants.IntakeParameters.HAVE_CUBE_CURRENT_HOLD) {
+                    setState(IntakeWheelsStates.INTAKE)
                 }
+            }
+        }
+
+        state(IntakeWheelsStates.HAVE_CUBE) {
+            entry {
+                left.set(ControlMode.PercentOutput, 0.0)
+                right.set(ControlMode.PercentOutput, 0.0)
+                send(RobotEvents.HAVE_CUBE)
+                Thread.sleep(Constants.IntakeParameters.HAVE_CUBE_CLAMP_DELAY)
+
+                foldingMachine.setState(IntakeFoldingStates.STOWED)
+                setState(IntakeWheelsStates.IDLE)
+
+                cubeCount++
             }
         }
 
@@ -217,14 +250,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     on (Events.TELEOP_ENABLED) {
         foldingMachine.setState(IntakeFoldingStates.STOWED)
+        //foldingMachine.setState("default")
         intakeMachine.setState(IntakeWheelsStates.IDLE)
     }
-}
-
-fun boxHeld(): Boolean {
-    return Intake.left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_L &&
-           Intake.right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_R
-}
-fun voltageCompensation(desiredOutput : Double) : Double{
-    return desiredOutput * (Constants.IntakeParameters.INTAKE_VOLTAGE/ PDP.voltage)
 }

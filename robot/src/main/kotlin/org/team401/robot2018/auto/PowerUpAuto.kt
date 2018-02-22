@@ -4,9 +4,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
+import org.team401.robot2018.auto.motion.GyroTurn
+import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
+import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StepGroup
+import org.team401.robot2018.auto.steps.SubSequence
+import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.subsystems.Drivetrain
 
 /*
@@ -24,8 +29,6 @@ import org.team401.robot2018.subsystems.Drivetrain
 
 object PowerUpAuto: AutoLoop() {
     object Delays {
-        const val ELEVATOR_DEPLOY = 500L //ms
-        const val PRE_SCORE = 500L //ms
         const val SCORE = 1000L //ms
     }
 
@@ -70,9 +73,9 @@ object PowerUpAuto: AutoLoop() {
      * Gets various info from SmartDashboard
      */
     private fun fetchSD() {
-        robotPos = robotPosSelector.selected
-        target = autoTargetSelector.selected
-        baseDelay = SmartDashboard.getNumber("baseDelay", 0.0).toLong()
+        robotPos = RobotPosition.DS_MID//robotPosSelector.selected
+        target = AutoTarget.SCALE_SWITCH//autoTargetSelector.selected
+        baseDelay = 0L//SmartDashboard.getNumber("baseDelay", 0.0).toLong()
     }
 
     /**
@@ -82,63 +85,110 @@ object PowerUpAuto: AutoLoop() {
     private fun mpStep(start: String, end: String, vararg otherActions: AutoStep): StepGroup {
         val leftMaster = Drivetrain.left.master
         val rightMaster = Drivetrain.right.master
+        val imu = Drivetrain.imu
 
-        /*
-        val leftStep = MotionProfileRunner(leftMaster)
-        val rightStep = MotionProfileRunner(rightMaster)
+        val step = RioProfileRunner(
+                leftMaster,
+                rightMaster,
+                imu,
+                Constants.DrivetrainParameters.LEFT_PDVA,
+                Constants.DrivetrainParameters.RIGHT_PDVA,
+                Constants.DrivetrainParameters.HEADING_GAIN
+        )
 
-        leftStep.load("$start-${end}_L.csv")
-        rightStep.load("$start-${end}_R.csv")
+        step.loadPoints(
+                "/home/lvuser/profiles/$start-${end}_L.csv",
+                "/home/lvuser/profiles/$start-${end}_R.csv"
+        )
 
-        val steps = arrayListOf<AutoStep>(leftStep, rightStep)
+        val steps = arrayListOf<AutoStep>(step)
         steps.addAll(otherActions.toList())
-        */
 
-        return StepGroup()//steps)
+        return StepGroup(steps)
     }
+
+
+    private const val TURN_AROUND_GAIN = 0.0024
+    private const val TURN_AROUND_F = 0.2
+    private const val TURN_AROUND_ERROR = 2.0
+    private const val TURN_AROUND_MAX = 1.0
+
+    private fun turnAroundCCW() = GyroTurn(
+            Drivetrain.left.master,
+            Drivetrain.right.master,
+            Drivetrain.imu,
+            180.0,
+            TURN_AROUND_GAIN,
+            TURN_AROUND_F,
+            TURN_AROUND_ERROR,
+            TURN_AROUND_MAX
+    )
+
+    private fun turnAroundCW() = GyroTurn(
+            Drivetrain.left.master,
+            Drivetrain.right.master,
+            Drivetrain.imu,
+            -180.0,
+            TURN_AROUND_GAIN,
+            TURN_AROUND_ERROR,
+            TURN_AROUND_MAX
+    )
 
     private fun assembleAuto() {
         sequence.run {
-            add(DelayStep(baseDelay))
+            add(Commands.IntakeToStow)
+            add(Commands.ElevatorHigh)
+            add(Commands.HoldElevator)
+            add(mpStep("DS_RIGHT", "SCALE_RIGHT", SubSequence(Commands.DeployElevator, Commands.WaitForDeploy, Commands.ScaleAfterUnfold)))
+            add(Commands.ElevatorHolderUnclamp)
 
-            add(Commands.ElevatorHolderClamp)
-            add(Commands.DeployElevator)
-            add(DelayStep(Delays.ELEVATOR_DEPLOY)) //Wait for the elevator to start deploying
+            /*
+            add(DelayStep(baseDelay)) //Wait an initial amount of time
 
+            add(Commands.IntakeToStow) //Stow the intake back
+            add(Commands.ElevatorHigh) //High gear
+            add(Commands.HoldElevator) //Hold the carriage in place
+            add(Commands.ElevatorHolderClamp) //Clamp down on the box
+
+            //Pass 1 (MP Init)
             when (target) {
-                AutoTarget.NONE -> {}
                 AutoTarget.SWITCH -> {
-                    add(mpStep(robotPos.toString(), "SWITCH_$switch", Commands.HomeElevator))
-                    add(Commands.ElevatorToSwitch)
-                    add(DelayStep(Delays.PRE_SCORE))
-                    add(Commands.ElevatorHolderUnclamp)
-                    add(Commands.ElevatorKickerScore)
-                    add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
-                    add(Commands.ElevatorKickerRetract)
+                    add(mpStep(robotPos.toString() , "SWITCH_$switch", Commands.DeployElevator)) //Drive and deploy
                 }
-                AutoTarget.SCALE -> {
-                    add(Commands.HoldElevator)
-                    add(mpStep(robotPos.toString(), "SCALE_$scale"))
-                    add(Commands.ElevatorHolderUnclamp)
-                    add(Commands.ElevatorKickerScore)
-                    add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
-                    add(Commands.ElevatorKickerRetract)
+                AutoTarget.SCALE, AutoTarget.SCALE_SWITCH -> {
+                    add(mpStep(robotPos.toString(), "SCALE_$scale", Commands.DeployElevator)) //Drive and deploy
                 }
-                AutoTarget.SCALE_SWITCH -> {
-                    add(Commands.HoldElevator)
-                    add(mpStep(robotPos.toString(), "SCALE_$scale"))
-                    add(Commands.ElevatorHolderUnclamp)
-                    add(Commands.ElevatorKickerScore)
-                    add(DelayStep(Delays.SCORE))
-                    add(Commands.ElevatorKickerRetract)
-                    add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator))
-                    //TODO intake
-                    add(Commands.ElevatorToSwitch)
-                    add(Commands.ElevatorKickerScore)
-                    add(DelayStep(Delays.SCORE))
-                    add(Commands.ElevatorKickerRetract)
-                }
+                else -> {}
             }
+
+            //Pass 2 (SWITCH, SCALE scoring sequence, SCALE_SWITCH initial scoring sequence
+            add(Commands.WaitForDeploy) //Wait for the elevator to finish deploying
+            add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
+            add(Commands.ElevatorKickerScore) //Kick the box out
+            add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
+            add(Commands.ElevatorKickerRetract) //Retract the kicker
+
+            //Pass 3 (SCALE_SWITCH final scoring sequence)
+            when (target) {
+                AutoTarget.SCALE_SWITCH -> {
+                    //add(turnAroundCCW()) //Turn around from scale
+                    add(Commands.IntakeToGrab) //Set up intake for cube grabbing
+                    add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator)) //Drive and home
+                    add(Commands.ElevatorToGround) //Bring the elevator to the ground
+                    add(Commands.IntakeWheelsRun) //Turn on intake wheels
+                    add(Commands.IntakeToIntake) //Intake the cube
+                    add(Commands.WaitForHasCube) //Wait for the cube to be taken in
+                    add(LambdaStep { println("got cube") })
+                    add(Commands.ElevatorToSwitch) //Elevator to the switch scoring position
+                    //add(mpStep("SWITCH_CUBE", "SWITCH_WALL")) //Drive the remaining distance to the switch wall
+                    add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
+                    add(Commands.ElevatorKickerScore) //Kick the box out
+                    add(DelayStep(Delays.SCORE)) //Wait for the cube to leave the robot
+                    add(Commands.ElevatorKickerRetract) //Retract the kicker
+                }
+                else -> {}
+            }
+            */
 
         }
     }

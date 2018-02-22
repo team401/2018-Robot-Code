@@ -1,19 +1,23 @@
 package org.team401.robot2018
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import com.sun.xml.internal.fastinfoset.util.StringArray
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistributionPanel
+import org.snakeskin.annotation.PostStartup
 import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
-import org.snakeskin.registry.*
 import org.snakeskin.dsl.Publisher
-import org.team401.robot2018.Constants.Setup.MJPEGParameters.ADDRESS
-import org.team401.robot2018.Constants.Setup.MJPEGParameters.PORT
-import org.team401.robot2018.auto.motion.MotionProfileRunner
+import org.snakeskin.registry.Controllers
+import org.snakeskin.registry.Sensors
+import org.snakeskin.registry.Subsystems
+import org.team401.robot2018.auto.PowerUpAuto
+import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
+import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
+import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
+import org.team401.robot2018.etc.Reporting
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
 import org.team401.robot2018.vision.VisionDataClient
@@ -32,24 +36,24 @@ import org.team401.robot2018.vision.VisionDataClient
  */
 
 val Vision = VisionController("10.4.1.3")
-
-val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
-
+//val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 val PDP = PowerDistributionPanel()
 
 object TestAuto: AutoLoop() {
-    var posLeft by Publisher(0.0)
-    var posRight by Publisher(0.0)
-
     override val rate = 10L
 
     lateinit var runner: RioProfileRunner
+    lateinit var turn: GyroTurn
 
     var started = false
 
     override fun entry() {
         done = false
         started = true
+        turn = GyroTurn(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, -180.0, 0.0024, .02, 2.0, 1.0)
+        turn.entry()
+
+        /*
         runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
                 PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
                 PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
@@ -58,36 +62,39 @@ object TestAuto: AutoLoop() {
 
         runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
         runner.entry()
+        */
+
     }
 
     override fun action() {
-        runner.action()
+        turn.action()
 
-        if (runner.done) {
+        if (turn.done) {
             done = true
+            println("TURN DONE")
         }
     }
 
     override fun exit() {
         if (started) {
-            runner.exit()
+            turn.exit()
         }
     }
 }
 
-@org.snakeskin.annotation.Setup
+@Setup
 fun setup() {
-    //AutoManager.auto = PowerUpAuto
-    AutoManager.auto = TestAuto
+    AutoManager.auto = PowerUpAuto
+    //AutoManager.auto = TestAuto
 
     //PowerUpAuto.publish()
 
-    val mjpeg = StringArray()
-    mjpeg.add(Constants.Setup.MJPEGParameters.FULL_ADDRESS)
-    NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg.array)
+    val mjpeg = Array<String>(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
+    NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
 
-    Subsystems.add(DrivetrainSubsystem, IntakeSubsystem)
-    Controllers.add(LeftStick, RightStick)
+    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Controllers.add(LeftStick, RightStick, Gamepad)
     Sensors.add(VisionStopSensor)
-    Reporting.start()
 }
+
+@PostStartup private fun startReporting() = Reporting.start()

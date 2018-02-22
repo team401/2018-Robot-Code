@@ -50,6 +50,8 @@ fun main(args: Array<String>) {
     val controller = ControllerServer(sideBySide, 640 * sideBySide.cols, 480 * sideBySide.rows, "/media/2018REC")
     controller.start()
 
+
+    /*
     val paramFile = File("parameters.json")
     val params = Gson().fromJson(paramFile.readText(), VisionParameters::class.java)
 
@@ -58,4 +60,5 @@ fun main(args: Array<String>) {
 
     val cubeFinder = CubeFinderPipeline(top, dataServer, params)
     cubeFinder.start()
+    */
 }
