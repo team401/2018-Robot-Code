@@ -94,6 +94,7 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     override fun entry() {
         done = false
 
+        SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
         runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, headingGain, rate)
