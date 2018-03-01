@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
 import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.Subsystem
 import org.snakeskin.dsl.buildSubsystem
@@ -364,6 +365,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
 
+        state("tune") {
+            action {
+                ratchet.set(SmartDashboard.getNumber("ratchetServoPos", 0.0))
+            }
+        }
+
         default {
             entry {
                 ratchet.set(0.0)
@@ -430,7 +437,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
+        //elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
+        elevatorRatchetMachine.setState("tune")
     }
 
     on (RobotEvents.HAVE_CUBE) {
