@@ -355,19 +355,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                ratchet.set(Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS)
+                ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                ratchet.set(Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS)
-            }
-        }
-
-        state("tune") {
-            action {
-                ratchet.set(SmartDashboard.getNumber("ratchetServoPos", 0.0))
+                ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
             }
         }
 
@@ -437,8 +431,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        //elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
-        elevatorRatchetMachine.setState("tune")
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
     }
 
     on (RobotEvents.HAVE_CUBE) {
