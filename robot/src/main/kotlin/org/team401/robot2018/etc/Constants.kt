@@ -168,8 +168,8 @@ object Constants {
         const val UNKNOWN_SCALE_POS = 25000.0
 
         const val RATCHET_SERVO_PORT = 0
-        const val RATCHET_UNLOCKED_SERVO_POS = 0.0
-        const val RATCHET_LOCKED_SERVO_POS = 1.0
+        const val RATCHET_UNLOCKED_SERVO_POS = 84.0
+        const val RATCHET_LOCKED_SERVO_POS = 97.0
 
         const val PITCH_DIAMETER = 1.805 //in
 

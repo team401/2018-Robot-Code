@@ -4,6 +4,8 @@ import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import openrio.powerup.MatchData
 import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
 import org.team401.robot2018.PDP
@@ -28,6 +30,14 @@ fun IMotorControllerEnhanced.configZeroPosOnReverseLimit(enable: Boolean, timeou
 
 fun IMotorControllerEnhanced.configZeroPosOnForwardLimit(enable: Boolean, timeout: Int = 0) {
     configSetParameter(ParamEnum.eClearPosOnLimitF, if (enable) 1.0 else 0.0, 0, 0, timeout)
+}
+
+fun MatchData.OwnedSide.invert(): MatchData.OwnedSide {
+    return when (this) {
+        MatchData.OwnedSide.RIGHT -> MatchData.OwnedSide.LEFT
+        MatchData.OwnedSide.LEFT -> MatchData.OwnedSide.RIGHT
+        else -> MatchData.OwnedSide.UNKNOWN
+    }
 }
 
 fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 0.0, f: Double = 0.0, slot: Int = 0, timeout: Int = 0) {

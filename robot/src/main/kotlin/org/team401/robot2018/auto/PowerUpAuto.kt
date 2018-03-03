@@ -12,7 +12,9 @@ import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StepGroup
 import org.team401.robot2018.auto.steps.SubSequence
 import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.etc.invert
 import org.team401.robot2018.subsystems.Drivetrain
+import kotlin.system.exitProcess
 
 /*
  * 2018-Robot-Code - Created on 1/23/18
@@ -34,22 +36,16 @@ object PowerUpAuto: AutoLoop() {
 
     override val rate = 10L
 
-    private val robotPosSelector = SendableChooser<RobotPosition>()
-    private val autoTargetSelector = SendableChooser<AutoTarget>()
+    private val robotPosSelector = RobotPosition.toSendableChooser()
+    private val autoTargetSelector = AutoTarget.toSendableChooser()
 
     fun publish() {
-        robotPosSelector.addDefault("Middle", RobotPosition.DS_MID)
-        robotPosSelector.addObject("Left", RobotPosition.DS_LEFT)
-        robotPosSelector.addObject("Right", RobotPosition.DS_RIGHT)
-
-        autoTargetSelector.addDefault("Scale -> Switch", AutoTarget.SCALE_SWITCH)
-        autoTargetSelector.addObject("Scale", AutoTarget.SCALE)
-        autoTargetSelector.addObject("Switch", AutoTarget.SWITCH)
-        autoTargetSelector.addObject("Do Nothing", AutoTarget.NONE)
+        SmartDashboard.putData("Robot Position", robotPosSelector)
+        SmartDashboard.putData("Auto Target", autoTargetSelector)
     }
 
     var robotPos = RobotPosition.DS_MID
-    var target = AutoTarget.SCALE_SWITCH
+    var target = AutoTarget.FULL
     var switch = MatchData.OwnedSide.UNKNOWN
     var scale = MatchData.OwnedSide.UNKNOWN
     var baseDelay = 0L
@@ -73,9 +69,10 @@ object PowerUpAuto: AutoLoop() {
      * Gets various info from SmartDashboard
      */
     private fun fetchSD() {
+        //TODO add back proper SD reading
         robotPos = RobotPosition.DS_MID//robotPosSelector.selected
-        target = AutoTarget.SCALE_SWITCH//autoTargetSelector.selected
-        baseDelay = 0L//SmartDashboard.getNumber("baseDelay", 0.0).toLong()
+        target = AutoTarget.FULL//autoTargetSelector.selected
+        baseDelay = 0L//SmartDashboard.getNumber("Base Delay", 0.0).toLong()
     }
 
     /**
@@ -134,60 +131,69 @@ object PowerUpAuto: AutoLoop() {
 
     private fun assembleAuto() {
         sequence.run {
-            add(Commands.IntakeToStow)
-            add(Commands.ElevatorHigh)
-            add(Commands.HoldElevator)
-            add(mpStep("DS_RIGHT", "SCALE_RIGHT", SubSequence(Commands.DeployElevator, Commands.WaitForDeploy, Commands.ScaleAfterUnfold)))
-            add(Commands.ElevatorHolderUnclamp)
+            add(DelayStep(baseDelay)) //Wait for the base delay
 
-            /*
-            add(DelayStep(baseDelay)) //Wait an initial amount of time
-
-            add(Commands.IntakeToStow) //Stow the intake back
-            add(Commands.ElevatorHigh) //High gear
-            add(Commands.HoldElevator) //Hold the carriage in place
-            add(Commands.ElevatorHolderClamp) //Clamp down on the box
-
-            //Pass 1 (MP Init)
+            //Identify target
             when (target) {
-                AutoTarget.SWITCH -> {
-                    add(mpStep(robotPos.toString() , "SWITCH_$switch", Commands.DeployElevator)) //Drive and deploy
+                AutoTarget.NOTHING -> {} //Do nothing
+                //Baseline only mode
+                AutoTarget.BASELINE_ONLY -> {
+                    when (robotPos) {
+                        //If we start on the left or right, just drive straight
+                        RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
+                            add(mpStep("DS_LEFT_RIGHT", "BASELINE"))
+                        }
+
+                        //If we start in the middle, drive to the opposite side from our switch
+                        //to allow other teams to go to the active switch side
+                        RobotPosition.DS_MID -> {
+                            add(mpStep("DS_MID", "BASELINE_${switch.invert()}"))
+                        }
+                    }
+                    //AUTO END
                 }
-                AutoTarget.SCALE, AutoTarget.SCALE_SWITCH -> {
-                    add(mpStep(robotPos.toString(), "SCALE_$scale", Commands.DeployElevator)) //Drive and deploy
+                AutoTarget.SWITCH_ONLY -> {
+                    add(mpStep(robotPos.toString(), "SWITCH_$switch"))
+                    //TODO add scoring stuff
+                    //AUTO END
                 }
-                else -> {}
+                AutoTarget.SCALE_ONLY -> {
+                    add(mpStep(robotPos.toString(), "SCALE_$scale"))
+                }
+                AutoTarget.FULL -> {
+                    when (robotPos) {
+                        RobotPosition.DS_MID -> {
+                            add(mpStep(robotPos.toString(), "SCALE_$scale"))
+                            //TODO scale score
+                            add(mpStep("SCALE_$scale", "SWITCH_$switch"))
+                            //TODO switch score
+                            //AUTO END
+                        }
+                        RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
+                            if (robotPos.alignedWith(scale)) {
+                                add(mpStep(robotPos.toString(), "SCALE_$scale"))
+                                //TODO scale score
+                                add(mpStep("SCALE_$scale", "SWITCH_$switch"))
+                                //TODO switch score
+                            } else {
+                                if (robotPos.alignedWith(switch)) {
+                                    add(mpStep(robotPos.toString(), "SWITCH_$switch"))
+                                    //TODO switch score
+                                    add(mpStep("SWITCH_$switch", "SWITCH_$scale"))
+                                    //TODO intake cube
+                                    add(mpStep("SWITCH_${switch.invert()}", "SCALE_$scale"))
+                                    //TODO scale score
+                                } else {
+                                    add(mpStep(robotPos.toString(), "SCALE_$scale"))
+                                    //TODO scale score
+                                    add(mpStep("SCALE_$scale", "SWITCH_$switch"))
+                                    //TODO switch score
+                                }
+                            }
+                        }
+                    }
+                }
             }
-
-            //Pass 2 (SWITCH, SCALE scoring sequence, SCALE_SWITCH initial scoring sequence
-            add(Commands.WaitForDeploy) //Wait for the elevator to finish deploying
-            add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
-            add(Commands.ElevatorKickerScore) //Kick the box out
-            add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
-            add(Commands.ElevatorKickerRetract) //Retract the kicker
-
-            //Pass 3 (SCALE_SWITCH final scoring sequence)
-            when (target) {
-                AutoTarget.SCALE_SWITCH -> {
-                    //add(turnAroundCCW()) //Turn around from scale
-                    add(Commands.IntakeToGrab) //Set up intake for cube grabbing
-                    add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator)) //Drive and home
-                    add(Commands.ElevatorToGround) //Bring the elevator to the ground
-                    add(Commands.IntakeWheelsRun) //Turn on intake wheels
-                    add(Commands.IntakeToIntake) //Intake the cube
-                    add(Commands.WaitForHasCube) //Wait for the cube to be taken in
-                    add(LambdaStep { println("got cube") })
-                    add(Commands.ElevatorToSwitch) //Elevator to the switch scoring position
-                    //add(mpStep("SWITCH_CUBE", "SWITCH_WALL")) //Drive the remaining distance to the switch wall
-                    add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
-                    add(Commands.ElevatorKickerScore) //Kick the box out
-                    add(DelayStep(Delays.SCORE)) //Wait for the cube to leave the robot
-                    add(Commands.ElevatorKickerRetract) //Retract the kicker
-                }
-                else -> {}
-            }
-            */
-
         }
     }
 
