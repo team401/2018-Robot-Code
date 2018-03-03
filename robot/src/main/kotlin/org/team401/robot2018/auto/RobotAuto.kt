@@ -25,10 +25,12 @@ abstract class RobotAuto: AutoLoop() {
     //DATA
     private val robotPosSelector = RobotPosition.toSendableChooser()
     private val autoTargetSelector = AutoTarget.toSendableChooser()
+    private var teammatesCanDoSwitch = false
 
     private fun publish() {
         SmartDashboard.putData("Robot Position", robotPosSelector)
         SmartDashboard.putData("Auto Target", autoTargetSelector)
+        SmartDashboard.putBoolean("Partner switch", teammatesCanDoSwitch)
     }
 
     protected var robotPos = RobotPosition.DS_MID; private set
@@ -62,18 +64,20 @@ abstract class RobotAuto: AutoLoop() {
     //AUTO MANAGER
     private val sequence = arrayListOf<AutoStep>()
     private var sequenceIdx = 0
+    private val adder: (AutoStep) -> Unit = { sequence.add(it) }
 
     override val rate = 10L
 
     abstract fun assembleAuto(add: (AutoStep) -> Unit)
 
     override fun entry() {
+        Routines.add = adder //Set the routines object to use this loop's adder
         done = false
         fetchSD()
         fetchFieldLayout()
         sequence.clear()
         sequenceIdx = 0
-        assembleAuto { sequence.add(it) }
+        assembleAuto(adder)
         sequence.forEach {
             it.reset()
         }
@@ -96,31 +100,5 @@ abstract class RobotAuto: AutoLoop() {
                 it.exit()
             }
         }
-    }
-
-    //INBUILT STEPS
-    protected fun mpStep(start: String, end: String, vararg otherActions: AutoStep): StepGroup {
-        val leftMaster = Drivetrain.left.master
-        val rightMaster = Drivetrain.right.master
-        val imu = Drivetrain.imu
-
-        val step = RioProfileRunner(
-                leftMaster,
-                rightMaster,
-                imu,
-                Constants.DrivetrainParameters.LEFT_PDVA,
-                Constants.DrivetrainParameters.RIGHT_PDVA,
-                Constants.DrivetrainParameters.HEADING_GAIN
-        )
-
-        step.loadPoints(
-                "/home/lvuser/profiles/$start-${end}_L.csv",
-                "/home/lvuser/profiles/$start-${end}_R.csv"
-        )
-
-        val steps = arrayListOf<AutoStep>(step)
-        steps.addAll(otherActions.toList())
-
-        return StepGroup(steps)
     }
 }

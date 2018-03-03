@@ -2,6 +2,8 @@ package org.team401.robot2018.auto
 
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
+import org.team401.robot2018.auto.steps.SubSequence
+import org.team401.robot2018.etc.StepAdder
 import org.team401.robot2018.etc.invert
 
 /*
@@ -18,69 +20,54 @@ import org.team401.robot2018.etc.invert
  */
 
 object PowerUpAuto: RobotAuto() {
-    override fun assembleAuto(add: (AutoStep) -> Unit) {
+    private fun scaleFirst(): Boolean {
+        //If we aren't aligned with the switch, always go to the scale
+        if (!robotPos.alignedWith(switch)) {
+            return true
+        }
+
+        //If we are aligned with the switch and the scale, go to the scale
+        if (robotPos.alignedWith(switch) && robotPos.alignedWith(scale)) {
+            return true
+        }
+
+        //If we are aligned with the switch and not the scale, evaluate whether or not our teammates can do switch in auto
+        return true //TODO add logic
+    }
+
+    override fun assembleAuto(add: StepAdder) {
         add(DelayStep(baseDelay)) //Wait for the base delay
 
-        //Identify target
-        when (target) {
-            AutoTarget.NOTHING -> {} //Do nothing
-            //Baseline only mode
-            AutoTarget.BASELINE_ONLY -> {
-                when (robotPos) {
-                    //If we start on the left or right, just drive straight
-                    RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
-                        add(mpStep("DS_LEFT_RIGHT", "BASELINE"))
-                    }
+        if (target != AutoTarget.NOTHING) {
+            Routines.setup() //Run common setup tasks (stow intake, elevator to high gear, lock elevator in place)
 
-                    //If we start in the middle, drive to the opposite side from our switch
-                    //to allow other teams to go to the active switch side
-                    RobotPosition.DS_MID -> {
-                        add(mpStep("DS_MID", "BASELINE_${switch.invert()}"))
-                    }
+            when (target) {
+                AutoTarget.BASELINE_ONLY -> {
+                    Routines.drive(robotPos, FieldElements.baseline(switch.invert()), SubSequence(*Commands.DeployAndWait))
+                    //AUTO END
                 }
-                //AUTO END
-            }
-            AutoTarget.SWITCH_ONLY -> {
-                add(mpStep(robotPos.toString(), "SWITCH_$switch"))
-                //TODO add scoring stuff
-                //AUTO END
-            }
-            AutoTarget.SCALE_ONLY -> {
-                add(mpStep(robotPos.toString(), "SCALE_$scale"))
-            }
-            AutoTarget.FULL -> {
-                when (robotPos) {
-                    RobotPosition.DS_MID -> {
-                        add(mpStep(robotPos.toString(), "SCALE_$scale"))
-                        //TODO scale score
-                        add(mpStep("SCALE_$scale", "SWITCH_$switch"))
-                        //TODO switch score
-                        //AUTO END
-                    }
-                    RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
-                        if (robotPos.alignedWith(scale)) {
-                            add(mpStep(robotPos.toString(), "SCALE_$scale"))
-                            //TODO scale score
-                            add(mpStep("SCALE_$scale", "SWITCH_$switch"))
-                            //TODO switch score
-                        } else {
-                            if (robotPos.alignedWith(switch)) {
-                                add(mpStep(robotPos.toString(), "SWITCH_$switch"))
-                                //TODO switch score
-                                add(mpStep("SWITCH_$switch", "SWITCH_$scale"))
-                                //TODO intake cube
-                                add(mpStep("SWITCH_${switch.invert()}", "SCALE_$scale"))
-                                //TODO scale score
-                            } else {
-                                add(mpStep(robotPos.toString(), "SCALE_$scale"))
-                                //TODO scale score
-                                add(mpStep("SCALE_$scale", "SWITCH_$switch"))
-                                //TODO switch score
-                            }
-                        }
-                    }
+
+                AutoTarget.SWITCH_ONLY -> {
+                    Routines.drive(robotPos, FieldElements.switch(switch), SubSequence(*Commands.DeployAndWait)) //Drive and deploy
+                    Routines.score() //Score cube
+                    //AUTO END
+                }
+
+                AutoTarget.SCALE_ONLY -> {
+                    Routines.drive(robotPos, FieldElements.scale(scale), SubSequence(*Commands.DeployAndWait, Commands.ScaleAfterUnfold))
+                    Routines.score()
+                    //AUTO END
+                }
+
+                AutoTarget.FULL -> {
+
+                }
+
+                else -> {
+                    //AUTO END
                 }
             }
         }
+        //AUTO END
     }
 }
