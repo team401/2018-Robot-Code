@@ -223,7 +223,7 @@ object Constants {
         const val INTAKE_POS = 2500.0
         const val GRAB_POS = (STOWED_POS + INTAKE_POS)/2.0
 
-        const val HAVE_CUBE_CURRENT_INTAKE = 5.0
+        const val HAVE_CUBE_CURRENT_INTAKE = 3.0
         const val HAVE_CUBE_CURRENT_HOLD = 1.0
 
         const val INVERT_LEFT = true
@@ -248,8 +248,8 @@ object Constants {
         const val RIGHT_PEAK_LIMIT_DUR = 100
 
         const val INRUSH_COUNT = 30
-        const val CUBE_HELD_TIME = 300L
-        const val HAVE_CUBE_CLAMP_DELAY = 500L
+        const val CUBE_HELD_TIME = 75L
+        const val HAVE_CUBE_CLAMP_DELAY = 50L
 
         object PIDF {
             const val P = 3.5

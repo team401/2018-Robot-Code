@@ -307,6 +307,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 Elevator.homed = false
                 homingCounter = 0
                 elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
+                Thread.sleep(100)
             }
 
             action {
@@ -420,6 +421,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
 
+        Thread.sleep(3000)
+
         if (!Elevator.homed) { //If we aren't homed
             elevatorMachine.setState(ElevatorStates.HOMING) //Home
         } else {
@@ -437,6 +440,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     on (RobotEvents.HAVE_CUBE) {
         elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
+    }
+    on (RobotEvents.EJECT_CUBE){
+        elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
     }
 
     test("Kicker test") {

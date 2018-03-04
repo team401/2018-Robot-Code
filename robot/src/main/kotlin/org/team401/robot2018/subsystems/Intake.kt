@@ -188,6 +188,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         }
 
         state(IntakeWheelsStates.REVERSE) {
+            entry{
+                send(RobotEvents.EJECT_CUBE)
+                Thread.sleep(100)
+            }
             action {
                 left.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
                 right.set(ControlMode.PercentOutput, Constants.IntakeParameters.REVERSE_RATE)
