@@ -182,6 +182,12 @@ object Constants {
             override val F = 1/100.0
         }
 
+        //high speed PIDF :
+        //P : 0.1
+        //I : 0.0
+        //D : 3.4
+        //F : 0.055
+
         object KickerMachine{
             const val EXTENDED = true
             const val RETRACTED = false
