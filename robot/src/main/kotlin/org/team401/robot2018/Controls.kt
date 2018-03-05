@@ -1,5 +1,6 @@
 package org.team401.robot2018
 
+import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.HumanControls
 import org.snakeskin.dsl.machine
 import org.snakeskin.logic.Direction
@@ -142,26 +143,9 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
 
-    /*
     whenButton(Buttons.START) {
         pressed {
-
-        }
-    }
-    */
-
-    whenButton(Buttons.START) { //TODO test homing
-        pressed {
-            elevatorMachine.setState(ElevatorStates.HOLD_POS_UNKNOWN)
-            elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY)
-
-            while (elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED) {
-                Thread.sleep(1)
-            }
-
-            elevatorMachine.setState(ElevatorStates.HOMING)
-            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
-            elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
+            elevatorMachine.setState("tuning")
         }
     }
 }

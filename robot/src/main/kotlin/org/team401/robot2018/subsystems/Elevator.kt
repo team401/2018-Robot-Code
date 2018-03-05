@@ -15,6 +15,8 @@ import org.snakeskin.publish.Publisher
 import org.team401.robot2018.Gamepad
 import org.team401.robot2018.PDP
 import org.team401.robot2018.etc.*
+import java.io.File
+import java.util.*
 
 //import org.team401.robot2018.MasherBox
 
@@ -294,6 +296,49 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.SCALE_POS_UNKNOWN) {
             entry {
                 mmSetpoint(Constants.ElevatorParameters.UNKNOWN_SCALE_POS)
+            }
+        }
+
+        state("tuning") {
+            var zeroCounter = 0
+            var positionDesired = 0
+            var velocityDesired = 0
+            var positionActual = 0
+            var velocityActual = 0
+            var time = 0L
+            var startTime = 0L
+            lateinit var file: File
+
+            entry {
+                file = File("/home/lvuser/elevatorTuning/plant-${Date(System.currentTimeMillis()).toString().replace(' ', '_').replace(':', '-')}")
+                zeroCounter = 0
+                positionDesired = 0
+                velocityDesired = 0
+                positionActual = 0
+                velocityActual = 0
+                time = 0
+                mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
+                startTime = System.currentTimeMillis()
+            }
+
+            action(10) {
+                positionDesired = master.activeTrajectoryPosition
+                velocityDesired = master.activeTrajectoryVelocity
+                positionActual = master.getSelectedSensorPosition(0)
+                velocityActual = master.getSelectedSensorVelocity(0)
+                time = System.currentTimeMillis() - startTime
+
+                if (velocityDesired == 0) {
+                    zeroCounter++
+                } else {
+                    zeroCounter = 0
+                }
+
+                if (zeroCounter > 10) {
+                    setState(ElevatorStates.POS_SCALE)
+                }
+
+                file.writeText("$positionDesired,$velocityDesired,$positionActual,$velocityActual,$time\n")
             }
         }
 
