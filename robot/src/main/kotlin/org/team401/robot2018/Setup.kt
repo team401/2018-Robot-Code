@@ -11,6 +11,7 @@ import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
 import org.team401.robot2018.auto.PowerUpAuto
+import org.team401.robot2018.auto.TestAuto
 import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
@@ -41,10 +42,13 @@ val PDP = PowerDistributionPanel()
 
 @Setup
 fun setup() {
-    AutoManager.auto = PowerUpAuto
-    //AutoManager.auto = TestAuto
+    //Uncomment which one you are using
+    //AutoManager.auto = PowerUpAuto //Real auto
+    AutoManager.auto = TestAuto //Test auto
 
-    //PowerUpAuto.publish()
+    //Uncomment which one you are using
+    //PowerUpAuto.publish() //Real auto
+    TestAuto.publish() //Test auto
 
     val mjpeg = Array<String>(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
@@ -54,4 +58,4 @@ fun setup() {
     Sensors.add(VisionStopSensor)
 }
 
-//@PostStartup private fun startReporting() = Reporting.start()
+@PostStartup private fun startReporting() = Reporting.start()

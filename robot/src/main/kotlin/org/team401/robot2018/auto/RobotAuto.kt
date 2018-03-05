@@ -27,7 +27,7 @@ abstract class RobotAuto: AutoLoop() {
     private val autoTargetSelector = AutoTarget.toSendableChooser()
     private var teammatesCanDoSwitch = false
 
-    private fun publish() {
+    fun publish() {
         SmartDashboard.putData("Robot Position", robotPosSelector)
         SmartDashboard.putData("Auto Target", autoTargetSelector)
         SmartDashboard.putBoolean("Partner switch", teammatesCanDoSwitch)
