@@ -18,13 +18,13 @@ import openrio.powerup.MatchData
 
 enum class RobotPosition(val prettyName: String) {
     DS_LEFT("Left"),
-    DS_MID("Middle"),
+    DS_CENTER("Center"),
     DS_RIGHT("Right");
 
     fun alignedWith(side: MatchData.OwnedSide) =
             when (this) {
                 DS_LEFT -> side == MatchData.OwnedSide.LEFT
-                DS_MID -> false
+                DS_CENTER -> false
                 DS_RIGHT -> side == MatchData.OwnedSide.RIGHT
             }
 

@@ -33,8 +33,8 @@ abstract class RobotAuto: AutoLoop() {
         SmartDashboard.putBoolean("Partner switch", teammatesCanDoSwitch)
     }
 
-    protected var robotPos = RobotPosition.DS_MID; private set
-    protected var target = AutoTarget.FULL; private set
+    protected var robotPos = RobotPosition.DS_CENTER; private set
+    protected var target = AutoTarget.SWITCH_ONLY; private set
     protected var switch = MatchData.OwnedSide.UNKNOWN; private set
     protected var scale = MatchData.OwnedSide.UNKNOWN; private set
     protected var baseDelay = 0L; private set
@@ -56,7 +56,7 @@ abstract class RobotAuto: AutoLoop() {
      */
     private fun fetchSD() {
         //TODO add back proper SD reading
-        robotPos = RobotPosition.DS_MID//robotPosSelector.selected
+        robotPos = RobotPosition.DS_LEFT//robotPosSelector.selected
         target = AutoTarget.FULL//autoTargetSelector.selected
         baseDelay = 0L//SmartDashboard.getNumber("Base Delay", 0.0).toLong()
     }

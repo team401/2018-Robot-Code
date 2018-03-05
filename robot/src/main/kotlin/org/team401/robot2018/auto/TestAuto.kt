@@ -1,24 +1,23 @@
-package org.team401.robot2018.auto
+package org.team401.robot2018.auto.steps
 
-import org.team401.robot2018.auto.motion.TuningRioProfileRunner
-import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.subsystems.Drivetrain
+import org.team401.robot2018.auto.*
+import org.team401.robot2018.etc.StepAdder
 
-/*
- * 2018-Robot-Code - Created on 3/5/18
- * Author: Cameron Earle
- * 
- * This code is licensed under the GNU GPL v3
- * You can find more info in the LICENSE file at project root
- */
+object TestAuto : RobotAuto(){
 
-/**
- * @author Cameron Earle
- * @version 3/5/18
- */
+    override fun assembleAuto(add: StepAdder) {
 
-object TestAuto: RobotAuto() {
-    override fun assembleAuto(add: (AutoStep) -> Unit) {
-        add(TuningRioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, "tuning")) //Example
+        add(DelayStep(1000))
+        Routines.setup()
+
+        add(DelayStep(500))
+
+        add(Commands.ElevatorToDrive)
+        add(DelayStep(500))
+
+        Routines.drive(RobotPosition.DS_LEFT, FieldElements.switch(switch), SubSequence(Commands.ElevatorToSwitch))
+        Routines.score()
     }
+
+
 }

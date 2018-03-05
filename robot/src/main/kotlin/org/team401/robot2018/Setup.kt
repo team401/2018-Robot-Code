@@ -11,10 +11,10 @@ import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
 import org.team401.robot2018.auto.PowerUpAuto
-import org.team401.robot2018.auto.TestAuto
 import org.team401.robot2018.auto.motion.GyroTurn
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.auto.motion.RioProfileRunner
+import org.team401.robot2018.auto.steps.TestAuto
 import org.team401.robot2018.etc.Constants
 import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
 import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
