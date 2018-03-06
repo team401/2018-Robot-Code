@@ -46,7 +46,7 @@ object Commands {
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
     val ScaleAfterUnfold = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
 
-    val ElevatorToDrive = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.GO_TO_DRIVE)
+    val ElevatorToDrive = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_DRIVE)
     val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
     val ElevatorToSwitch = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
     val ElevatorToScale = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SCALE_HIGH)

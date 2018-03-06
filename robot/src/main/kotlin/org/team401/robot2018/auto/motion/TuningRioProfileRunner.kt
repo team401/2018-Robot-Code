@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
 import com.google.gson.Gson
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import org.team401.robot2018.etc.RobotMath
 
 /*
  * 2018-Robot-Code - Created on 2/22/18
@@ -75,14 +76,14 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
         imu.getYawPitchRoll(imuData)
         val currentData = PublishData(
             PublishData.Side(
-                leftController.getSelectedSensorPosition(0),
-                leftController.getSelectedSensorVelocity(0),
+                RobotMath.UnitConversions.nativeUnitsToRevolutions(leftController.getSelectedSensorPosition(0).toDouble()).toInt(),
+                RobotMath.UnitConversions.nativeUnitsToRpm(leftController.getSelectedSensorVelocity(0).toDouble()).toInt(),
                 leftCurrent.position,
                 leftCurrent.velocity
             ),
             PublishData.Side(
-                    rightController.getSelectedSensorPosition(0),
-                    rightController.getSelectedSensorVelocity(0),
+                    RobotMath.UnitConversions.nativeUnitsToRevolutions(rightController.getSelectedSensorPosition(0).toDouble()).toInt(),
+                    RobotMath.UnitConversions.nativeUnitsToRpm(rightController.getSelectedSensorVelocity(0).toDouble()).toInt(),
                     rightCurrent.position,
                     rightCurrent.velocity
             ), imuData[0], leftCurrent.heading, leftCurrent.timestep * runner.index().toLong()
