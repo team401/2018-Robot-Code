@@ -37,11 +37,11 @@ object Commands {
         ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).getState() == ElevatorDeployStates.DEPLOYED
     }
 
-    val DeployAndWait = arrayOf(DeployElevator, WaitForDeploy)
-
     val WaitForHasCube = WaitForStep {
         ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
     }
+
+    val WaitForAtSwitch = WaitForStep(Elevator::atSwitch)
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
     val ScaleAfterUnfold = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
@@ -64,4 +64,5 @@ object Commands {
     val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
     val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
+    val HighLockDeployAndWait = arrayOf(ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
 }

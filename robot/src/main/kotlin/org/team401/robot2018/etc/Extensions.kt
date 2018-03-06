@@ -43,6 +43,8 @@ fun MatchData.OwnedSide.invert(): MatchData.OwnedSide {
     }
 }
 
+operator fun MatchData.OwnedSide.not() = this.invert()
+
 fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 0.0, f: Double = 0.0, slot: Int = 0, timeout: Int = 0) {
     config_kP(slot, p, timeout)
     config_kI(slot, i, timeout)

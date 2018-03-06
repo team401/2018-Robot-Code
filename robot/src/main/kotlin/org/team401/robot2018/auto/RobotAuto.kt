@@ -25,18 +25,19 @@ abstract class RobotAuto: AutoLoop() {
     //DATA
     private val robotPosSelector = RobotPosition.toSendableChooser()
     private val autoTargetSelector = AutoTarget.toSendableChooser()
-    private var teammatesCanDoSwitch = false
 
     fun publish() {
         SmartDashboard.putData("Robot Position", robotPosSelector)
         SmartDashboard.putData("Auto Target", autoTargetSelector)
-        SmartDashboard.putBoolean("Partner switch", teammatesCanDoSwitch)
+        SmartDashboard.putBoolean("Partner Switch", teammatesCanDoSwitch)
+        SmartDashboard.putNumber("Base Delay", 0.0)
     }
 
     protected var robotPos = RobotPosition.DS_CENTER; private set
     protected var target = AutoTarget.SWITCH_ONLY; private set
     protected var switch = MatchData.OwnedSide.UNKNOWN; private set
     protected var scale = MatchData.OwnedSide.UNKNOWN; private set
+    protected var teammatesCanDoSwitch = false; private set
     protected var baseDelay = 0L; private set
 
     /**
@@ -58,6 +59,7 @@ abstract class RobotAuto: AutoLoop() {
         //TODO add back proper SD reading
         robotPos = RobotPosition.DS_LEFT//robotPosSelector.selected
         target = AutoTarget.FULL//autoTargetSelector.selected
+        teammatesCanDoSwitch = false//SmartDashboard.getBoolean("Partner Switch", false)
         baseDelay = 0L//SmartDashboard.getNumber("Base Delay", 0.0).toLong()
     }
 

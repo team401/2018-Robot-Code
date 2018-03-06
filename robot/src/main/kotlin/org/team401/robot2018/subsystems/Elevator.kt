@@ -94,6 +94,7 @@ object Elevator {
 
     var homed by LockingDelegate(false)
 
+    fun atSwitch() = gearbox.master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.SWITCH_POS, 1000.0)
     fun atCollection() = gearbox.master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.COLLECTION_POS, 1000.0)
 }
 
