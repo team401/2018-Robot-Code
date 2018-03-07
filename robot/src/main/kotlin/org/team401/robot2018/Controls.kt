@@ -66,8 +66,10 @@ val Gamepad = HumanControls.f310(2) {
     //Intake control
     whenButton(Buttons.A) {
         pressed {
+            elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
+            Thread.sleep(100)
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
-            intakeFolding.setState(IntakeFoldingStates.INTAKE)
+            intakeFolding.setState(IntakeFoldingStates.GO_TO_INTAKE)
             intakeWheels.setState(IntakeWheelsStates.REVERSE)
         }
         released {

@@ -238,14 +238,14 @@ object Constants {
         const val FOLDING_PEAK_OUTPUT_FORWARD = 0.5
         const val FOLDING_PEAK_OUTPUT_REVERSE = -0.5
 
-        const val LEFT_PEAK_LIMIT = 40
-        const val RIGHT_PEAK_LIMIT = 40
+        const val LEFT_PEAK_LIMIT = 20
+        const val RIGHT_PEAK_LIMIT = 20
 
-        const val LEFT_CONTINUOUS_LIMIT = 30
-        const val RIGHT_CONTINUOUS_LIMIT = 30
+        const val LEFT_CONTINUOUS_LIMIT = 15
+        const val RIGHT_CONTINUOUS_LIMIT = 15
 
-        const val LEFT_PEAK_LIMIT_DUR = 100
-        const val RIGHT_PEAK_LIMIT_DUR = 100
+        const val LEFT_PEAK_LIMIT_DUR = 50
+        const val RIGHT_PEAK_LIMIT_DUR = 50
 
         const val INRUSH_COUNT = 30
         const val CUBE_HELD_TIME = 75L

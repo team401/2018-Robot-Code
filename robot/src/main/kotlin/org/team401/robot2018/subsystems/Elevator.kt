@@ -1,5 +1,6 @@
 package org.team401.robot2018.subsystems
 
+import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
@@ -16,6 +17,7 @@ import org.team401.robot2018.Gamepad
 import org.team401.robot2018.PDP
 import org.team401.robot2018.etc.*
 import java.io.File
+import java.io.PrintWriter
 import java.util.*
 
 //import org.team401.robot2018.MasherBox
@@ -136,6 +138,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         master.configPeakOutputForward(1.0, 0)
         master.configPeakOutputReverse(-1.0, 0)
+
+
 
     }
 
@@ -306,17 +310,38 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             var velocityDesired = 0
             var positionActual = 0
             var velocityActual = 0
+            var actualPower = 0.0
             var time = 0L
             var startTime = 0L
+            var oldFrameRate = 0
+            var oldEncoderRate = 0
             lateinit var file: File
+            lateinit var writer: PrintWriter
 
             entry {
-                file = File("/home/lvuser/elevatorTuning/plant-${Date(System.currentTimeMillis()).toString().replace(' ', '_').replace(':', '-')}")
+                try {
+                    file = File("/home/lvuser/elevatorTuning/plant-${Date(System.currentTimeMillis()).toString().replace(' ', '_').replace(':', '-')}.csv")
+                    writer = file.printWriter()
+                    writer.println("P,I,D,F,I Zone")
+                    writer.println("${Elevator.gearbox.master.configGetParameter(ParamEnum.eProfileParamSlot_P, 0, 0)}," +
+                            "${Elevator.gearbox.master.configGetParameter(ParamEnum.eProfileParamSlot_I, 0, 0)}," +
+                            "${Elevator.gearbox.master.configGetParameter(ParamEnum.eProfileParamSlot_D, 0, 0)}," +
+                            "${Elevator.gearbox.master.configGetParameter(ParamEnum.eProfileParamSlot_F, 0, 0)}," +
+                            "${Elevator.gearbox.master.configGetParameter(ParamEnum.eProfileParamSlot_IZone, 0, 0)}")
+                    writer.println("Time, Desired Position, Desired Velocity, Actual Position, Actual Velocity")
+                }catch(e : Exception){
+                    println(e.message)
+                }
+                oldFrameRate = master.getStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 100)
+                oldEncoderRate = master.getStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 100)
+                master.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 10, 0)
+                master.setStatusFramePeriod(StatusFrame.Status_1_General, 10, 0)
                 zeroCounter = 0
                 positionDesired = 0
                 velocityDesired = 0
                 positionActual = 0
                 velocityActual = 0
+                actualPower = 0.0
                 time = 0
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
                 startTime = System.currentTimeMillis()
@@ -329,6 +354,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                 velocityActual = master.getSelectedSensorVelocity(0)
                 time = System.currentTimeMillis() - startTime
 
+                actualPower = master.motorOutputPercent
+
                 if (velocityDesired == 0) {
                     zeroCounter++
                 } else {
@@ -339,7 +366,14 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
                     setState(ElevatorStates.POS_SCALE)
                 }
 
-                file.writeText("$positionDesired,$velocityDesired,$positionActual,$velocityActual,$time\n")
+                writer.println("$time,$positionDesired,$velocityDesired,$positionActual,$velocityActual")
+            }
+            exit{
+                writer.flush()
+                writer.close()
+
+                master.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, oldFrameRate, 0)
+                master.setStatusFramePeriod(StatusFrame.Status_1_General, oldEncoderRate,0)
             }
         }
 
@@ -546,10 +580,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         var slave2Power by Publisher(0.0)
         var slave3Power by Publisher(0.0)
 
-        masterPower = PDP.getCurrent(4)
-        slave1Power = PDP.getCurrent(5)
-        slave2Power = PDP.getCurrent(6)
-        slave3Power = PDP.getCurrent(7)
+        //getCurrent is currently messed up
+        //masterPower = PDP.getCurrent(4)
+        //slave1Power = PDP.getCurrent(5)
+        //slave2Power = PDP.getCurrent(6)
+        //slave3Power = PDP.getCurrent(7)
 
         Thread.sleep(2000)
         elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
@@ -565,6 +600,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         //results of the test
         val tolerance = 5.0
-        (masterPower + slave1Power + slave2Power + slave3Power + tolerance) / 4 >= masterPower
+        //(masterPower + slave1Power + slave2Power + slave3Power + tolerance) / 4 >= masterPower
+        false
     }
 }
