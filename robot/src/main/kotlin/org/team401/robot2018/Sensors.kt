@@ -3,8 +3,7 @@ package org.team401.robot2018
 import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.Sensors
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.etc.Constants.DrivetrainParameters.PITCH_CORRECTION_MIN
-import org.team401.robot2018.etc.Constants.DrivetrainParameters.ROLL_CORRECTION_MIN
+import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -63,12 +62,12 @@ fun getRoll(): Double {
 val PitchSensor = Sensors.numericSensor({Math.abs(getPitch())}) {
     pollAt(20)
 
-    whenAbove(PITCH_CORRECTION_MIN.toDouble()) {
+    whenAbove(Constants.DrivetrainParameters.PITCH_CORRECTION_MIN.toDouble()) {
 
         DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
     }
 
-    whenBelow(PITCH_CORRECTION_MIN.toDouble()) {
+    whenBelow(Constants.DrivetrainParameters.PITCH_CORRECTION_MIN.toDouble()) {
 
         DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
     }
@@ -77,12 +76,12 @@ val PitchSensor = Sensors.numericSensor({Math.abs(getPitch())}) {
 val RollSensor = Sensors.numericSensor({Math.abs(getRoll())}) {
     pollAt(20)
 
-    whenAbove(ROLL_CORRECTION_MIN.toDouble()) {
+    whenAbove(Constants.DrivetrainParameters.ROLL_CORRECTION_MIN.toDouble()) {
 
         DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
     }
 
-    whenBelow(ROLL_CORRECTION_MIN.toDouble()) {
+    whenBelow(Constants.DrivetrainParameters.ROLL_CORRECTION_MIN.toDouble()) {
 
         DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
     }

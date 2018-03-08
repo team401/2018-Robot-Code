@@ -4,7 +4,7 @@ import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.StepGroup
-import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.StepAdder
 import org.team401.robot2018.subsystems.Drivetrain
 

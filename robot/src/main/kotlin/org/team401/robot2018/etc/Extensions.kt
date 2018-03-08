@@ -10,6 +10,7 @@ import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
 import org.team401.robot2018.PDP
 import org.team401.robot2018.auto.steps.AutoStep
+import org.team401.robot2018.constants.ConstantsBase
 import org.team401.robot2018.subsystems.ShiftCommand
 
 /*
@@ -52,7 +53,7 @@ fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 
     config_kF(slot, f, timeout)
 }
 
-fun IMotorControllerEnhanced.pidf(pidf: Constants.PIDF) {
+fun IMotorControllerEnhanced.pidf(pidf: ConstantsBase.PIDF) {
     pidf(pidf.P, pidf.I, pidf.D, pidf.F)
 }
 

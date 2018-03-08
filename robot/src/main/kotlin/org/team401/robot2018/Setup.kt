@@ -4,24 +4,16 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import org.snakeskin.annotation.PostStartup
 import org.snakeskin.annotation.Setup
-import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
-import org.snakeskin.dsl.Publisher
 import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
-import org.team401.robot2018.auto.PowerUpAuto
-import org.team401.robot2018.auto.motion.GyroTurn
-import org.team401.robot2018.auto.motion.PDVA
-import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.TestAuto
-import org.team401.robot2018.etc.Constants
-import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
-import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
+import org.team401.robot2018.constants.Constants
+import org.team401.robot2018.constants.CompConstants
 import org.team401.robot2018.etc.Reporting
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.VisionController
-import org.team401.robot2018.vision.VisionDataClient
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -42,6 +34,10 @@ val PDP = PowerDistributionPanel()
 
 @Setup
 fun setup() {
+    //Uncomment which one you are using
+    Constants = CompConstants()
+    //Constants = PracticeConstants()
+
     //Uncomment which one you are using
     //AutoManager.auto = PowerUpAuto //Real auto
     AutoManager.auto = TestAuto //Test auto

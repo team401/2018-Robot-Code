@@ -3,7 +3,7 @@ package org.team401.robot2018.subsystems
 import edu.wpi.first.wpilibj.Solenoid
 import org.snakeskin.dsl.Subsystem
 import org.snakeskin.dsl.buildSubsystem
-import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.constants.Constants
 
 /*
  * 2018-Robot-Code - Created on 1/15/18

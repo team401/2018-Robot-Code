@@ -23,7 +23,7 @@ import org.snakeskin.event.Events
 import org.snakeskin.logic.scalars.CubicScalar
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
-import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.getCurrent
 import org.team401.robot2018.etc.shiftUpdate
 import org.team401.robot2018.getPitch
