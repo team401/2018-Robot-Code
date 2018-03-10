@@ -547,15 +547,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
-        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
-        /*
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
                 Thread.sleep(10)
             }
         }
-        */
+
         Thread.sleep(3000)
 
         if (!Elevator.homed) { //If we aren't homed
