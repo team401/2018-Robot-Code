@@ -56,9 +56,9 @@ object ElevatorStates {
 
     const val POS_COLLECTION = "ground"
     const val POS_DRIVE = "hold"
-    const val POS_SWITCH = "switch"
+    const val POS_SWITCH = "switchSide"
     const val POS_SCALE_LOW = "scale_low"
-    const val POS_SCALE = "scale"
+    const val POS_SCALE = "scaleSide"
     const val POS_SCALE_HIGH = "scale_high"
     const val POS_MAX = "max"
 

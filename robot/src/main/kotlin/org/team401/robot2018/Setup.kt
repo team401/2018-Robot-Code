@@ -15,6 +15,7 @@ import org.snakeskin.event.Events
 import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
+import org.team401.robot2018.auto.PowerUpAuto
 import org.team401.robot2018.auto.TestAuto
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.constants.CompConstants
@@ -48,12 +49,12 @@ fun setup() {
     //Constants = PracticeConstants()
 
     //Uncomment which one you are using
-    //AutoManager.auto = PowerUpAuto //Real auto
-    AutoManager.auto = TestAuto //Test auto
+    AutoManager.auto = PowerUpAuto //Real auto
+    //AutoManager.auto = TestAuto //Test auto
 
     //Uncomment which one you are using
-    //PowerUpAuto.publish() //Real auto
-    TestAuto.publish() //Test auto
+    PowerUpAuto.publish() //Real auto
+    //TestAuto.publish() //Test auto
 
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
