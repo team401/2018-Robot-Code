@@ -35,7 +35,17 @@ val LeftStick = HumanControls.t16000m(0) {
 }
 
 val RightStick = HumanControls.t16000m(1) {
+    whenButton(Buttons.BASE_LEFT_TOP_1) {
+        pressed {
+            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
+        }
+    }
 
+    whenButton(Buttons.BASE_LEFT_TOP_2) {
+        pressed {
+            ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
+        }
+    }
 }
 
 val Gamepad = HumanControls.f310(2) {
