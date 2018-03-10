@@ -19,15 +19,6 @@ import org.team401.robot2018.subsystems.*
  * @version 1/30/18
  */
 
-val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOperatorControl && DriverStation.getInstance().matchTime <= 5}) {
-    pollAt(1000)
-
-    whenTriggered {
-        Thread.sleep(10000)
-        Vision.stop()
-    }
-}
-
 /*
 val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent}) {
     pollAt(20)
@@ -46,44 +37,3 @@ val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent})
     }
 }
 */
-
-fun getPitch(): Double {
-    var imuData = DoubleArray(3)
-    Drivetrain.imu.getYawPitchRoll(imuData)
-    return imuData[1]
-}
-
-fun getRoll(): Double {
-    var imuData = DoubleArray(3)
-    Drivetrain.imu.getYawPitchRoll(imuData)
-    return imuData[2]
-}
-
-val PitchSensor = Sensors.numericSensor({Math.abs(getPitch())}) {
-    pollAt(20)
-
-    whenAbove(Constants.DrivetrainParameters.PITCH_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
-    }
-
-    whenBelow(Constants.DrivetrainParameters.PITCH_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
-    }
-}
-
-val RollSensor = Sensors.numericSensor({Math.abs(getRoll())}) {
-    pollAt(20)
-
-    whenAbove(Constants.DrivetrainParameters.ROLL_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
-    }
-
-    whenBelow(Constants.DrivetrainParameters.ROLL_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
-    }
-
-}

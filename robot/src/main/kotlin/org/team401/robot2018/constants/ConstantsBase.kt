@@ -14,7 +14,6 @@ import org.team401.robot2018.auto.motion.PDVA
  * @author Cameron Earle
  * @version 3/7/18
  */
-
 abstract class ConstantsBase {
     interface PIDF {
         val P: Double
@@ -128,13 +127,14 @@ abstract class ConstantsBase {
         val DEPLOY_TIMER = 3500L //ms
         
         val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
+        val CLIMB_MANUAL_RATE = 3 * .02
         
         val CURRENT_LIMIT_CONTINUOUS = 30 //A
         
         val MIN_VELOCITY = -400.0
         val MAX_VELOCITY = 400.0
         
-        val MAX_POS = 40960.0 //ticks
+        val MAX_POS = 60000.0 //ticks
 
         val ZERO_POS = 0.0 //ticks
         val COLLECTION_POS = ZERO_POS + 500.0
@@ -199,7 +199,7 @@ abstract class ConstantsBase {
 
         abstract val STOWED_POS: Double
         abstract val INTAKE_POS: Double
-        val GRAB_POS = (STOWED_POS + INTAKE_POS) / 2.0
+        abstract val GRAB_POS: Double
 
         val HAVE_CUBE_CURRENT_INTAKE = 3.0
         val HAVE_CUBE_CURRENT_HOLD = 1.0
@@ -226,7 +226,7 @@ abstract class ConstantsBase {
         val RIGHT_PEAK_LIMIT_DUR = 50
 
         val INRUSH_COUNT = 30
-        val CUBE_HELD_TIME = 75L
+        val CUBE_HELD_TIME = 100L
         val HAVE_CUBE_CLAMP_DELAY = 50L
 
         abstract val PIDF: PIDF

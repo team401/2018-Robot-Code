@@ -3,6 +3,7 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import edu.wpi.first.wpilibj.Servo
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.snakeskin.logic.History
@@ -54,6 +55,8 @@ var cubeCount = 0
 
 val IntakeSubsystem: Subsystem = buildSubsystem {
     val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
+    val camera = Servo(1)
+
 
     val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
     val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
@@ -100,6 +103,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
         state(IntakeFoldingStates.GRAB) {
             entry {
+                camera.set(1.0)
                 folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
             }
         }
@@ -115,18 +119,21 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         state(IntakeFoldingStates.INTAKE) {
             entry {
+                camera.set(1.0)
                 folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
             }
         }
 
         state(IntakeFoldingStates.STOWED) {
             entry {
+                camera.set(.65)
                 folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
             }
         }
 
         default {
             entry {
+                camera.set(0.0)
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
             action{

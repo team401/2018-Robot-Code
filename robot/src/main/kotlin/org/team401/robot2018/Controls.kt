@@ -47,6 +47,7 @@ val Gamepad = HumanControls.f310(2) {
     val rungsMachine = RungsSubsystem.machine(RUNGS_MACHINE)
     val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
     val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
+    val elevatorRatchetMachine = ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE)
 
     //Elevator setpoints
     whenHatChanged(Hats.D_PAD) {
@@ -130,24 +131,23 @@ val Gamepad = HumanControls.f310(2) {
 
     whenButton(Buttons.LEFT_BUMPER) {
         pressed {
-            //elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
             elevatorClampMachine.toggle(ElevatorClampStates.CLAMPED, ElevatorClampStates.UNCLAMPED)
         }
     }
-
-
-    //TODO FUTURE NOT NOW NO THANKS
 
     //Climbing and rungs
     whenButton(Buttons.BACK) {
         pressed {
             rungsMachine.setState(RungsStates.DEPLOY)
+            elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+            elevatorMachine.setState(ElevatorStates.CLIMB_MANUAL)
         }
     }
 
     whenButton(Buttons.START) {
         pressed {
-            elevatorMachine.setState("tuning")
+            elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+            elevatorMachine.setState(ElevatorStates.CLIMB)
         }
     }
 }

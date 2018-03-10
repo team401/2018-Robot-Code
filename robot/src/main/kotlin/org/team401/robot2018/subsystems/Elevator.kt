@@ -61,6 +61,9 @@ object ElevatorStates {
     const val POS_SCALE = "scale"
     const val POS_SCALE_HIGH = "scale_high"
     const val POS_MAX = "max"
+
+    const val CLIMB_MANUAL = "climbAlign"
+    const val CLIMB = "climb"
 }
 
 const val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
@@ -119,6 +122,21 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val ratchet = Servo(Constants.ElevatorParameters.RATCHET_SERVO_PORT)
 
+    fun runMode() {
+        master.configMotionCruiseVelocity(21680, 0)
+        master.configMotionAcceleration(21680, 0)
+    }
+
+    fun climbMode() {
+        master.configMotionCruiseVelocity(217, 0)
+        master.configMotionAcceleration(21680, 0)
+    }
+
+    fun finalClimbMode() {
+        master.configMotionCruiseVelocity(217 * 4, 0)
+        master.configMotionAcceleration(21680, 0)
+    }
+
     setup {
         Elevator.gearbox = gearbox
         Elevator.shifter = shifter
@@ -129,8 +147,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         
         gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
-        master.configMotionCruiseVelocity(21680, 0)
-        master.configMotionAcceleration(21680, 0)
+        runMode()
         //master.pidf(Constants.ElevatorParameters.PIDF)
         gearbox.setCurrentLimit(Constants.ElevatorParameters.CURRENT_LIMIT_CONTINUOUS)
         master.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 10)
@@ -196,8 +213,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
-        fun posSetpoint(setpoint: Number) = gearbox.set(ControlMode.Position, setpoint.toDouble())
-        fun mmSetpoint(setpoint: Number) = gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+        fun mmSetpoint(setpoint: Number) {
+            runMode()
+            gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+        }
+
+        fun climbSetpoint(setpoint: Number) {
+            climbMode()
+            gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+        }
+
+        fun finalClimbSetpoint(setpoint: Number) {
+            finalClimbMode()
+            gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+        }
 
         state(ElevatorStates.OPEN_LOOP_CONTROL) {
             rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
@@ -393,8 +422,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 velocity = master.getSelectedSensorVelocity(0)
-                println("Elevator Velocity: " + velocity)
-                gearbox.set(ControlMode.PercentOutput, 0.0) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, -0.1) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, -0.1) //Run down at the homing rate
 
                 if (velocity == 0) {
                     homingCounter++
@@ -418,24 +447,48 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
+                if (Gamepad.readButton { LEFT_STICK }) {
+                    position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
+                }
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
-                posSetpoint(position)
+                mmSetpoint(position)
+            }
+        }
+
+        state(ElevatorStates.CLIMB_MANUAL) {
+            var position = 0
+
+            entry {
+                position = gearbox.getPosition()
+            }
+
+            action {
+                position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.CLIMB_MANUAL_RATE)).toInt()
+                if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
+                if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
+                climbSetpoint(position)
+            }
+        }
+
+        state(ElevatorStates.CLIMB) {
+            rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
+            entry {
+                finalClimbSetpoint(Constants.ElevatorParameters.ZERO_POS)
             }
         }
 
         default {
             action {
-                //println("RESTING: " + master.getSelectedSensorPosition(0))
                 gearbox.set(ControlMode.PercentOutput, 0.0)
             }
         }
     }
 
     val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
-
         state(ElevatorRatchetStates.LOCKED) {
+            rejectIf { elevatorMachine.getState() != ElevatorStates.CLIMB || elevatorMachine.getState() != ElevatorStates.CLIMB_MANUAL }
+
             entry {
                 ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
             }
@@ -494,14 +547,15 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
-
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
+        /*
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
                 Thread.sleep(10)
             }
         }
-
+        */
         Thread.sleep(3000)
 
         if (!Elevator.homed) { //If we aren't homed
