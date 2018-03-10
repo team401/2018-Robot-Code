@@ -2,6 +2,7 @@ package org.team401.robot2018
 
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.CameraServer
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Servo
 import org.snakeskin.annotation.PostStartup
