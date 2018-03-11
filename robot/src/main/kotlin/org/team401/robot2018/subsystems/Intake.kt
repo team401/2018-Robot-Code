@@ -110,7 +110,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         state(IntakeFoldingStates.GO_TO_INTAKE) {
             action {
-                if (Elevator.atCollection()) {
+                if (Elevator.estop || Elevator.atCollection()) {
                     Thread.sleep(100)
                     setState(IntakeFoldingStates.INTAKE)
                 }
@@ -188,8 +188,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 send(RobotEvents.HAVE_CUBE)
                 Thread.sleep(Constants.IntakeParameters.HAVE_CUBE_CLAMP_DELAY)
 
-                foldingMachine.setState(IntakeFoldingStates.STOWED)
-                setState(IntakeWheelsStates.IDLE)
+                if (!Elevator.estop) {
+                    foldingMachine.setState(IntakeFoldingStates.STOWED)
+                    setState(IntakeWheelsStates.IDLE)
+                }
 
                 cubeCount++
             }

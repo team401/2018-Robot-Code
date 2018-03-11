@@ -1,10 +1,7 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.auto.steps.LambdaStep
-import org.team401.robot2018.auto.steps.StateStep
-import org.team401.robot2018.auto.steps.WaitForStep
+import org.team401.robot2018.auto.steps.*
 import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.*
 

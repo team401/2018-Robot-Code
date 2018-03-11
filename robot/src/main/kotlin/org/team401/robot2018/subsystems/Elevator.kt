@@ -62,6 +62,7 @@ object ElevatorStates {
     const val POS_SCALE_HIGH = "scale_high"
     const val POS_MAX = "max"
 
+    const val START_CLIMB = "startClimb"
     const val CLIMB_MANUAL = "climbAlign"
     const val CLIMB = "climb"
 }
@@ -99,12 +100,14 @@ object Elevator {
     lateinit var clamp: Solenoid
 
     var homed by LockingDelegate(false)
+    var estop by LockingDelegate(false)
 
     fun atSwitch() = gearbox.master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.SWITCH_POS, 1000.0)
     fun atCollection() = gearbox.master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.COLLECTION_POS, 1000.0)
 }
 
 val ElevatorSubsystem: Subsystem = buildSubsystem {
+
     val master = TalonSRX(Constants.MotorControllers.ELEVATOR_MASTER_CAN)
     val slave1 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_1_CAN)
     val slave2 = VictorSPX(Constants.MotorControllers.ELEVATOR_SLAVE_2_CAN)
@@ -215,13 +218,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE) {
         state(ElevatorClampStates.CLAMPED){
             entry {
-                println("CLAMPED")
                 clamp.set(false)
             }
         }
         state(ElevatorClampStates.UNCLAMPED){
             entry {
-                println("UNCLAMPED")
                 clamp.set(true)
             }
         }
@@ -230,23 +231,33 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         fun mmSetpoint(setpoint: Number) {
-            runMode()
-            gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+            if (!Elevator.estop) {
+                runMode()
+                gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+            } else {
+                gearbox.set(ControlMode.PercentOutput, 0.0)
+            }
         }
 
         fun climbSetpoint(setpoint: Number) {
-            climbMode()
-            gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+            if (!Elevator.estop) {
+                climbMode()
+                gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+            } else {
+                gearbox.set(ControlMode.PercentOutput, 0.0)
+            }
         }
 
         fun finalClimbSetpoint(setpoint: Number) {
-            finalClimbMode()
-            gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+            if (!Elevator.estop) {
+                finalClimbMode()
+                gearbox.set(ControlMode.MotionMagic, setpoint.toDouble())
+            } else {
+                gearbox.set(ControlMode.PercentOutput, 0.0)
+            }
         }
 
         state(ElevatorStates.OPEN_LOOP_CONTROL) {
-            rejectIf { elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED }
-
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
             }
@@ -437,8 +448,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 velocity = master.getSelectedSensorVelocity(0)
-                gearbox.set(ControlMode.PercentOutput, -0.2) //Run down at the homing rate
-                gearbox.set(ControlMode.PercentOutput, -0.2) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, -0.25) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, -0.25) //Run down at the homing rate
 
                 if (velocity == 0) {
                     homingCounter++
@@ -471,6 +482,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
 
+        state(ElevatorStates.START_CLIMB) {
+            timeout(5000L, ElevatorStates.CLIMB_MANUAL)
+
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.CLIMB_PREP_POS)
+            }
+
+            action {
+                if (master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.CLIMB_PREP_POS, 1000.0)) {
+                    setState(ElevatorStates.CLIMB_MANUAL)
+                }
+            }
+        }
+
         state(ElevatorStates.CLIMB_MANUAL) {
             var position = 0
 
@@ -489,7 +514,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.CLIMB) {
             rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
             entry {
-                finalClimbSetpoint(Constants.ElevatorParameters.CUBE_POS)
+                finalClimbSetpoint(Constants.ElevatorParameters.SWITCH_POS)
             }
         }
 
@@ -503,14 +528,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                println("L O C K E D  L O L -- - -- - - -- ")
                 ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                println("U N L O C K E D ++++++++++++++++++++")
                 ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
             }
         }
@@ -526,14 +549,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorKickerStates.KICK) {
             entry {
-                println("KICKER EXTEND")
                 kicker.set(true)
             }
         }
 
         state(ElevatorKickerStates.STOW) {
             entry {
-                println("KICKER STOW")
                 kicker.set(false)
             }
         }
@@ -553,10 +574,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
 
-        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
-
-        Thread.sleep(3000)
-
         if (!Elevator.homed) { //If we aren't homed
             elevatorMachine.setState(ElevatorStates.HOMING) //Home
         } else {
@@ -571,90 +588,10 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (RobotEvents.HAVE_CUBE) {
-        println("HAVE CUBE -------------------------")
         elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
     }
     on (RobotEvents.EJECT_CUBE){
         elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
-    }
-
-    test("Kicker test") {
-        //test kicker
-        elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
-        Thread.sleep(1000)
-        elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        Thread.sleep(1000)
-        elevatorKickerMachine.setState("")
-        Thread.sleep(1000)
-
-        false
-    }
-    test("Clamp test") {
-        //test clamp
-        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
-        Thread.sleep(1000)
-        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
-        Thread.sleep(1000)
-        elevatorClampMachine.setState("")
-        Thread.sleep(1000)
-
-        false
-    }
-    test("Ratchet test") {
-        //test ratchet
-        elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
-        Thread.sleep(1000)
-        elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
-        Thread.sleep(1000)
-        elevatorRatchetMachine.setState("")
-        Thread.sleep(1000)
-
-        false
-    }
-    test("Shifter test") {
-        //test shifter
-        elevatorShifterMachine.setState(ElevatorShifterStates.HIGH)
-        Thread.sleep(1000)
-        elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
-        Thread.sleep(1000)
-        elevatorShifterMachine.setState("")
-        Thread.sleep(1000)
-
-        false
-    }
-    test("Elevator test") {
-        //test elevator
-        elevatorMachine.setState(ElevatorStates.HOMING)
-        Thread.sleep(2000)
-        elevatorMachine.setState(ElevatorStates.POS_MAX)
-
-        var masterPower by Publisher(0.0)
-        var slave1Power by Publisher(0.0)
-        var slave2Power by Publisher(0.0)
-        var slave3Power by Publisher(0.0)
-
-        //getCurrent is currently messed up
-        //masterPower = PDP.getCurrent(4)
-        //slave1Power = PDP.getCurrent(5)
-        //slave2Power = PDP.getCurrent(6)
-        //slave3Power = PDP.getCurrent(7)
-
-        Thread.sleep(2000)
-        elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
-        Thread.sleep(2000)
-        elevatorMachine.setState(ElevatorStates.POS_SCALE)
-        Thread.sleep(2000)
-        elevatorMachine.setState(ElevatorStates.POS_SCALE_LOW)
-        Thread.sleep(2000)
-        elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
-        Thread.sleep(2000)
-        elevatorMachine.setState("")
-        Thread.sleep(1000)
-
-        //results of the test
-        val tolerance = 5.0
-        //(masterPower + slave1Power + slave2Power + slave3Power + tolerance) / 4 >= masterPower
-        false
     }
 }

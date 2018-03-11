@@ -43,11 +43,11 @@ class CompConstants: ConstantsBase() {
     }
 
     override val IntakeParameters = object: IntakeParametersConfig() {
-        override val STOWED_POS = 780.0
-        override val INTAKE_POS = 2500.0
+        override val STOWED_POS = 790.0
+        override val INTAKE_POS = 2800.0
         override val GRAB_POS = (STOWED_POS + INTAKE_POS) / 2.0
         override val PIDF = object: PIDF {
-            override val P = 3.5
+            override val P = 4.0
             override val I = 0.0
             override val D = 35.0
             override val F = 0.0

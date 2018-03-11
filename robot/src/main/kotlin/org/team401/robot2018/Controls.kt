@@ -35,17 +35,24 @@ val LeftStick = HumanControls.t16000m(0) {
 }
 
 val RightStick = HumanControls.t16000m(1) {
-    whenButton(Buttons.STICK_LEFT) {
+    whenButton(Buttons.STICK_RIGHT) {
         pressed {
-            println("HOME")
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
     }
 
-    whenButton(Buttons.STICK_RIGHT) {
+    whenButton(Buttons.STICK_LEFT) {
         pressed {
-            println("DEPLOY")
             ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
+        }
+    }
+
+    //E STOP ELEVATOR
+    whenButton(Buttons.STICK_BOTTOM) {
+        pressed {
+            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            Elevator.estop = true
+            DriverStation.reportWarning("ELEVATOR E-STOPPED!", false)
         }
     }
 }
@@ -150,20 +157,19 @@ val Gamepad = HumanControls.f310(2) {
     }
 
     //Climbing and rungs
+    /*
     whenButton(Buttons.BACK) {
         pressed {
             rungsMachine.setState(RungsStates.DEPLOY)
             elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
-            elevatorMachine.setState(ElevatorStates.CLIMB_MANUAL)
+            elevatorMachine.setState(ElevatorStates.START_CLIMB)
         }
     }
 
     whenButton(Buttons.START) {
         pressed {
             elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
-            elevatorMachine.setState(ElevatorStates.CLIMB)
-            Thread.sleep(5000)
-            elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
         }
     }
+    */
 }

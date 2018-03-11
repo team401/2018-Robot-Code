@@ -143,6 +143,8 @@ abstract class ConstantsBase {
         val SCALE_POS = ZERO_POS + 48800 //ticks
         val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
+        val CLIMB_PREP_POS = 40000.0
+        val CLIMB_BOTTOM_POS = 2000.0
 
         val UNKNOWN_SCALE_POS = 25000.0
 
@@ -226,8 +228,8 @@ abstract class ConstantsBase {
         val RIGHT_PEAK_LIMIT_DUR = 50
 
         val INRUSH_COUNT = 30
-        val CUBE_HELD_TIME = 100L
-        val HAVE_CUBE_CLAMP_DELAY = 50L
+        val CUBE_HELD_TIME = 150L
+        val HAVE_CUBE_CLAMP_DELAY = 70L
 
         abstract val PIDF: PIDF
     }
