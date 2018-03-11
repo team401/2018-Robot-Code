@@ -29,12 +29,12 @@ abstract class RobotAuto: AutoLoop() {
         SmartDashboard.putNumber("Base Delay", 0.0)
     }
 
-    protected var robotPos = RobotPosition.DS_CENTER; private set
-    protected var target = AutoTarget.SWITCH_ONLY; private set
-    protected var switchSide = MatchData.OwnedSide.UNKNOWN; private set
-    protected var scaleSide = MatchData.OwnedSide.UNKNOWN; private set
-    protected var teammatesCanDoSwitch = false; private set
-    protected var baseDelay = 0L; private set
+    private var robotPos = RobotPosition.DS_CENTER; private set
+    private var target = AutoTarget.SWITCH_ONLY; private set
+    private var switchSide = MatchData.OwnedSide.UNKNOWN; private set
+    private var scaleSide = MatchData.OwnedSide.UNKNOWN; private set
+    private var teammatesCanDoSwitch = false; private set
+    private var baseDelay = 0L; private set
 
     /**
      * Polls the field for data until valid data is found
@@ -53,10 +53,13 @@ abstract class RobotAuto: AutoLoop() {
      */
     private fun fetchSD() {
         //TODO add back proper SD reading
-        robotPos = RobotPosition.DS_LEFT//robotPosSelector.selected
-        target = AutoTarget.FULL//autoTargetSelector.selected
-        teammatesCanDoSwitch = false//SmartDashboard.getBoolean("Partner Switch", false)
+        println("FETCH SD")
+        robotPos = robotPosSelector.selected
+        target = autoTargetSelector.selected
+        teammatesCanDoSwitch = SmartDashboard.getBoolean("Partner Switch", false)
         baseDelay = 0L//SmartDashboard.getNumber("Base Delay", 0.0).toLong()
+        println("FSD:  POS: $robotPos  TARGET: $target")
+
     }
 
     //AUTO MANAGER
@@ -66,16 +69,17 @@ abstract class RobotAuto: AutoLoop() {
 
     override val rate = 10L
 
-    abstract fun assembleAuto(add: (AutoStep) -> Unit)
+    abstract fun assembleAuto(add: (AutoStep) -> Unit, robotPos: RobotPosition, target: AutoTarget, switchSide: MatchData.OwnedSide, scaleSide: MatchData.OwnedSide, teammatesCanDoSwitch: Boolean, baseDelay: Long)
 
     override fun entry() {
         Routines.add = adder //Set the routines object to use this loop's adder
         done = false
         fetchSD()
+        println("RA:  POS: $robotPos  TARGET: $target")
         fetchFieldLayout()
         sequence.clear()
         sequenceIdx = 0
-        assembleAuto(adder)
+        assembleAuto(adder, robotPos, target, switchSide, scaleSide, teammatesCanDoSwitch, baseDelay)
         sequence.forEach {
             it.reset()
         }

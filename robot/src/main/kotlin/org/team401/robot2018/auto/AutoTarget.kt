@@ -26,11 +26,11 @@ enum class AutoTarget(val prettyName: String) {
         fun toSendableChooser(): SendableChooser<AutoTarget> {
             val chooser = SendableChooser<AutoTarget>()
             values().forEachIndexed {
-                index, autoTarget ->
+                index, target ->
                 if (index == 0) {
-                    chooser.addDefault(autoTarget.prettyName, autoTarget)
+                    chooser.addDefault(target.prettyName, target)
                 } else {
-                    chooser.addObject(autoTarget.prettyName, autoTarget)
+                    chooser.addObject(target.prettyName, target)
                 }
             }
             return chooser

@@ -128,12 +128,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     fun climbMode() {
-        master.configMotionCruiseVelocity(217, 0)
+        master.configMotionCruiseVelocity(217*14, 0)
         master.configMotionAcceleration(21680, 0)
     }
 
     fun finalClimbMode() {
-        master.configMotionCruiseVelocity(217 * 4, 0)
+        master.configMotionCruiseVelocity(217 * 14, 0)
         master.configMotionAcceleration(21680, 0)
     }
 
@@ -165,7 +165,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorDeployStates.STOWED) {
             entry {
-                deployer.set(Constants.ElevatorParameters.DeployMachine.LOCKED)
+                deployer.set(false)
             }
         }
 
@@ -173,13 +173,13 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             timeout(Constants.ElevatorParameters.DEPLOY_TIMER, ElevatorDeployStates.DEPLOYED)
 
             entry {
-                deployer.set(Constants.ElevatorParameters.DeployMachine.UNLOCKED)
+                deployer.set(true)
             }
         }
 
         state(ElevatorDeployStates.DEPLOYED) {
             entry {
-                deployer.set(Constants.ElevatorParameters.DeployMachine.LOCKED)
+                deployer.set(false)
             }
         }
 
@@ -212,6 +212,22 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
 
+    val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE) {
+        state(ElevatorClampStates.CLAMPED){
+            entry {
+                println("CLAMPED")
+                clamp.set(false)
+            }
+        }
+        state(ElevatorClampStates.UNCLAMPED){
+            entry {
+                println("UNCLAMPED")
+                clamp.set(true)
+            }
+        }
+    }
+
+
     val elevatorMachine = stateMachine(ELEVATOR_MACHINE) {
         fun mmSetpoint(setpoint: Number) {
             runMode()
@@ -233,7 +249,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 gearbox.set(ControlMode.PercentOutput, 0.0)
-                //println("OPENLOOP: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -422,8 +437,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 velocity = master.getSelectedSensorVelocity(0)
-                gearbox.set(ControlMode.PercentOutput, -0.1) //Run down at the homing rate
-                gearbox.set(ControlMode.PercentOutput, -0.1) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, -0.2) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, -0.2) //Run down at the homing rate
 
                 if (velocity == 0) {
                     homingCounter++
@@ -474,7 +489,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.CLIMB) {
             rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
             entry {
-                finalClimbSetpoint(Constants.ElevatorParameters.ZERO_POS)
+                finalClimbSetpoint(Constants.ElevatorParameters.CUBE_POS)
             }
         }
 
@@ -487,15 +502,15 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
     val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
         state(ElevatorRatchetStates.LOCKED) {
-            rejectIf { elevatorMachine.getState() != ElevatorStates.CLIMB || elevatorMachine.getState() != ElevatorStates.CLIMB_MANUAL }
-
             entry {
+                println("L O C K E D  L O L -- - -- - - -- ")
                 ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
+                println("U N L O C K E D ++++++++++++++++++++")
                 ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
             }
         }
@@ -511,37 +526,21 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorKickerStates.KICK) {
             entry {
-                kicker.set(Constants.ElevatorParameters.KickerMachine.EXTENDED)
+                println("KICKER EXTEND")
+                kicker.set(true)
             }
         }
 
         state(ElevatorKickerStates.STOW) {
             entry {
-                kicker.set(Constants.ElevatorParameters.KickerMachine.RETRACTED)
+                println("KICKER STOW")
+                kicker.set(false)
             }
         }
 
         default {
             entry {
                 kicker.set(false)
-            }
-        }
-    }
-
-    val elevatorClampMachine = stateMachine(ELEVATOR_CLAMP_MACHINE) {
-        state(ElevatorClampStates.CLAMPED){
-            entry{
-                clamp.set(false)
-            }
-        }
-        state(ElevatorClampStates.UNCLAMPED){
-            entry {
-                clamp.set(true)
-            }
-        }
-        default {
-            entry {
-                clamp.set(false)
             }
         }
     }
@@ -554,6 +553,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
         }
 
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
+
         Thread.sleep(3000)
 
         if (!Elevator.homed) { //If we aren't homed
@@ -563,14 +564,14 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
         }
 
-
         //Always put all machines in a known state on enable
         elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
     }
 
     on (RobotEvents.HAVE_CUBE) {
+        println("HAVE CUBE -------------------------")
         elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
     }

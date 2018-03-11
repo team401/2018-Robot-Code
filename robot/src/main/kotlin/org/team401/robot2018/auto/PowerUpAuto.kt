@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import edu.wpi.first.wpilibj.DriverStation
+import openrio.powerup.MatchData
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.SubSequence
 import org.team401.robot2018.etc.StepAdder
@@ -20,7 +21,7 @@ import org.team401.robot2018.etc.not
  */
 
 object PowerUpAuto: RobotAuto() {
-    private fun scaleFirst(): Boolean {
+    private fun scaleFirst(robotPos: RobotPosition, target: AutoTarget, switchSide: MatchData.OwnedSide, scaleSide: MatchData.OwnedSide, teammatesCanDoSwitch: Boolean, baseDelay: Long): Boolean {
         //If we are in the middle
         if (robotPos == RobotPosition.DS_CENTER) {
             return false
@@ -46,7 +47,7 @@ object PowerUpAuto: RobotAuto() {
         return false
     }
 
-    override fun assembleAuto(add: StepAdder) {
+    override fun assembleAuto(add: StepAdder, robotPos: RobotPosition, target: AutoTarget, switchSide: MatchData.OwnedSide, scaleSide: MatchData.OwnedSide, teammatesCanDoSwitch: Boolean, baseDelay: Long) {
         add(DelayStep(baseDelay)) //Wait for the base delay
 
         if (target != AutoTarget.NOTHING) {
@@ -59,6 +60,7 @@ object PowerUpAuto: RobotAuto() {
                 }
 
                 AutoTarget.SWITCH_ONLY -> {
+                    println("SWITCH ONLY")
                     Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
                     Routines.score() //Score cube
                     //AUTO END
@@ -71,7 +73,8 @@ object PowerUpAuto: RobotAuto() {
                 }
 
                 AutoTarget.FULL -> {
-                    if (scaleFirst()) {
+                    println("FULL AUTO")
+                    if (scaleFirst(robotPos, target, switchSide, scaleSide, teammatesCanDoSwitch, baseDelay)) {
                         Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
                         Routines.score()
                         Routines.drive(FieldElements.scale(scaleSide), FieldElements.backFromScale(scaleSide)) //drive back from scaleSide

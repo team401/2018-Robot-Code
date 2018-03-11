@@ -17,7 +17,7 @@ import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
 import org.team401.robot2018.auto.PowerUpAuto
-import org.team401.robot2018.auto.TestAuto
+//import org.team401.robot2018.auto.TestAuto
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.constants.CompConstants
 import org.team401.robot2018.etc.Reporting
@@ -41,7 +41,7 @@ import org.team401.robot2018.vision.VisionController
 //val Vision = VisionController("10.4.1.3")
 //val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 val PDP = PowerDistributionPanel()
-val MJPEG = MjpegServer(1180)
+//val MJPEG = MjpegServer(1180)
 
 @Setup
 fun setup() {
@@ -60,12 +60,16 @@ fun setup() {
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
 
+    CameraServer.getInstance().startAutomaticCapture(0)
+
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick, Gamepad)
 
+    /*
     on(Events.TELEOP_ENABLED) {
         MJPEG.start()
     }
+    */
 }
 
-@PostStartup private fun startReporting() = Reporting.start()
+//@PostStartup private fun startReporting() = Reporting.start()

@@ -35,14 +35,16 @@ val LeftStick = HumanControls.t16000m(0) {
 }
 
 val RightStick = HumanControls.t16000m(1) {
-    whenButton(Buttons.BASE_LEFT_TOP_1) {
+    whenButton(Buttons.STICK_LEFT) {
         pressed {
+            println("HOME")
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
     }
 
-    whenButton(Buttons.BASE_LEFT_TOP_2) {
+    whenButton(Buttons.STICK_RIGHT) {
         pressed {
+            println("DEPLOY")
             ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
         }
     }
@@ -58,6 +60,8 @@ val Gamepad = HumanControls.f310(2) {
     val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
     val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
     val elevatorRatchetMachine = ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE)
+
+    invertAxis(Axes.LEFT_Y)
 
     //Elevator setpoints
     whenHatChanged(Hats.D_PAD) {
@@ -141,7 +145,7 @@ val Gamepad = HumanControls.f310(2) {
 
     whenButton(Buttons.LEFT_BUMPER) {
         pressed {
-            elevatorClampMachine.toggle(ElevatorClampStates.CLAMPED, ElevatorClampStates.UNCLAMPED)
+            elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
         }
     }
 
@@ -158,6 +162,8 @@ val Gamepad = HumanControls.f310(2) {
         pressed {
             elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
             elevatorMachine.setState(ElevatorStates.CLIMB)
+            Thread.sleep(5000)
+            elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
         }
     }
 }

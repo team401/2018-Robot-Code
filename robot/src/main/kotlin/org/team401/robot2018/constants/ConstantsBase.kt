@@ -127,7 +127,7 @@ abstract class ConstantsBase {
         val DEPLOY_TIMER = 3500L //ms
         
         val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
-        val CLIMB_MANUAL_RATE = 3 * .02
+        val CLIMB_MANUAL_RATE = 16 * .02
         
         val CURRENT_LIMIT_CONTINUOUS = 30 //A
         
