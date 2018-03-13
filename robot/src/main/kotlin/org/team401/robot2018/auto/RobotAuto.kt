@@ -3,11 +3,7 @@ package org.team401.robot2018.auto
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
-import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.auto.steps.StepGroup
-import org.team401.robot2018.constants.Constants
-import org.team401.robot2018.subsystems.Drivetrain
 
 /*
  * 2018-Robot-Code - Created on 3/3/18
@@ -35,8 +31,8 @@ abstract class RobotAuto: AutoLoop() {
 
     protected var robotPos = RobotPosition.DS_CENTER; private set
     protected var target = AutoTarget.SWITCH_ONLY; private set
-    protected var switch = MatchData.OwnedSide.UNKNOWN; private set
-    protected var scale = MatchData.OwnedSide.UNKNOWN; private set
+    protected var switchSide = MatchData.OwnedSide.UNKNOWN; private set
+    protected var scaleSide = MatchData.OwnedSide.UNKNOWN; private set
     protected var teammatesCanDoSwitch = false; private set
     protected var baseDelay = 0L; private set
 
@@ -45,9 +41,9 @@ abstract class RobotAuto: AutoLoop() {
      * Runs at a 1 ms rate to ensure we get data as fast as possible
      */
     private fun fetchFieldLayout() {
-        while (switch == MatchData.OwnedSide.UNKNOWN || scale == MatchData.OwnedSide.UNKNOWN) {
-            switch = MatchData.getOwnedSide(MatchData.GameFeature.SWITCH_NEAR)
-            scale = MatchData.getOwnedSide(MatchData.GameFeature.SCALE)
+        while (switchSide == MatchData.OwnedSide.UNKNOWN || scaleSide == MatchData.OwnedSide.UNKNOWN) {
+            switchSide = MatchData.getOwnedSide(MatchData.GameFeature.SWITCH_NEAR)
+            scaleSide = MatchData.getOwnedSide(MatchData.GameFeature.SCALE)
             Thread.sleep(1)
         }
     }
@@ -57,9 +53,10 @@ abstract class RobotAuto: AutoLoop() {
      */
     private fun fetchSD() {
         //TODO add back proper SD reading
-        robotPos = RobotPosition.DS_LEFT//robotPosSelector.selected
-        target = AutoTarget.FULL//autoTargetSelector.selected
-        teammatesCanDoSwitch = false//SmartDashboard.getBoolean("Partner Switch", false)
+        println("FETCH SD")
+        robotPos = robotPosSelector.selected
+        target = autoTargetSelector.selected
+        teammatesCanDoSwitch = SmartDashboard.getBoolean("Partner Switch", false)
         baseDelay = 0L//SmartDashboard.getNumber("Base Delay", 0.0).toLong()
     }
 

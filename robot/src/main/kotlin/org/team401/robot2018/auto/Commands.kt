@@ -1,9 +1,8 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.auto.steps.StateStep
-import org.team401.robot2018.auto.steps.WaitForStep
+import org.team401.robot2018.auto.steps.*
+import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -65,4 +64,6 @@ object Commands {
     val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
     val HighLockDeployAndWait = arrayOf(ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
+
+    val ZeroIMU = LambdaStep { Drivetrain.imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 0); Thread.sleep(500) }
 }

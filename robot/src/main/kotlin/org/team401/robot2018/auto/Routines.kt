@@ -62,6 +62,7 @@ object Routines {
     }
 
     fun setup() {
+        add(Commands.ZeroIMU)
         add(Commands.IntakeToStow)
         add(Commands.ElevatorHigh)
         add(Commands.HoldElevator)
