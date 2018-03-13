@@ -1,18 +1,11 @@
 package org.team401.robot2018.auto
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj.DriverStation
 import openrio.powerup.MatchData
-import org.snakeskin.auto.AutoLoop
-import org.team401.robot2018.auto.motion.GyroTurn
-import org.team401.robot2018.auto.motion.RioProfileRunner
-import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
-import org.team401.robot2018.auto.steps.LambdaStep
-import org.team401.robot2018.auto.steps.StepGroup
 import org.team401.robot2018.auto.steps.SubSequence
-import org.team401.robot2018.etc.Constants
-import org.team401.robot2018.subsystems.Drivetrain
+import org.team401.robot2018.etc.StepAdder
+import org.team401.robot2018.etc.not
 
 /*
  * 2018-Robot-Code - Created on 1/23/18
@@ -27,201 +20,87 @@ import org.team401.robot2018.subsystems.Drivetrain
  * @version 1/23/18
  */
 
-object PowerUpAuto: AutoLoop() {
-    object Delays {
-        const val SCORE = 1000L //ms
-    }
-
-    override val rate = 10L
-
-    private val robotPosSelector = SendableChooser<RobotPosition>()
-    private val autoTargetSelector = SendableChooser<AutoTarget>()
-
-    fun publish() {
-        robotPosSelector.addDefault("Middle", RobotPosition.DS_MID)
-        robotPosSelector.addObject("Left", RobotPosition.DS_LEFT)
-        robotPosSelector.addObject("Right", RobotPosition.DS_RIGHT)
-
-        autoTargetSelector.addDefault("Scale -> Switch", AutoTarget.SCALE_SWITCH)
-        autoTargetSelector.addObject("Scale", AutoTarget.SCALE)
-        autoTargetSelector.addObject("Switch", AutoTarget.SWITCH)
-        autoTargetSelector.addObject("Do Nothing", AutoTarget.NONE)
-    }
-
-    var robotPos = RobotPosition.DS_MID
-    var target = AutoTarget.SCALE_SWITCH
-    var switch = MatchData.OwnedSide.UNKNOWN
-    var scale = MatchData.OwnedSide.UNKNOWN
-    var baseDelay = 0L
-
-    var sequence = arrayListOf<AutoStep>()
-    private var sequenceIdx = 0
-
-    /**
-     * Polls the field for data until valid data is found
-     * Runs at a 1 ms rate to ensure we get data as fast as possible
-     */
-    private fun fetchFieldLayout() {
-        while (switch == MatchData.OwnedSide.UNKNOWN || scale == MatchData.OwnedSide.UNKNOWN) {
-            switch = MatchData.getOwnedSide(MatchData.GameFeature.SWITCH_NEAR)
-            scale = MatchData.getOwnedSide(MatchData.GameFeature.SCALE)
-            Thread.sleep(1)
+object PowerUpAuto: RobotAuto() {
+    private fun scaleFirst(): Boolean {
+        //If we are in the middle
+        if (robotPos == RobotPosition.DS_CENTER) {
+            return false
         }
+
+        //If we aren't aligned with the switchSide, always go to the scaleSide
+        if (!robotPos.alignedWith(switchSide)) {
+            return true
+        }
+
+        //If we are aligned with the switchSide and the scaleSide, go to the scaleSide
+        if (robotPos.alignedWith(switchSide) && robotPos.alignedWith(scaleSide)) {
+            return true
+        }
+
+        //If we are aligned with the switchSide and not the scaleSide, evaluate whether or not our teammates can do switchSide in auto
+        if (robotPos.alignedWith(switchSide) && !robotPos.alignedWith(scaleSide)) {
+            return teammatesCanDoSwitch
+        }
+
+        //Some unhandled condition
+        DriverStation.reportWarning("Auto 'scaleFirst' found an unhandled condition!  Field: ${DriverStation.getInstance().gameSpecificMessage}  Robot: $robotPos  Partner Switch: $teammatesCanDoSwitch", false)
+        return false
     }
 
-    /**
-     * Gets various info from SmartDashboard
-     */
-    private fun fetchSD() {
-        robotPos = RobotPosition.DS_MID//robotPosSelector.selected
-        target = AutoTarget.SCALE_SWITCH//autoTargetSelector.selected
-        baseDelay = 0L//SmartDashboard.getNumber("baseDelay", 0.0).toLong()
-    }
+    override fun assembleAuto(add: StepAdder) {
+        add(DelayStep(baseDelay)) //Wait for the base delay
+        if (target != AutoTarget.NOTHING) {
+            Routines.setup() //Run common setup tasks (stow intake, elevator to high gear, lock elevator in place)
 
-    /**
-     * Builds a motion profile step group for the left and
-     * right sides of the drivetrain using the given entry and end
-     */
-    private fun mpStep(start: String, end: String, vararg otherActions: AutoStep): StepGroup {
-        val leftMaster = Drivetrain.left.master
-        val rightMaster = Drivetrain.right.master
-        val imu = Drivetrain.imu
-
-        val step = RioProfileRunner(
-                leftMaster,
-                rightMaster,
-                imu,
-                Constants.DrivetrainParameters.LEFT_PDVA,
-                Constants.DrivetrainParameters.RIGHT_PDVA,
-                Constants.DrivetrainParameters.HEADING_GAIN
-        )
-
-        step.loadPoints(
-                "/home/lvuser/profiles/$start-${end}_L.csv",
-                "/home/lvuser/profiles/$start-${end}_R.csv"
-        )
-
-        val steps = arrayListOf<AutoStep>(step)
-        steps.addAll(otherActions.toList())
-
-        return StepGroup(steps)
-    }
-
-
-    private const val TURN_AROUND_GAIN = 0.0024
-    private const val TURN_AROUND_F = 0.2
-    private const val TURN_AROUND_ERROR = 2.0
-    private const val TURN_AROUND_MAX = 1.0
-
-    private fun turnAroundCCW() = GyroTurn(
-            Drivetrain.left.master,
-            Drivetrain.right.master,
-            Drivetrain.imu,
-            180.0,
-            TURN_AROUND_GAIN,
-            TURN_AROUND_F,
-            TURN_AROUND_ERROR,
-            TURN_AROUND_MAX
-    )
-
-    private fun turnAroundCW() = GyroTurn(
-            Drivetrain.left.master,
-            Drivetrain.right.master,
-            Drivetrain.imu,
-            -180.0,
-            TURN_AROUND_GAIN,
-            TURN_AROUND_ERROR,
-            TURN_AROUND_MAX
-    )
-
-    private fun assembleAuto() {
-        sequence.run {
-            add(Commands.IntakeToStow)
-            add(Commands.ElevatorHigh)
-            add(Commands.HoldElevator)
-            add(mpStep("DS_RIGHT", "SCALE_RIGHT", SubSequence(Commands.DeployElevator, Commands.WaitForDeploy, Commands.ScaleAfterUnfold)))
-            add(Commands.ElevatorHolderUnclamp)
-
-            /*
-            add(DelayStep(baseDelay)) //Wait an initial amount of time
-
-            add(Commands.IntakeToStow) //Stow the intake back
-            add(Commands.ElevatorHigh) //High gear
-            add(Commands.HoldElevator) //Hold the carriage in place
-            add(Commands.ElevatorHolderClamp) //Clamp down on the box
-
-            //Pass 1 (MP Init)
             when (target) {
-                AutoTarget.SWITCH -> {
-                    add(mpStep(robotPos.toString() , "SWITCH_$switch", Commands.DeployElevator)) //Drive and deploy
+                AutoTarget.BASELINE_ONLY -> {
+                    Routines.drive(robotPos, FieldElements.baseline(!switchSide), SubSequence(*Commands.HighLockDeployAndWait))
+                    //AUTO END
                 }
-                AutoTarget.SCALE, AutoTarget.SCALE_SWITCH -> {
-                    add(mpStep(robotPos.toString(), "SCALE_$scale", Commands.DeployElevator)) //Drive and deploy
+
+                AutoTarget.SWITCH_ONLY -> {
+                    Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
+                    Routines.score() //Score cube
+                    //AUTO END
                 }
-                else -> {}
-            }
 
-            //Pass 2 (SWITCH, SCALE scoring sequence, SCALE_SWITCH initial scoring sequence
-            add(Commands.WaitForDeploy) //Wait for the elevator to finish deploying
-            add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
-            add(Commands.ElevatorKickerScore) //Kick the box out
-            add(DelayStep(Delays.SCORE)) //Wait for cube to leave robot
-            add(Commands.ElevatorKickerRetract) //Retract the kicker
-
-            //Pass 3 (SCALE_SWITCH final scoring sequence)
-            when (target) {
-                AutoTarget.SCALE_SWITCH -> {
-                    //add(turnAroundCCW()) //Turn around from scale
-                    add(Commands.IntakeToGrab) //Set up intake for cube grabbing
-                    add(mpStep("SCALE_$scale", "SWITCH_$switch", Commands.HomeElevator)) //Drive and home
-                    add(Commands.ElevatorToGround) //Bring the elevator to the ground
-                    add(Commands.IntakeWheelsRun) //Turn on intake wheels
-                    add(Commands.IntakeToIntake) //Intake the cube
-                    add(Commands.WaitForHasCube) //Wait for the cube to be taken in
-                    add(LambdaStep { println("got cube") })
-                    add(Commands.ElevatorToSwitch) //Elevator to the switch scoring position
-                    //add(mpStep("SWITCH_CUBE", "SWITCH_WALL")) //Drive the remaining distance to the switch wall
-                    add(Commands.ElevatorHolderUnclamp) //Unclamp the carriage
-                    add(Commands.ElevatorKickerScore) //Kick the box out
-                    add(DelayStep(Delays.SCORE)) //Wait for the cube to leave the robot
-                    add(Commands.ElevatorKickerRetract) //Retract the kicker
+                AutoTarget.SCALE_ONLY -> {
+                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                    Routines.score()
+                    //AUTO END
                 }
-                else -> {}
-            }
-            */
 
-        }
-    }
+                AutoTarget.FULL -> {
+                    if (scaleFirst()) {
+                        Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                        Routines.score()
+                        Routines.drive(FieldElements.scale(scaleSide), FieldElements.backFromScale(scaleSide)) //drive back from scaleSide
+                        add(Commands.IntakeToGrab) //Prepare intake for grabbing a cube
+                        Routines.drive(FieldElements.backFromScale(scaleSide), FieldElements.switch(switchSide), Commands.HomeElevator) //drive and home
+                        Routines.intake() //Intake the cube
+                        add(Commands.ElevatorToSwitch) //Go to switch
+                        add(Commands.WaitForAtSwitch) //Wait
+                        Routines.drive("SWITCH_FINAL") //Drive the final way to the switch
+                        Routines.score()
+                    } else {
+                        Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait))
+                        Routines.score()
+                        Routines.drive(FieldElements.switch(switchSide), FieldElements.backFromSwitch(switchSide))
+                        add(Commands.IntakeToGrab)
+                        Routines.drive(FieldElements.backFromSwitch(switchSide), FieldElements.switch(scaleSide), Commands.HomeElevator) //Drive to the side of the switch aligned with the scale
+                        Routines.intake()
+                        Routines.drive(FieldElements.switch(scaleSide), FieldElements.backFromSwitchFront(scaleSide)) //Drive back
+                        Routines.drive(FieldElements.backFromSwitchFront(scaleSide), FieldElements.scale(scaleSide), Commands.ElevatorToScale)
+                        Routines.score()
+                    }
+                    //AUTO END
+                }
 
-    override fun entry() {
-        done = false
-        fetchSD()
-        fetchFieldLayout()
-        sequence.clear()
-        sequenceIdx = 0
-        assembleAuto()
-        sequence.forEach {
-            it.reset()
-        }
-    }
-
-    override fun action() {
-        if (sequenceIdx < sequence.size) {
-            sequence[sequenceIdx].tick()
-            if (sequence[sequenceIdx].doContinue()) {
-                sequenceIdx++
-            }
-        } else {
-            done = true
-        }
-    }
-
-    override fun exit() {
-        sequence.forEach {
-            if (it.state != AutoStep.State.CONTINUE) {
-                it.exit()
+                else -> {
+                    //AUTO END
+                }
             }
         }
+        //AUTO END
     }
-
 }

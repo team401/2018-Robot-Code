@@ -19,11 +19,11 @@ import java.io.File
  * @version 2/6/18
  */
 
-class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val tuning: Boolean = false, val rate: Long = 20): TankMotionStep() {
+class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
     /**
      * Represents a single point in a profile
      */
-    private data class Waypoint(val position: Double, val velocity: Double, val timestep: Int, val acceleration: Double, val heading: Double) {
+    data class Waypoint(val position: Double, val velocity: Double, val timestep: Int, val acceleration: Double, val heading: Double) {
         companion object {
             /**
              * Generates a Waypoint from an input CSV line
@@ -135,6 +135,10 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
     private val left = MpSide(leftController, leftGains, -1.0)
     private val right = MpSide(rightController, rightGains, 1.0)
 
+    fun leftCurrentWaypoint() = left.currentWaypoint
+    fun rightCurrentWaypoint() = right.currentWaypoint
+    fun index() = pointIdx
+
     fun loadPoints(leftFilename: String, rightFilename: String) {
         val leftFile = File(leftFilename)
         val rightFile = File(rightFilename)
@@ -164,7 +168,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imuValue[1] = 0.0
         imuValue[2] = 0.0
 
-        imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 20) //TODO BUG CTRE BECAUSE THEY DUN GOOFED
+        imu.getYawPitchRoll(imuValue)
+        imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(imuValue[0] % 360), 100)
         left.zero(0)
         right.zero(0)
         Thread.sleep(100)
@@ -189,10 +194,6 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
         left.updateController(headingAdjustment)
         right.updateController(headingAdjustment)
-
-        if (tuning) {
-            println("Index: $pointIdx, Left: ${left.value} (S: ${left.saturated}), Right: ${right.value} (S: ${right.saturated}), Heading: ${headingAdjustment}")
-        }
 
         if (currentTime - lastUpdate >= rate) {
             pointIdx++

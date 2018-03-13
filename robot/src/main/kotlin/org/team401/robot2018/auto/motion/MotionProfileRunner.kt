@@ -6,7 +6,7 @@ import com.ctre.phoenix.motion.TrajectoryPoint
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.factory.ExecutorFactory
-import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.constants.Constants
 import java.io.File
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -84,7 +84,7 @@ class MotionProfileRunner(override val leftController: TalonSRX, override val ri
             controller.getMotionProfileStatus(status)
         }
 
-        fun checkMinPoints() = status.btmBufferCnt >= Constants.MotionProfileParameters.MIN_POINTS
+        fun checkMinPoints() = status.btmBufferCnt >= 10
         fun checkHold() = status.activePointValid && status.isLast
     }
 
@@ -116,8 +116,8 @@ class MotionProfileRunner(override val leftController: TalonSRX, override val ri
         //The other half is handled in the "motion control rate" setting on the controller
         val timeDur = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms.valueOf(duration)
 
-        point.position = position * Constants.MotionProfileParameters.TICKS_PER_REV //revolutions to ticks
-        point.velocity = velocity * Constants.MotionProfileParameters.TICKS_PER_REV / 600.0 //rpm to ticks per 100 ms
+        point.position = position * 4096.0 //revolutions to ticks
+        point.velocity = velocity * 4096.0 / 600.0 //rpm to ticks per 100 ms
         point.timeDur = timeDur
         point.zeroPos = (index == 0) //Is this the first line?
         point.isLastPoint = (index == max) //Is this the last line?

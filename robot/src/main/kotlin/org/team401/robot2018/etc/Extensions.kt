@@ -4,9 +4,13 @@ import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import openrio.powerup.MatchData
 import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
 import org.team401.robot2018.PDP
+import org.team401.robot2018.auto.steps.AutoStep
+import org.team401.robot2018.constants.ConstantsBase
 import org.team401.robot2018.subsystems.ShiftCommand
 
 /*
@@ -21,6 +25,8 @@ import org.team401.robot2018.subsystems.ShiftCommand
  * @author Cameron Earle
  * @version 1/17/18
  */
+typealias StepAdder = (AutoStep) -> Unit
+
 
 fun IMotorControllerEnhanced.configZeroPosOnReverseLimit(enable: Boolean, timeout: Int = 0) {
     configSetParameter(ParamEnum.eClearPosOnLimitR, if (enable) 1.0 else 0.0, 0, 0, timeout)
@@ -30,6 +36,16 @@ fun IMotorControllerEnhanced.configZeroPosOnForwardLimit(enable: Boolean, timeou
     configSetParameter(ParamEnum.eClearPosOnLimitF, if (enable) 1.0 else 0.0, 0, 0, timeout)
 }
 
+fun MatchData.OwnedSide.invert(): MatchData.OwnedSide {
+    return when (this) {
+        MatchData.OwnedSide.RIGHT -> MatchData.OwnedSide.LEFT
+        MatchData.OwnedSide.LEFT -> MatchData.OwnedSide.RIGHT
+        else -> MatchData.OwnedSide.UNKNOWN
+    }
+}
+
+operator fun MatchData.OwnedSide.not() = this.invert()
+
 fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 0.0, f: Double = 0.0, slot: Int = 0, timeout: Int = 0) {
     config_kP(slot, p, timeout)
     config_kI(slot, i, timeout)
@@ -37,7 +53,7 @@ fun IMotorControllerEnhanced.pidf(p: Double = 0.0, i: Double = 0.0, d: Double = 
     config_kF(slot, f, timeout)
 }
 
-fun IMotorControllerEnhanced.pidf(pidf: Constants.PIDF) {
+fun IMotorControllerEnhanced.pidf(pidf: ConstantsBase.PIDF) {
     pidf(pidf.P, pidf.I, pidf.D, pidf.F)
 }
 

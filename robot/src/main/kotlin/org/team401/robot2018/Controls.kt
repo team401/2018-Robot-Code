@@ -1,5 +1,6 @@
 package org.team401.robot2018
 
+import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.HumanControls
 import org.snakeskin.dsl.machine
 import org.snakeskin.logic.Direction
@@ -34,7 +35,26 @@ val LeftStick = HumanControls.t16000m(0) {
 }
 
 val RightStick = HumanControls.t16000m(1) {
+    whenButton(Buttons.STICK_RIGHT) {
+        pressed {
+            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
+        }
+    }
 
+    whenButton(Buttons.STICK_LEFT) {
+        pressed {
+            ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
+        }
+    }
+
+    //E STOP ELEVATOR
+    whenButton(Buttons.STICK_BOTTOM) {
+        pressed {
+            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            Elevator.estop = true
+            DriverStation.reportWarning("ELEVATOR E-STOPPED!", false)
+        }
+    }
 }
 
 val Gamepad = HumanControls.f310(2) {
@@ -46,6 +66,9 @@ val Gamepad = HumanControls.f310(2) {
     val rungsMachine = RungsSubsystem.machine(RUNGS_MACHINE)
     val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
     val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
+    val elevatorRatchetMachine = ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE)
+
+    invertAxis(Axes.LEFT_Y)
 
     //Elevator setpoints
     whenHatChanged(Hats.D_PAD) {
@@ -65,8 +88,10 @@ val Gamepad = HumanControls.f310(2) {
     //Intake control
     whenButton(Buttons.A) {
         pressed {
+            elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
+            Thread.sleep(100)
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
-            intakeFolding.setState(IntakeFoldingStates.INTAKE)
+            intakeFolding.setState(IntakeFoldingStates.GO_TO_INTAKE)
             intakeWheels.setState(IntakeWheelsStates.REVERSE)
         }
         released {
@@ -127,41 +152,24 @@ val Gamepad = HumanControls.f310(2) {
 
     whenButton(Buttons.LEFT_BUMPER) {
         pressed {
-            //elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
-            elevatorClampMachine.toggle(ElevatorClampStates.CLAMPED, ElevatorClampStates.UNCLAMPED)
+            elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
         }
     }
 
-
-    //TODO FUTURE NOT NOW NO THANKS
-
     //Climbing and rungs
+    /*
     whenButton(Buttons.BACK) {
         pressed {
             rungsMachine.setState(RungsStates.DEPLOY)
+            elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+            elevatorMachine.setState(ElevatorStates.START_CLIMB)
         }
     }
 
-    /*
     whenButton(Buttons.START) {
         pressed {
-
+            elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
         }
     }
     */
-
-    whenButton(Buttons.START) { //TODO test homing
-        pressed {
-            elevatorMachine.setState(ElevatorStates.HOLD_POS_UNKNOWN)
-            elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY)
-
-            while (elevatorDeployMachine.getState() != ElevatorDeployStates.DEPLOYED) {
-                Thread.sleep(1)
-            }
-
-            elevatorMachine.setState(ElevatorStates.HOMING)
-            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
-            elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
-        }
-    }
 }

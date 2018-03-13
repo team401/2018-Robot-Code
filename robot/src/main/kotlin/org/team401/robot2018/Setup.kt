@@ -1,26 +1,29 @@
 package org.team401.robot2018
 
 import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.wpilibj.CameraServer
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistributionPanel
+import edu.wpi.first.wpilibj.Servo
 import org.snakeskin.annotation.PostStartup
 import org.snakeskin.annotation.Setup
-import org.snakeskin.auto.AutoLoop
 import org.snakeskin.auto.AutoManager
-import org.snakeskin.dsl.Publisher
+import org.snakeskin.dsl.Subsystem
+import org.snakeskin.dsl.buildSubsystem
+import org.snakeskin.dsl.on
+import org.snakeskin.dsl.send
+import org.snakeskin.event.Events
 import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
 import org.team401.robot2018.auto.PowerUpAuto
-import org.team401.robot2018.auto.motion.GyroTurn
-import org.team401.robot2018.auto.motion.PDVA
-import org.team401.robot2018.auto.motion.RioProfileRunner
-import org.team401.robot2018.etc.Constants
-import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.ADDRESS
-import org.team401.robot2018.etc.Constants.Setup.MJPEGParameters.PORT
+//import org.team401.robot2018.auto.TestAuto
+import org.team401.robot2018.constants.Constants
+import org.team401.robot2018.constants.CompConstants
 import org.team401.robot2018.etc.Reporting
 import org.team401.robot2018.subsystems.*
+import org.team401.robot2018.vision.MjpegServer
 import org.team401.robot2018.vision.VisionController
-import org.team401.robot2018.vision.VisionDataClient
 
 /*
  * 2018-Robot-Code - Created on 1/5/18
@@ -35,66 +38,38 @@ import org.team401.robot2018.vision.VisionDataClient
  * @version 1/5/18
  */
 
-val Vision = VisionController("10.4.1.3")
+//val Vision = VisionController("10.4.1.3")
 //val VisionData = VisionDataClient(ADDRESS, Integer.valueOf(PORT))
 val PDP = PowerDistributionPanel()
-
-object TestAuto: AutoLoop() {
-    override val rate = 10L
-
-    lateinit var runner: RioProfileRunner
-    lateinit var turn: GyroTurn
-
-    var started = false
-
-    override fun entry() {
-        done = false
-        started = true
-        turn = GyroTurn(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, -180.0, 0.0024, .02, 2.0, 1.0)
-        turn.entry()
-
-        /*
-        runner = RioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu,
-                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
-                PDVA(Constants.Setup.PDVA.P, Constants.Setup.PDVA.V),
-                Constants.Setup.HEADING_GAIN,
-                tuning = true)
-
-        runner.loadPoints("/home/lvuser/profiles/LEFT_TO_SWITCH_L.csv", "/home/lvuser/profiles/LEFT_TO_SWITCH_R.csv")
-        runner.entry()
-        */
-
-    }
-
-    override fun action() {
-        turn.action()
-
-        if (turn.done) {
-            done = true
-            println("TURN DONE")
-        }
-    }
-
-    override fun exit() {
-        if (started) {
-            turn.exit()
-        }
-    }
-}
+//val MJPEG = MjpegServer(1180)
 
 @Setup
 fun setup() {
-    AutoManager.auto = PowerUpAuto
-    //AutoManager.auto = TestAuto
+    //Uncomment which one you are using
+    Constants = CompConstants()
+    //Constants = PracticeConstants()
 
-    //PowerUpAuto.publish()
+    //Uncomment which one you are using
+    AutoManager.auto = PowerUpAuto //Real auto
+    //AutoManager.auto = TestAuto //Test auto
 
-    val mjpeg = Array<String>(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
-    NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
+    //Uncomment which one you are using
+    PowerUpAuto.publish() //Real auto
+    //TestAuto.publish() //Test auto
+
+    //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
+    //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
+
+    CameraServer.getInstance().startAutomaticCapture(0)
 
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick, Gamepad)
-    Sensors.add(VisionStopSensor)
+
+    /*
+    on(Events.TELEOP_ENABLED) {
+        MJPEG.start()
+    }
+    */
 }
 
-@PostStartup private fun startReporting() = Reporting.start()
+//@PostStartup private fun startReporting() = Reporting.start()

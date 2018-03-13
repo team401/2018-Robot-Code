@@ -3,8 +3,7 @@ package org.team401.robot2018
 import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.Sensors
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.etc.Constants.DrivetrainParameters.PITCH_CORRECTION_MIN
-import org.team401.robot2018.etc.Constants.DrivetrainParameters.ROLL_CORRECTION_MIN
+import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -19,15 +18,6 @@ import org.team401.robot2018.subsystems.*
  * @author Cameron Earle
  * @version 1/30/18
  */
-
-val VisionStopSensor = Sensors.booleanSensor({DriverStation.getInstance().isOperatorControl && DriverStation.getInstance().matchTime <= 5}) {
-    pollAt(1000)
-
-    whenTriggered {
-        Thread.sleep(10000)
-        Vision.stop()
-    }
-}
 
 /*
 val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent}) {
@@ -47,44 +37,3 @@ val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent})
     }
 }
 */
-
-fun getPitch(): Double {
-    var imuData = DoubleArray(3)
-    Drivetrain.imu.getYawPitchRoll(imuData)
-    return imuData[1]
-}
-
-fun getRoll(): Double {
-    var imuData = DoubleArray(3)
-    Drivetrain.imu.getYawPitchRoll(imuData)
-    return imuData[2]
-}
-
-val PitchSensor = Sensors.numericSensor({Math.abs(getPitch())}) {
-    pollAt(20)
-
-    whenAbove(PITCH_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
-    }
-
-    whenBelow(PITCH_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
-    }
-}
-
-val RollSensor = Sensors.numericSensor({Math.abs(getRoll())}) {
-    pollAt(20)
-
-    whenAbove(ROLL_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.TIP_CONTROL)
-    }
-
-    whenBelow(ROLL_CORRECTION_MIN.toDouble()) {
-
-        DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DrivetrainSubsystem.machine(DRIVE_MACHINE).getLastState())
-    }
-
-}

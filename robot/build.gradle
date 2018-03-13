@@ -26,6 +26,11 @@ deploy {
     }
 }
 
+wpi {
+    wpilibVersion = '2018.3.3'
+    ctreVersion = '5.3.1.0'
+}
+
 dependencies {
     compile wpilib()
     compile ctre()

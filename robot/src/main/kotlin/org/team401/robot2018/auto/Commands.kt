@@ -1,9 +1,8 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.auto.steps.StateStep
-import org.team401.robot2018.auto.steps.WaitForStep
+import org.team401.robot2018.auto.steps.*
+import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -41,9 +40,12 @@ object Commands {
         ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
     }
 
+    val WaitForAtSwitch = WaitForStep(Elevator::atSwitch)
+
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
     val ScaleAfterUnfold = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
 
+    val ElevatorToDrive = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_DRIVE)
     val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
     val ElevatorToSwitch = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
     val ElevatorToScale = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SCALE_HIGH)
@@ -61,4 +63,7 @@ object Commands {
     val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
     val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
+    val HighLockDeployAndWait = arrayOf(ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
+
+    val ZeroIMU = LambdaStep { Drivetrain.imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 0); Thread.sleep(500) }
 }

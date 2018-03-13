@@ -23,10 +23,9 @@ import org.snakeskin.event.Events
 import org.snakeskin.logic.scalars.CubicScalar
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
-import org.team401.robot2018.etc.Constants
+import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.getCurrent
 import org.team401.robot2018.etc.shiftUpdate
-import org.team401.robot2018.getPitch
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -47,7 +46,6 @@ object DriveStates {
     const val OPEN_LOOP = "openloop"
     const val CHEESY = "cheesy"
     const val CHEESY_CLOSED = "betterCheesy"
-    const val TIP_CONTROL = "tipControl"
 }
 
 const val DRIVE_SHIFT_MACHINE = "autoShifting"
@@ -203,14 +201,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         RightStick.readAxis { ROLL },
                         RightStick.readButton { TRIGGER}
                 )
-            }
-        }
-
-        state(DriveStates.TIP_CONTROL) {
-            var correction: Double
-            action {
-                correction = getPitch() / Constants.DrivetrainParameters.TIP_CORRECTION_SCALAR
-                Drivetrain.arcade(ControlMode.PercentOutput, correction, 0.0)
             }
         }
 

@@ -15,4 +15,5 @@ package org.team401.robot2018.etc
 
 object RobotEvents {
     val HAVE_CUBE = "haveCube"
+    val EJECT_CUBE = "reverseCube"
 }
