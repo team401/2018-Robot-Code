@@ -21,51 +21,13 @@ import java.io.File
 
 class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
     /**
-     * Represents a single point in a profile
-     */
-    data class Waypoint(val position: Double, val velocity: Double, val timestep: Int, val acceleration: Double, val heading: Double) {
-        companion object {
-            /**
-             * Generates a Waypoint from an input CSV line
-             * @param line The CSV line
-             * @return The Waypoint
-             */
-            fun fromCsv(line: String): Waypoint {
-                val split = line.split(",")
-                val position = split[0].toDouble()
-                val velocity = split[1].toDouble()
-                val timestep = split[2].toInt()
-                val acceleration = try {
-                    split[3].toDouble()
-                } catch (e: Exception) {
-                    0.0
-                }
-                val heading = try {
-                    split[4].toDouble()
-                } catch (e: Exception) {
-                    90.0
-                }
-
-                return Waypoint(position, velocity, timestep, acceleration, heading)
-            }
-        }
-    }
-
-    /**
      * Represents one side of the drivetrain.
      * Contains all of the points, controllers, and gains for that side.
      */
     private inner class MpSide(val controller: IMotorControllerEnhanced, val gains: PDVA, val polarity: Double) {
         private val points = arrayListOf<Waypoint>()
 
-        fun loadPoints(file: File) {
-            points.clear()
-
-            val lines = file.readLines()
-            lines.forEach {
-                points.add(Waypoint.fromCsv(it))
-            }
-        }
+        fun loadPoints(profile: String) = ProfileLoader.populate(profile, points)
 
         var error = 0.0
         var lastError = 0.0
@@ -140,10 +102,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
     fun index() = pointIdx
 
     fun loadPoints(leftFilename: String, rightFilename: String) {
-        val leftFile = File(leftFilename)
-        val rightFile = File(rightFilename)
-        left.loadPoints(leftFile)
-        right.loadPoints(rightFile)
+        left.loadPoints(leftFilename)
+        right.loadPoints(rightFilename)
     }
 
     private var lastUpdate = 0L

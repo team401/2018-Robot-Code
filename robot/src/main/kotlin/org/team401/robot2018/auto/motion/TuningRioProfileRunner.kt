@@ -32,8 +32,8 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     private var rightPointfile = ""
 
     private lateinit var runner: RioProfileRunner
-    private lateinit var leftCurrent: RioProfileRunner.Waypoint
-    private lateinit var rightCurrent: RioProfileRunner.Waypoint
+    private lateinit var leftCurrent: Waypoint
+    private lateinit var rightCurrent: Waypoint
 
     private val gson = Gson()
     
