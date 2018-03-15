@@ -1,9 +1,13 @@
 package org.team401.robot2018.auto
 
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
+import org.snakeskin.factory.ExecutorFactory
 import org.team401.robot2018.auto.steps.AutoStep
+import java.sql.Driver
+import java.util.concurrent.TimeUnit
 
 /*
  * 2018-Robot-Code - Created on 3/3/18
@@ -18,9 +22,20 @@ import org.team401.robot2018.auto.steps.AutoStep
  * @version 3/3/18
  */
 abstract class RobotAuto: AutoLoop() {
+    private val executor = ExecutorFactory.getExecutor("Auto")
+
     //DATA
     private val robotPosSelector = RobotPosition.toSendableChooser()
     private val autoTargetSelector = AutoTarget.toSendableChooser()
+
+    fun startTasks() {
+        val ds = DriverStation.getInstance()
+        executor.scheduleAtFixedRate({
+            if (ds.isDisabled) {
+                preAuto()
+            }
+        }, 0L, 20L, TimeUnit.MILLISECONDS)
+    }
 
     fun publish() {
         SmartDashboard.putData("Robot Position", robotPosSelector)
@@ -67,6 +82,7 @@ abstract class RobotAuto: AutoLoop() {
 
     override val rate = 10L
 
+    abstract fun preAuto()
     abstract fun assembleAuto(add: (AutoStep) -> Unit)
 
     override fun entry() {

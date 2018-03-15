@@ -1,6 +1,8 @@
 package org.team401.robot2018.auto.motion
 
+import org.snakeskin.factory.ExecutorFactory
 import java.io.File
+import java.util.concurrent.CountDownLatch
 
 /*
  * 2018-Robot-Code - Created on 3/13/18
@@ -16,7 +18,20 @@ import java.io.File
  */
 
 object ProfileLoader {
+    class LoadPromise(private val points: ArrayList<Waypoint>) {
+        private val latch = CountDownLatch(1)
+
+        fun load(pointsIn: ArrayList<Waypoint>) {
+            points.clear()
+            points.addAll(pointsIn)
+            latch.countDown()
+        }
+
+        fun await() = latch.await()
+    }
+
     private val cache = HashMap<String, ArrayList<Waypoint>>()
+    private val executor = ExecutorFactory.getExecutor("Point loader")
 
     private fun loadFromFile(filename: String): ArrayList<Waypoint> {
         val f = File(filename)
@@ -42,16 +57,35 @@ object ProfileLoader {
     }
 
     /**
-     * Populates the input ArrayList from the points in the profile, loading from the cache if possible
+     * Populates the input ArrayList immediately from the points in the profile, loading from the cache if possible
      * @param profile The profile to load
      * @param points The ArrayList to load the points into
      */
-    fun populate(profile: String, points: ArrayList<Waypoint>) {
+    fun populateNow(profile: String, points: ArrayList<Waypoint>) {
         points.clear()
         if (cache.containsKey(profile)) {
             points.addAll(cache[profile]!!)
         } else {
             points.addAll(loadFromFile(profile))
         }
+    }
+
+    /**
+     * Populates the input ArrayList sometime later from the points in the profile, loading from the cache if possible
+     * @param profile The profile to load
+     * @param points The ArrayList to load the points into
+     *
+     * @return A promise that tells us when the loading is complete
+     */
+    fun populateLater(profile: String, points: ArrayList<Waypoint>): LoadPromise {
+        val promise = LoadPromise(points)
+        executor.submit {
+            if (cache.containsKey(profile)) {
+                promise.load(cache[profile]!!)
+            } else {
+                promise.load(loadFromFile(profile))
+            }
+        }
+        return promise
     }
 }

@@ -1,15 +1,17 @@
 package org.team401.robot2018.auto.steps
 
-class BackgroundDelayStep(val time: Long, val period: Long): AutoStep() {
-    var counter = 0
+class BackgroundDelayStep(val time: Long): AutoStep() {
+    var startTime = 0L
 
     override fun entry() {
         done = false
-        counter = 0
+        startTime = System.currentTimeMillis()
     }
 
     override fun action() {
-        done = (counter++ * period >= time)
+        if (System.currentTimeMillis() - startTime >= time) {
+            done = true
+        }
     }
 
     override fun exit() {}

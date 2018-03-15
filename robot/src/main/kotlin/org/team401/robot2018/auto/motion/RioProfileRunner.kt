@@ -4,7 +4,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
 import org.team401.robot2018.etc.RobotMath
-import java.io.File
 
 /*
  * 2018-Robot-Code - Created on 2/6/18
@@ -26,8 +25,12 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
      */
     private inner class MpSide(val controller: IMotorControllerEnhanced, val gains: PDVA, val polarity: Double) {
         private val points = arrayListOf<Waypoint>()
+        private var promise: ProfileLoader.LoadPromise? = null
+        fun awaitLoading() = promise?.await()
 
-        fun loadPoints(profile: String) = ProfileLoader.populate(profile, points)
+        fun loadPoints(profile: String) {
+            promise = ProfileLoader.populateLater(profile, points)
+        }
 
         var error = 0.0
         var lastError = 0.0
@@ -133,6 +136,9 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         left.zero(0)
         right.zero(0)
         Thread.sleep(100)
+
+        left.awaitLoading() //Wait for points to finish loading
+        right.awaitLoading()
     }
 
     override fun action() {

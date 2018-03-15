@@ -21,6 +21,10 @@ import org.team401.robot2018.etc.not
  */
 
 object PowerUpAuto: RobotAuto() {
+    override fun preAuto() {
+
+    }
+
     private fun scaleFirst(): Boolean {
         //If we are in the middle
         if (robotPos == RobotPosition.DS_CENTER) {
