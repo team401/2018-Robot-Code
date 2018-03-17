@@ -46,6 +46,13 @@ class PracticeConstants: ConstantsBase() {
         override val STOWED_POS = 780.0
         override val INTAKE_POS = 2500.0
         override val GRAB_POS = (STOWED_POS + INTAKE_POS) / 2.0
+
+        override val HAVE_CUBE_CURRENT_CLAMP = 0.0
+        override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.0
+        override val HAVE_CUBE_CURRENT_LEFT_INTAKE = 0.0
+        override val HAVE_CUBE_CURRENT_RIGHT_HOLD = 0.0
+        override val HAVE_CUBE_CURRENT_RIGHT_INTAKE = 0.0
+
         override val PIDF = object: PIDF {
             override val P = 3.5
             override val I = 0.0

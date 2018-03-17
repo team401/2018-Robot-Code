@@ -26,6 +26,7 @@ import org.team401.robot2018.etc.*
 
 const val INTAKE_WHEELS_MACHINE = "intake"
 object IntakeWheelsStates {
+    const val INTAKE_PRE = "grabIntake"
     const val INTAKE = "intake"
     const val REVERSE = "reverse"
     const val IDLE = "idle"
@@ -143,6 +144,13 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
+        state(IntakeWheelsStates.INTAKE_PRE) {
+            action {
+                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+            }
+        }
+
         state(IntakeWheelsStates.INTAKE) {
             var inrushCounter = 0
             entry {
@@ -153,12 +161,15 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
                 right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                println("Intake Current: " + RobotMath.averageCurrent(left, right))
-
                 if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
                     inrushCounter++
                 } else {
-                    if (RobotMath.averageCurrent(left, right) >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_INTAKE) {
+                    println("INTAKE  Clamp: ${folding.outputCurrent}  Left: ${left.outputCurrent}  Right: ${right.outputCurrent}")
+
+                    //If all conditions are met to say we have a cube
+                    if (left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_INTAKE &&
+                        right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE &&
+                        folding.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_CLAMP) {
                         setState(IntakeWheelsStates.GOT_CUBE)
                     }
                 }
@@ -172,12 +183,17 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
                 right.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                println("Got Current: " + RobotMath.averageCurrent(left, right))
+                println("GOT  Clamp: ${folding.outputCurrent}  Left: ${left.outputCurrent}  Right: ${right.outputCurrent}")
 
+                /*
+                //If any of the conditions are met to say we don't have a cube
+                if (left.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_HOLD ||
+                    right.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_HOLD ||
+                    folding.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_CLAMP) {
 
-                if (RobotMath.averageCurrent(left, right) < Constants.IntakeParameters.HAVE_CUBE_CURRENT_HOLD) {
                     setState(IntakeWheelsStates.INTAKE)
                 }
+                */
             }
         }
 
@@ -193,7 +209,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                     setState(IntakeWheelsStates.IDLE)
                 }
 
-                cubeCount++
+                //cubeCount++
             }
         }
 

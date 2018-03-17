@@ -58,7 +58,7 @@ fun IMotorControllerEnhanced.pidf(pidf: ConstantsBase.PIDF) {
 }
 
 fun IMotorControllerEnhanced.voltageCompensation(desiredOutput : Double, nominal: Double) {
-    set(ControlMode.PercentOutput, desiredOutput * (nominal/ PDP.voltage))
+    set(ControlMode.PercentOutput, desiredOutput * (nominal/ busVoltage))
 }
 
 fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)

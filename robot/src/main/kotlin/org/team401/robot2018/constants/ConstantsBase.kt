@@ -1,6 +1,7 @@
 package org.team401.robot2018.constants
 
 import org.team401.robot2018.auto.motion.PDVA
+import org.team401.robot2018.etc.RobotMath
 
 /*
  * 2018-Robot-Code - Created on 3/7/18
@@ -138,7 +139,7 @@ abstract class ConstantsBase {
 
         val ZERO_POS = 0.0 //ticks
         val COLLECTION_POS = ZERO_POS + 500.0
-        val CUBE_POS = ZERO_POS + 6000.0 //ticks
+        val CUBE_POS = RobotMath.Elevator.inchesToTicks(6.0) //ticks
         val SWITCH_POS = ZERO_POS + 17500.0 //ticks
         val SCALE_POS = ZERO_POS + 48800 //ticks
         val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
@@ -203,8 +204,11 @@ abstract class ConstantsBase {
         abstract val INTAKE_POS: Double
         abstract val GRAB_POS: Double
 
-        val HAVE_CUBE_CURRENT_INTAKE = 3.0
-        val HAVE_CUBE_CURRENT_HOLD = 1.0
+        abstract val HAVE_CUBE_CURRENT_LEFT_HOLD: Double
+        abstract val HAVE_CUBE_CURRENT_RIGHT_HOLD: Double
+        abstract val HAVE_CUBE_CURRENT_LEFT_INTAKE: Double
+        abstract val HAVE_CUBE_CURRENT_RIGHT_INTAKE: Double
+        abstract val HAVE_CUBE_CURRENT_CLAMP: Double
 
         val INVERT_LEFT = true
         val INVERT_RIGHT = false

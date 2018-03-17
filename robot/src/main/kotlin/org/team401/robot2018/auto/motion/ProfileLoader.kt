@@ -2,6 +2,7 @@ package org.team401.robot2018.auto.motion
 
 import org.snakeskin.factory.ExecutorFactory
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 
 /*
@@ -30,7 +31,7 @@ object ProfileLoader {
         fun await() = latch.await()
     }
 
-    private val cache = HashMap<String, ArrayList<Waypoint>>()
+    private val cache = ConcurrentHashMap<String, ArrayList<Waypoint>>()
     private val executor = ExecutorFactory.getExecutor("Point loader")
 
     private fun loadFromFile(filename: String): ArrayList<Waypoint> {

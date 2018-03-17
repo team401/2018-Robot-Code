@@ -19,11 +19,11 @@ import org.team401.robot2018.constants.Constants
 object RobotMath {
     object Elevator {
         fun inchesToTicks(inches: Double,
-                          pitchDiameter: Double = Constants.ElevatorParameters.PITCH_DIAMETER,
+                          pitchDiameter: Double = 1.805,
                           ticksPerRev: Double = 4096.0) = (ticksPerRev * inches) / (Math.PI * pitchDiameter)
 
         fun feetToTicks(feet: Double,
-                        pitchDiameter: Double = Constants.ElevatorParameters.PITCH_DIAMETER,
+                        pitchDiameter: Double = 1.805,
                         ticksPerRev: Double = 4096.0) = inchesToTicks(feet * 12.0, pitchDiameter, ticksPerRev)
     }
 

@@ -1,5 +1,6 @@
 package org.team401.robot2018
 
+import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.CameraServer
 import edu.wpi.first.wpilibj.DriverStation
@@ -57,10 +58,14 @@ fun setup() {
     PowerUpAuto.publish() //Real auto
     //TestAuto.publish() //Test auto
 
+    //Uncomment which one you are using
+    PowerUpAuto.startTasks() //Real auto
+    //TestAuto.startTasks() //Test auto
+
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
 
-    CameraServer.getInstance().startAutomaticCapture(0)
+    //CameraServer.getInstance().startAutomaticCapture(0)
 
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
     Controllers.add(LeftStick, RightStick, Gamepad)

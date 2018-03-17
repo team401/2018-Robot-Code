@@ -35,24 +35,32 @@ val LeftStick = HumanControls.t16000m(0) {
 }
 
 val RightStick = HumanControls.t16000m(1) {
-    whenButton(Buttons.STICK_RIGHT) {
+    //E STOP ELEVATOR
+    //* . .
+    //. . .
+    whenButton(Buttons.BASE_LEFT_TOP_1) {
         pressed {
-            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
+            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            Elevator.estop = true
+            DriverStation.reportWarning("ELEVATOR E-STOPPED!", false)
         }
     }
 
-    whenButton(Buttons.STICK_LEFT) {
+    //DEPLOY ELEVATOR
+    //. . .
+    //* . .
+    whenButton(Buttons.BASE_LEFT_BOTTOM_1) {
         pressed {
             ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
         }
     }
 
-    //E STOP ELEVATOR
-    whenButton(Buttons.STICK_BOTTOM) {
+    //HOME ELEVATOR
+    //. . .
+    //. . *
+    whenButton(Buttons.BASE_LEFT_BOTTOM_3) {
         pressed {
-            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.OPEN_LOOP_CONTROL)
-            Elevator.estop = true
-            DriverStation.reportWarning("ELEVATOR E-STOPPED!", false)
+            ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
     }
 }
@@ -73,15 +81,16 @@ val Gamepad = HumanControls.f310(2) {
     //Elevator setpoints
     whenHatChanged(Hats.D_PAD) {
         when (it) {
-            Direction.CENTER -> {}
+            Direction.CENTER -> {
+            }
 
             Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
             Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
             Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
             Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE)
 
-           // Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
-           // Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
+        // Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+        // Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
         }
     }
 
@@ -100,6 +109,7 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
 
+    //Intake
     whenButton(Buttons.B) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
@@ -110,19 +120,25 @@ val Gamepad = HumanControls.f310(2) {
             intakeWheels.setState(IntakeWheelsStates.INTAKE)
         }
         released {
-            intakeWheels.setState(IntakeWheelsStates.IDLE)
-            intakeFolding.setState(IntakeFoldingStates.STOWED)
+            if (intakeWheels.getState() != IntakeWheelsStates.IDLE) {
+                intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
+            }
+            if (intakeFolding.getState() != IntakeFoldingStates.STOWED) {
+                intakeFolding.setState(IntakeFoldingStates.GRAB)
+            }
         }
     }
 
+    //Grab
     whenButton(Buttons.Y) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
-            intakeWheels.setState(IntakeWheelsStates.IDLE)
+            intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
         }
     }
 
+    //Reset
     whenButton(Buttons.X) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
@@ -150,6 +166,7 @@ val Gamepad = HumanControls.f310(2) {
         }
     }
 
+    //Manual clamp
     whenButton(Buttons.LEFT_BUMPER) {
         pressed {
             elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
