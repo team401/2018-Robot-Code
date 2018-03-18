@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.CameraServer
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Servo
+import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import org.snakeskin.annotation.PostStartup
 import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoManager
@@ -18,6 +19,7 @@ import org.snakeskin.registry.Controllers
 import org.snakeskin.registry.Sensors
 import org.snakeskin.registry.Subsystems
 import org.team401.robot2018.auto.PowerUpAuto
+import org.team401.robot2018.auto.TestAuto
 //import org.team401.robot2018.auto.TestAuto
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.constants.CompConstants
@@ -51,16 +53,16 @@ fun setup() {
     //Constants = PracticeConstants()
 
     //Uncomment which one you are using
-    AutoManager.auto = PowerUpAuto //Real auto
-    //AutoManager.auto = TestAuto //Test auto
+    //AutoManager.auto = PowerUpAuto //Real auto
+    AutoManager.auto = TestAuto //Test auto
 
     //Uncomment which one you are using
-    PowerUpAuto.publish() //Real auto
-    //TestAuto.publish() //Test auto
+    //PowerUpAuto.publish() //Real auto
+    TestAuto.publish() //Test auto
 
     //Uncomment which one you are using
-    PowerUpAuto.startTasks() //Real auto
-    //TestAuto.startTasks() //Test auto
+    //PowerUpAuto.startTasks() //Real auto
+    TestAuto.startTasks() //Test auto
 
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
@@ -75,6 +77,8 @@ fun setup() {
         MJPEG.start()
     }
     */
+
+    LiveWindow.disableTelemetry(PDP) //Fix bugs with PDP errors
 }
 
 //@PostStartup private fun startReporting() = Reporting.start()

@@ -10,14 +10,13 @@ import org.team401.robot2018.etc.StepAdder
 import org.team401.robot2018.subsystems.Drivetrain
 import org.team401.robot2018.subsystems.ElevatorSubsystem
 import java.awt.Robot
-/*
-object TestAuto : RobotAuto(){
+
+object TestAuto : RobotAuto() {
+    override fun preAuto() {}
+
     override fun assembleAuto(add: StepAdder) {
-        add(TuningRioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, "memes"))
-
-
+        add(Commands.ZeroIMU)
+        add(TuningRioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, "lol"))
+        println("Assembled auto")
     }
-
-
 }
-        */

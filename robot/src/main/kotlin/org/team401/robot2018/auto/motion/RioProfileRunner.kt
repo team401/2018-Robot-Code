@@ -2,6 +2,7 @@ package org.team401.robot2018.auto.motion
 
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import org.team401.robot2018.etc.RobotMath
 
@@ -32,6 +33,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
             promise = ProfileLoader.populateLater(profile, points)
         }
 
+        var lastTime = 0L
+        var time = 0L
         var error = 0.0
         var lastError = 0.0
         var sensor = 0.0
@@ -43,6 +46,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         fun reset() {
             controller.set(ControlMode.PercentOutput, 0.0)
 
+            time = 0L
+            lastTime = 0L
             error = 0.0
             lastError = 0.0
             sensor = 0.0
@@ -60,12 +65,14 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
             saturated = false
             currentWaypoint = points[index]
             sensor = RobotMath.UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
+            time = System.currentTimeMillis()
 
             error = currentWaypoint.position - sensor
             value =
                     gains.p * error +
-                    gains.d * ((error - lastError) / currentWaypoint.timestep) +
-                    (gains.v * currentWaypoint.velocity + gains.a * currentWaypoint.acceleration)
+                    gains.d * ((error - lastError) / (time - lastTime)) +
+                    gains.v * currentWaypoint.velocity +
+                    gains.a * currentWaypoint.acceleration
 
             if (value > 1.0) {
                 value = 1.0
@@ -76,6 +83,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
                 saturated = true
             }
             lastError = error
+            lastTime = time
             return saturated
         }
 
@@ -137,8 +145,11 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         right.zero(0)
         Thread.sleep(100)
 
+        println("WAITING FOR LEFT")
         left.awaitLoading() //Wait for points to finish loading
+        println("WAITING FOR RIGHT")
         right.awaitLoading()
+        println("DONE WAITING")
     }
 
     override fun action() {

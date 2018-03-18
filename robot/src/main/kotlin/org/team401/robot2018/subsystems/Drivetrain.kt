@@ -4,10 +4,7 @@ package org.team401.robot2018.subsystems
 
 //import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.RightStick
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.FeedbackDevice
-import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
-import com.ctre.phoenix.motorcontrol.NeutralMode
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.Solenoid
@@ -72,6 +69,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     val left = Gearbox(leftFront, leftMidF, leftMidR, leftRear)
     val right = Gearbox(rightFront, rightMidF, rightMidR, rightRear)
     val imu = PigeonIMU(leftRear)
+
+    left.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
+    right.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
 
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 

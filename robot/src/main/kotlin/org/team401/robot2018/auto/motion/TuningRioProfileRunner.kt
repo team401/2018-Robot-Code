@@ -1,6 +1,9 @@
 package org.team401.robot2018.auto.motion
 
+import ch.qos.logback.core.status.StatusUtil
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.StatusFrame
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
 import com.google.gson.Gson
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -65,8 +68,8 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
                                    val head: Double,
                                    val desHead: Double,
                                    val time: Long) {
-        data class Side(val pos: Int,
-                        val vel: Int,
+        data class Side(val pos: Double,
+                        val vel: Double,
                         val desPos: Double,
                         val desVel: Double)
     }
@@ -76,14 +79,14 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
         imu.getYawPitchRoll(imuData)
         val currentData = PublishData(
             PublishData.Side(
-                RobotMath.UnitConversions.nativeUnitsToRevolutions(leftController.getSelectedSensorPosition(0).toDouble()).toInt(),
-                RobotMath.UnitConversions.nativeUnitsToRpm(leftController.getSelectedSensorVelocity(0).toDouble()).toInt(),
+                RobotMath.UnitConversions.nativeUnitsToRevolutions(leftController.getSelectedSensorPosition(0).toDouble()),
+                RobotMath.UnitConversions.nativeUnitsToRpm(leftController.getSelectedSensorVelocity(0).toDouble()),
                 leftCurrent.position,
                 leftCurrent.velocity
             ),
             PublishData.Side(
-                    RobotMath.UnitConversions.nativeUnitsToRevolutions(rightController.getSelectedSensorPosition(0).toDouble()).toInt(),
-                    RobotMath.UnitConversions.nativeUnitsToRpm(rightController.getSelectedSensorVelocity(0).toDouble()).toInt(),
+                    RobotMath.UnitConversions.nativeUnitsToRevolutions(rightController.getSelectedSensorPosition(0).toDouble()),
+                    RobotMath.UnitConversions.nativeUnitsToRpm(rightController.getSelectedSensorVelocity(0).toDouble()),
                     rightCurrent.position,
                     rightCurrent.velocity
             ), imuData[0], leftCurrent.heading, leftCurrent.timestep * runner.index().toLong()
@@ -94,13 +97,15 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     
     override fun entry() {
         done = false
-
         SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
         runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, headingGain, rate)
+        println("loading points")
         runner.loadPoints(leftPointfile, rightPointfile)
+        println("points loaded")
         runner.entry()
+        println("entry done")
     }
     
     override fun action() {
@@ -115,5 +120,6 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     override fun exit() {
         runner.exit()
         ready()
+        println("exit done")
     }
 }

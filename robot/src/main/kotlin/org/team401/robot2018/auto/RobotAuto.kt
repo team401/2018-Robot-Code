@@ -90,6 +90,7 @@ abstract class RobotAuto: AutoLoop() {
         done = false
         fetchSD()
         fetchFieldLayout()
+        println("FETCH DONE")
         sequence.clear()
         sequenceIdx = 0
         assembleAuto(adder)

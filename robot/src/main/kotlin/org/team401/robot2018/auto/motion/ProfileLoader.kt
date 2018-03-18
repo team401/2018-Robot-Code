@@ -28,19 +28,22 @@ object ProfileLoader {
             latch.countDown()
         }
 
-        fun await() = latch.await()
+        fun await() {
+            latch.await()
+        }
     }
 
     private val cache = ConcurrentHashMap<String, ArrayList<Waypoint>>()
     private val executor = ExecutorFactory.getExecutor("Point loader")
 
-    private fun loadFromFile(filename: String): ArrayList<Waypoint> {
+    @Synchronized private fun loadFromFile(filename: String): ArrayList<Waypoint> {
         val f = File(filename)
         val points = arrayListOf<Waypoint>()
         val lines = f.readLines()
         lines.forEach {
             points.add(Waypoint.fromCsv(it))
         }
+        println("LOADED $filename DONE ------")
         return points
     }
 
@@ -81,10 +84,14 @@ object ProfileLoader {
     fun populateLater(profile: String, points: ArrayList<Waypoint>): LoadPromise {
         val promise = LoadPromise(points)
         executor.submit {
+            println("loading points $profile")
             if (cache.containsKey(profile)) {
+                println("loading from cache")
                 promise.load(cache[profile]!!)
             } else {
+                println("loading from file")
                 promise.load(loadFromFile(profile))
+                println("loaded from file")
             }
         }
         return promise
