@@ -61,6 +61,7 @@ object ElevatorStates {
     const val POS_SCALE = "scaleSide"
     const val POS_SCALE_HIGH = "scale_high"
     const val POS_MAX = "max"
+    const val POS_VAULT_RUNNER = "vault-outOfWay"
 
     const val START_CLIMB = "startClimb"
     const val CLIMB_MANUAL = "climbAlign"

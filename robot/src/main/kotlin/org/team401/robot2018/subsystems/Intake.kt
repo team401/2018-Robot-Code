@@ -155,7 +155,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                     homingCounter = 0
                 }
 
-                if (homingCounter > Constants.ElevatorParameters.HOMING_COUNT) {
+                if (homingCounter > Constants.IntakeParameters.HOMING_COUNT) {
                     folding.setSelectedSensorPosition(0, 0, 0)
                     Intake.homed = true
                     setState(IntakeFoldingStates.STOWED)

@@ -207,6 +207,8 @@ abstract class ConstantsBase {
         val INTAKE_POS = 2010.0
         val GRAB_POS = 1210.0
 
+        val HOMING_COUNT = 10
+
         abstract val HAVE_CUBE_CURRENT_LEFT_HOLD: Double
         abstract val HAVE_CUBE_CURRENT_RIGHT_HOLD: Double
         abstract val HAVE_CUBE_CURRENT_LEFT_INTAKE: Double
