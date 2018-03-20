@@ -159,9 +159,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         master.configPeakOutputForward(1.0, 0)
         master.configPeakOutputReverse(-1.0, 0)
-
-
-
     }
 
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
@@ -293,9 +290,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             entry {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
             }
-            action {
-                //println("UP: " + master.getSelectedSensorPosition(0))
-            }
         }
 
         state(ElevatorStates.POS_SWITCH) {
@@ -303,10 +297,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
-            }
-
-            action {
-                //println("DOWN: " + master.getSelectedSensorPosition(0))
             }
         }
 
@@ -323,11 +313,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
-            }
-
-            action {
-                //println("SCALE: " + master.getSelectedSensorPosition(0))
-
             }
         }
 
@@ -448,8 +433,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 velocity = master.getSelectedSensorVelocity(0)
-                gearbox.set(ControlMode.PercentOutput, -0.25) //Run down at the homing rate
-                gearbox.set(ControlMode.PercentOutput, -0.25) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
 
                 if (velocity == 0) {
                     homingCounter++

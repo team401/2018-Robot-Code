@@ -39,4 +39,10 @@ object RobotMath {
     }
 
     fun averageCurrent(vararg motors: IMotorControllerEnhanced): Double = motors.map { it.outputCurrent }.average()
+    fun limit180(degIn: Double): Double {
+        var degOut = degIn
+        while (degOut >= 180.0) degOut -= 360.0
+        while (degOut < -180.0) degOut += 360.0
+        return degOut
+    }
 }

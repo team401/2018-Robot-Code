@@ -129,6 +129,8 @@ abstract class ConstantsBase {
         
         val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
         val CLIMB_MANUAL_RATE = 16 * .02
+
+        val HOMING_RATE = -0.25
         
         val CURRENT_LIMIT_CONTINUOUS = 30 //A
         
@@ -196,13 +198,14 @@ abstract class ConstantsBase {
         val INTAKE_RATE = .7
         val RETAIN_RATE = .25
         val REVERSE_RATE = -0.7
+        val HOMING_RATE = -0.25
 
         val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        abstract val STOWED_POS: Double
-        abstract val INTAKE_POS: Double
-        abstract val GRAB_POS: Double
+        val STOWED_POS = 0.0
+        val INTAKE_POS = 2010.0
+        val GRAB_POS = 1210.0
 
         abstract val HAVE_CUBE_CURRENT_LEFT_HOLD: Double
         abstract val HAVE_CUBE_CURRENT_RIGHT_HOLD: Double

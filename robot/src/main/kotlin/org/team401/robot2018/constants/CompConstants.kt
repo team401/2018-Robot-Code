@@ -43,10 +43,6 @@ class CompConstants: ConstantsBase() {
     }
 
     override val IntakeParameters = object: IntakeParametersConfig() {
-        override val STOWED_POS = 790.0
-        override val INTAKE_POS = 2800.0
-        override val GRAB_POS = 2000.0
-
         override val HAVE_CUBE_CURRENT_CLAMP = 10.0
         override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.0
         override val HAVE_CUBE_CURRENT_LEFT_INTAKE = 5.0

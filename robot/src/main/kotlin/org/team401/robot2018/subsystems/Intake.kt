@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Servo
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
 import org.snakeskin.logic.History
+import org.snakeskin.logic.LockingDelegate
 import org.team401.robot2018.PDP
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.*
@@ -39,6 +40,7 @@ object IntakeFoldingStates {
     const val GRAB = "wide"
     const val INTAKE = "out"
     const val STOWED = "in"
+    const val HOMING = "homing"
     const val GO_TO_INTAKE = "goToIntake"
 }
 
@@ -46,6 +48,8 @@ object Intake {
     lateinit var folding: TalonSRX
     lateinit var left: TalonSRX
     lateinit var right: TalonSRX
+
+    var homed by LockingDelegate(false)
 
     fun stowed() = folding.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.IntakeParameters.STOWED_POS, 100.0)
     fun atGrab() = folding.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.IntakeParameters.GRAB_POS, 100.0)
@@ -132,13 +136,37 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
         }
 
+        state(IntakeFoldingStates.HOMING) {
+            var homingCounter = 0
+            var velocity: Int
+
+            entry {
+                Intake.homed = false
+                homingCounter = 0
+            }
+
+            action {
+                velocity = folding.getSelectedSensorVelocity(0)
+                folding.set(ControlMode.PercentOutput, Constants.IntakeParameters.HOMING_RATE) //Run in at the homing rate
+
+                if (velocity == 0) {
+                    homingCounter++
+                } else {
+                    homingCounter = 0
+                }
+
+                if (homingCounter > Constants.ElevatorParameters.HOMING_COUNT) {
+                    folding.setSelectedSensorPosition(0, 0, 0)
+                    Intake.homed = true
+                    setState(IntakeFoldingStates.STOWED)
+                }
+            }
+        }
+
         default {
             entry {
                 camera.set(0.0)
                 folding.set(ControlMode.PercentOutput, 0.0)
-            }
-            action{
-                //println("Intake Position: ${folding.getSelectedSensorPosition(0)}")
             }
         }
     }
@@ -164,12 +192,10 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
                     inrushCounter++
                 } else {
-                    println("INTAKE  Clamp: ${folding.outputCurrent}  Left: ${left.outputCurrent}  Right: ${right.outputCurrent}")
 
                     //If all conditions are met to say we have a cube
                     if (left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_INTAKE &&
-                        right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE &&
-                        folding.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_CLAMP) {
+                        right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE) {
                         setState(IntakeWheelsStates.GOT_CUBE)
                     }
                 }
@@ -208,8 +234,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                     foldingMachine.setState(IntakeFoldingStates.STOWED)
                     setState(IntakeWheelsStates.IDLE)
                 }
-
-                //cubeCount++
             }
         }
 
@@ -239,48 +263,12 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         }
     }
 
-
-    test("Folding Machine"){
-        //test folding
-        foldingMachine.setState(IntakeFoldingStates.STOWED)
-        Thread.sleep(1000)
-
-        foldingMachine.setState(IntakeFoldingStates.GRAB)
-        Thread.sleep(1000)
-
-        foldingMachine.setState(IntakeFoldingStates.INTAKE)
-        Thread.sleep(1000)
-
-        true//TODO fix later
-    }
-    test("Intake Machine"){
-        //test each sides motors
-        left.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(2000)
-        var leftVoltage by Publisher(0.0)
-        var leftCurrent by Publisher(0.0)
-        leftVoltage = left.motorOutputVoltage
-        leftCurrent = left.outputCurrent
-
-        left.set(ControlMode.PercentOutput, 0.0)
-        Thread.sleep(1000)
-
-        right.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(2000)
-        var rightVoltage by Publisher(0.0)
-        var rightCurrent by Publisher(0.0)
-        rightVoltage = right.motorOutputVoltage
-        rightCurrent = right.outputCurrent
-
-        right.set(ControlMode.PercentOutput, 0.0)
-        Thread.sleep(1000)
-
-        leftCurrent + rightCurrent + 5.0 >= leftCurrent
-    }
-
     on (Events.TELEOP_ENABLED) {
-        foldingMachine.setState(IntakeFoldingStates.STOWED)
-        //foldingMachine.setState("default")
+        if (!Intake.homed) {
+            foldingMachine.setState(IntakeFoldingStates.HOMING)
+        } else {
+            foldingMachine.setState(IntakeFoldingStates.STOWED)
+        }
         intakeMachine.setState(IntakeWheelsStates.IDLE)
     }
 }

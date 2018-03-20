@@ -19,7 +19,7 @@ import org.team401.robot2018.etc.RobotMath
  * @version 2/6/18
  */
 
-class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val headingGain: Double = 0.0, val rate: Long = 20): TankMotionStep() {
+class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val hP: Double = 0.0, val hD: Double = 0.0, val rate: Long = 20): TankMotionStep() {
     /**
      * Represents one side of the drivetrain.
      * Contains all of the points, controllers, and gains for that side.
@@ -46,8 +46,6 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         fun reset() {
             controller.set(ControlMode.PercentOutput, 0.0)
 
-            time = 0L
-            lastTime = 0L
             error = 0.0
             lastError = 0.0
             sensor = 0.0
@@ -61,11 +59,10 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
         fun activeHeading() = currentWaypoint.heading
 
-        fun calculate(index: Int): Boolean {
+        fun calculate(index: Int, time: Long, lastTime: Long): Boolean {
             saturated = false
             currentWaypoint = points[index]
             sensor = RobotMath.UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
-            time = System.currentTimeMillis()
 
             error = currentWaypoint.position - sensor
             value =
@@ -83,7 +80,6 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
                 saturated = true
             }
             lastError = error
-            lastTime = time
             return saturated
         }
 
@@ -119,9 +115,11 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
     private var lastUpdate = 0L
     private var currentTime = 0L
+    private var lastTime = 0L
     private var pointIdx = 0
+    private var headingError = 0.0
+    private var lastHeadingError = 0.0
     private var headingAdjustment = 0.0
-    private var desiredHeading = 0.0
     private val imuValue = DoubleArray(3)
 
     override fun entry() {
@@ -131,9 +129,11 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
         lastUpdate = 0L
         currentTime = 0L
+        lastTime = 0L
         pointIdx = 0
+        headingError = 0.0
+        lastHeadingError = 0.0
         headingAdjustment = 0.0
-        desiredHeading = 0.0
 
         imuValue[0] = 0.0
         imuValue[1] = 0.0
@@ -145,19 +145,16 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         right.zero(0)
         Thread.sleep(100)
 
-        println("WAITING FOR LEFT")
         left.awaitLoading() //Wait for points to finish loading
-        println("WAITING FOR RIGHT")
         right.awaitLoading()
-        println("DONE WAITING")
     }
 
     override fun action() {
         currentTime = System.currentTimeMillis()
 
         if (pointIdx < Math.min(left.numPoints(), right.numPoints())) {
-            left.calculate(pointIdx)
-            right.calculate(pointIdx)
+            left.calculate(pointIdx, currentTime, lastTime)
+            right.calculate(pointIdx, currentTime, lastTime)
         } else {
             left.done()
             right.done()
@@ -165,9 +162,12 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         }
 
         imu.getYawPitchRoll(imuValue)
-        desiredHeading = left.activeHeading()
+        headingError = RobotMath.limit180(left.activeHeading() - imuValue[0])
 
-        headingAdjustment = headingGain * (desiredHeading - imuValue[0])
+        headingAdjustment = (hP * headingError) +
+                            (hD * (headingError - lastHeadingError) / (currentTime - lastTime))
+
+        lastHeadingError = headingError
 
         left.updateController(headingAdjustment)
         right.updateController(headingAdjustment)
@@ -176,6 +176,7 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
             pointIdx++
             lastUpdate = currentTime
         }
+        lastTime = currentTime
     }
 
     override fun exit() {

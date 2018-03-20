@@ -16,7 +16,6 @@ object TestAuto : RobotAuto() {
 
     override fun assembleAuto(add: StepAdder) {
         add(Commands.ZeroIMU)
-        add(TuningRioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, "lol"))
-        println("Assembled auto")
+        add(TuningRioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, "testing"))
     }
 }

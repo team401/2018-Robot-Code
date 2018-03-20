@@ -261,35 +261,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         }
     }
 
-    fun testMotor(controller: IMotorControllerEnhanced, name: String): Boolean {
-        left.unlink()
-        right.unlink()
-        controller.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-
-        val position = controller.getSelectedSensorPosition(0)
-        val velocity = controller.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("$name Position", position.toDouble())
-        SmartDashboard.putNumber("$name Velocity", velocity.toDouble())
-
-        controller.set(ControlMode.PercentOutput, 0.0)
-
-        left.link()
-        right.link()
-
-        return true //TODO pick a condition to test here
-    }
-
-    test ("Drivetrain leftFront") { testMotor(leftFront, "leftFront") }
-    test ("Drivetrain leftMidF") { testMotor(leftMidF, "leftMidF") }
-    test ("Drivetrain leftMidR") { testMotor(leftMidR, "leftMidR") }
-    test ("Drivetrain leftRear") { testMotor(leftRear, "leftRear") }
-
-    test ("Drivetrain rightFront") { testMotor(rightFront, "rightFront") }
-    test ("Drivetrain rightMidF") { testMotor(rightMidF, "rightMidF") }
-    test("Drivetrain rightMidR") { testMotor(rightMidR, "rightMidR") }
-    test("Drivetrain rightRear") { testMotor(rightRear, "rightRear") }
-
     on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.CHEESY)
         shiftMachine.setState(DriveShiftStates.HIGH)

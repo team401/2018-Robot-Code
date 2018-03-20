@@ -43,10 +43,6 @@ class PracticeConstants: ConstantsBase() {
     }
 
     override val IntakeParameters = object: IntakeParametersConfig() {
-        override val STOWED_POS = 780.0
-        override val INTAKE_POS = 2500.0
-        override val GRAB_POS = (STOWED_POS + INTAKE_POS) / 2.0
-
         override val HAVE_CUBE_CURRENT_CLAMP = 0.0
         override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.0
         override val HAVE_CUBE_CURRENT_LEFT_INTAKE = 0.0

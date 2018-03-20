@@ -30,7 +30,8 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     
     private var leftGains = PDVA()
     private var rightGains = PDVA()
-    private var headingGain = 0.0
+    private var hP = 0.0
+    private var hD = 0.0
     private var leftPointfile = ""
     private var rightPointfile = ""
 
@@ -53,7 +54,8 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
                 SmartDashboard.getNumber("tuningRunner-$name-rightV", 0.0),
                 SmartDashboard.getNumber("tuningRunner-$name-rightA", 0.0)
         )
-        headingGain = SmartDashboard.getNumber("tuningRunner-$name-H", 0.0)
+        hP = SmartDashboard.getNumber("tuningRunner-$name-hP", 0.0)
+        hD = SmartDashboard.getNumber("tuningRunner-$name-hD", 0.0)
 
         leftPointfile = SmartDashboard.getString("tuningRunner-$name-lPoints", "")
         rightPointfile = SmartDashboard.getString("tuningRunner-$name-rPoints", "")
@@ -100,12 +102,9 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
         SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
-        runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, headingGain, rate)
-        println("loading points")
+        runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, hP, hD, rate)
         runner.loadPoints(leftPointfile, rightPointfile)
-        println("points loaded")
         runner.entry()
-        println("entry done")
     }
     
     override fun action() {
@@ -120,6 +119,5 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     override fun exit() {
         runner.exit()
         ready()
-        println("exit done")
     }
 }
