@@ -111,7 +111,11 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         //Empty state for when the drivetrain is being controlled by other processes
-        state(DriveStates.EXTERNAL_CONTROL) {}
+        state(DriveStates.EXTERNAL_CONTROL) {
+            entry {
+                Drivetrain.setRampRate(0.0, 0.0)
+            }
+        }
 
         //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
@@ -153,6 +157,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
+                Drivetrain.setRampRate(.25, .25)
                 cheesyParameters.reset()
             }
             action {
@@ -267,7 +272,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     }
 
     on (Events.AUTO_ENABLED) {
-        driveMachine.setState("nothing")
+        driveMachine.setState(DriveStates.EXTERNAL_CONTROL)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }

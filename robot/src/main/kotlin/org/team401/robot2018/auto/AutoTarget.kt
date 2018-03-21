@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
  * @version 1/23/18
  */
 enum class AutoTarget(val prettyName: String) {
-    FULL("Full Auto (Default)"),
+    FULL("Full Auto"),
     NOTHING("Do Nothing"),
     BASELINE_ONLY("Baseline Only"),
     SWITCH_ONLY("Switch Only"),

@@ -20,10 +20,11 @@ class CompConstants: ConstantsBase() {
         override val SPEED_THRESHOLD = 7.5
         override val SPEED_SPLIT = 3.5
 
-        override val LEFT_PDVA = PDVA(1/19.0, 0/3.0, 1/1100.0, 0.0)
-        override val RIGHT_PDVA = PDVA(1/19.0, 0/3.0, 1/1100.0, 0.0)
+        override val LEFT_PDVA = PDVA(.35, 0.0, 1/650.0, 0.0005)
+        override val RIGHT_PDVA = PDVA(.35, 0.0, 1/650.0, 0.0005)
 
-        override val HEADING_GAIN = .01
+        override val HEADING_GAIN = .017
+        override val HEADING_D = .5
 
         override val TIP_CORRECTION_SCALAR = 10
         override val PITCH_CORRECTION_MIN = 10

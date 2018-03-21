@@ -57,7 +57,31 @@ object ProfileLoader {
      * @param profile The name of the profile to preload
      */
     fun preload(profile: String) {
-        cache.putIfAbsent(profile, loadFromFile(profile))
+        if (!cache.containsKey(profile)) {
+            cache.put(profile, loadFromFile(profile))
+        }
+    }
+
+    /**
+     * Preloads a set of profiles, removing any that aren't in the set
+     * @param profiles The names of the profiles to load
+     */
+    fun preloadThese(vararg profiles: String) {
+        //Remove any values that shouldn't be in the cache
+        val toRemove = arrayListOf<String>()
+        cache.forEach {
+            key, _ ->
+            if (profiles.none { it == key }) {
+                toRemove.add(key)
+            }
+        }
+        toRemove.forEach {
+            cache.remove(it)
+        }
+        //Load the cache
+        profiles.forEach {
+            preload(it)
+        }
     }
 
     /**
@@ -84,14 +108,10 @@ object ProfileLoader {
     fun populateLater(profile: String, points: ArrayList<Waypoint>): LoadPromise {
         val promise = LoadPromise(points)
         executor.submit {
-            println("loading points $profile")
             if (cache.containsKey(profile)) {
-                println("loading from cache")
                 promise.load(cache[profile]!!)
             } else {
-                println("loading from file")
                 promise.load(loadFromFile(profile))
-                println("loaded from file")
             }
         }
         return promise

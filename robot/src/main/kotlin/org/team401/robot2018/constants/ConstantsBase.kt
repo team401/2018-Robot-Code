@@ -116,6 +116,7 @@ abstract class ConstantsBase {
         abstract val RIGHT_PDVA: PDVA
 
         abstract val HEADING_GAIN: Double
+        abstract val HEADING_D: Double
 
         abstract val TIP_CORRECTION_SCALAR: Int //fixme (testme)
 
