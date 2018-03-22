@@ -139,11 +139,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         imuValue[1] = 0.0
         imuValue[2] = 0.0
 
-        imu.getYawPitchRoll(imuValue)
-        imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(imuValue[0] % 360), 100)
         left.zero(0)
         right.zero(0)
-        Thread.sleep(100)
 
         left.awaitLoading() //Wait for points to finish loading
         right.awaitLoading()

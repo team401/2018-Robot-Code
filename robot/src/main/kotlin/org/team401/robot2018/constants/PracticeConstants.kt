@@ -24,6 +24,7 @@ class PracticeConstants: ConstantsBase() {
         override val RIGHT_PDVA = PDVA(1/19.0, 0/3.0, 1/1200.0, 0.0)
 
         override val HEADING_GAIN = .0025
+        override val HEADING_D = 0.5
 
         override val TIP_CORRECTION_SCALAR = 10
         override val PITCH_CORRECTION_MIN = 10

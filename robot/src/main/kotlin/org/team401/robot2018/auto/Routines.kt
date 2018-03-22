@@ -34,7 +34,8 @@ object Routines {
                 imu,
                 Constants.DrivetrainParameters.LEFT_PDVA,
                 Constants.DrivetrainParameters.RIGHT_PDVA,
-                Constants.DrivetrainParameters.HEADING_GAIN
+                Constants.DrivetrainParameters.HEADING_GAIN,
+                Constants.DrivetrainParameters.HEADING_D
         )
 
         step.loadPoints(
