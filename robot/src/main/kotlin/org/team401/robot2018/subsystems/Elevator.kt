@@ -11,10 +11,13 @@ import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.Subsystem
 import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.event.Events
+import org.snakeskin.logic.Direction
 import org.snakeskin.logic.LockingDelegate
 import org.snakeskin.publish.Publisher
 import org.team401.robot2018.Gamepad
+import org.team401.robot2018.LeftStick
 import org.team401.robot2018.PDP
+import org.team401.robot2018.RightStick
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.*
 import java.io.File
@@ -483,13 +486,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorStates.CLIMB_MANUAL) {
             var position = 0
+            var scalar = 0.0
 
             entry {
+                scalar = 0.0
                 position = gearbox.getPosition()
             }
 
             action {
-                position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.CLIMB_MANUAL_RATE)).toInt()
+                scalar = when(RightStick.readHat { STICK_HAT }) {
+                    Direction.NORTH -> 1.0
+                    Direction.SOUTH -> -1.0
+                    else -> 0.0
+                }
+                position += RobotMath.Elevator.inchesToTicks(scalar * Constants.ElevatorParameters.CLIMB_MANUAL_RATE).toInt()
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
                 climbSetpoint(position)
@@ -499,7 +509,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.CLIMB) {
             rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
             entry {
-                finalClimbSetpoint(Constants.ElevatorParameters.SWITCH_POS)
+                finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_BOTTOM_POS)
             }
         }
 

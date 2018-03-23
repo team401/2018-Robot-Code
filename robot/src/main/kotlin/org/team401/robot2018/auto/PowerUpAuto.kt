@@ -1,11 +1,14 @@
 package org.team401.robot2018.auto
 
+import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.DriverStation
 import openrio.powerup.MatchData
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.SubSequence
 import org.team401.robot2018.etc.StepAdder
+import org.team401.robot2018.etc.encoderMissing
 import org.team401.robot2018.etc.not
+import org.team401.robot2018.subsystems.Drivetrain
 
 /*
  * 2018-Robot-Code - Created on 1/23/18
@@ -23,6 +26,22 @@ import org.team401.robot2018.etc.not
 object PowerUpAuto: RobotAuto() {
     override fun preAuto() {
 
+    }
+
+    private fun checkSensors(): Boolean {
+        if (Drivetrain.imu.state == PigeonIMU.PigeonState.NoComm) {
+            DriverStation.reportWarning("IMU is not present!  Auto will not run", false)
+            return false
+        }
+        if (Drivetrain.left.encoderMissing()) {
+            DriverStation.reportWarning("Left drive encoder is not present!  Auto will not run", false)
+            return false
+        }
+        if (Drivetrain.right.encoderMissing()) {
+            DriverStation.reportWarning("Right drive encoder is not present!  Auto will not run", false)
+            return false
+        }
+        return true
     }
 
     private fun scaleFirst(): Boolean {
@@ -53,7 +72,7 @@ object PowerUpAuto: RobotAuto() {
 
     override fun assembleAuto(add: StepAdder) {
         add(DelayStep(baseDelay)) //Wait for the base delay
-        if (target != AutoTarget.NOTHING) {
+        if (checkSensors() && target != AutoTarget.NOTHING) {
             Routines.setup() //Run common setup tasks (stow intake, elevator to high gear, lock elevator in place)
 
             when (target) {
