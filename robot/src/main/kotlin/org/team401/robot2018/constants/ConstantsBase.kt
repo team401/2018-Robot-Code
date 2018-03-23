@@ -148,7 +148,7 @@ abstract class ConstantsBase {
         val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
         val CLIMB_PREP_POS = 40000.0
-        val CLIMB_BOTTOM_POS = 2000.0
+        val CLIMB_BOTTOM_POS = RobotMath.Elevator.inchesToTicks(36.0)
 
         val UNKNOWN_SCALE_POS = 25000.0
 

@@ -32,9 +32,7 @@ val LeftStick = HumanControls.t16000m(0) {
             driveShiftMachine.setState(DriveShiftStates.HIGH)
         }
     }
-}
 
-val RightStick = HumanControls.t16000m(1) {
     //E STOP ELEVATOR
     //* . .
     //. . .
@@ -61,6 +59,32 @@ val RightStick = HumanControls.t16000m(1) {
     whenButton(Buttons.BASE_LEFT_BOTTOM_3) {
         pressed {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
+        }
+    }
+}
+
+val RightStick = HumanControls.t16000m(1) {
+    val elevatorMachine = ElevatorSubsystem.machine(ELEVATOR_MACHINE)
+    val elevatorClampMachine = ElevatorSubsystem.machine(ELEVATOR_CLAMP_MACHINE)
+    val elevatorKickerMachine = ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE)
+    val intakeFolding = IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE)
+    val intakeWheels = IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE)
+    val rungsMachine = RungsSubsystem.machine(RUNGS_MACHINE)
+    val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
+    val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
+    val elevatorRatchetMachine = ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE)
+
+    whenButton(Buttons.STICK_LEFT) {
+        pressed {
+            elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+            elevatorMachine.setState(ElevatorStates.START_CLIMB)
+        }
+    }
+
+    whenButton(Buttons.STICK_RIGHT) {
+        pressed {
+            elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+            elevatorMachine.setState(ElevatorStates.CLIMB)
         }
     }
 }
@@ -172,21 +196,4 @@ val Gamepad = HumanControls.f310(2) {
             elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
         }
     }
-
-    //Climbing and rungs
-    /*
-    whenButton(Buttons.BACK) {
-        pressed {
-            rungsMachine.setState(RungsStates.DEPLOY)
-            elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
-            elevatorMachine.setState(ElevatorStates.START_CLIMB)
-        }
-    }
-
-    whenButton(Buttons.START) {
-        pressed {
-            elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
-        }
-    }
-    */
 }
