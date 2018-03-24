@@ -45,9 +45,9 @@ class CompConstants: ConstantsBase() {
 
     override val IntakeParameters = object: IntakeParametersConfig() {
         override val HAVE_CUBE_CURRENT_CLAMP = 10.0
-        override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.0
+        override val HAVE_CUBE_CURRENT_LEFT_HOLD = 2.0
         override val HAVE_CUBE_CURRENT_LEFT_INTAKE = 5.0
-        override val HAVE_CUBE_CURRENT_RIGHT_HOLD = 0.0
+        override val HAVE_CUBE_CURRENT_RIGHT_HOLD = 2.0
         override val HAVE_CUBE_CURRENT_RIGHT_INTAKE = 5.0
 
         override val PIDF = object: PIDF {

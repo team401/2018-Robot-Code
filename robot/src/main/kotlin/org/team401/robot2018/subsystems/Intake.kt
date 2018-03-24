@@ -115,7 +115,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         state(IntakeFoldingStates.GO_TO_INTAKE) {
             action {
-                if (Elevator.estop || Elevator.atCollection()) {
+                if (Elevator.estop || Elevator.atCollection() || ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_VAULT_RUNNER) {
                     Thread.sleep(100)
                     setState(IntakeFoldingStates.INTAKE)
                 }
@@ -230,7 +230,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 send(RobotEvents.HAVE_CUBE)
                 Thread.sleep(Constants.IntakeParameters.HAVE_CUBE_CLAMP_DELAY)
 
-                if (!Elevator.estop) {
+                if (!Elevator.estop && ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() != ElevatorStates.POS_VAULT_RUNNER) {
                     foldingMachine.setState(IntakeFoldingStates.STOWED)
                     setState(IntakeWheelsStates.IDLE)
                 }

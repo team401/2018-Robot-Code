@@ -3,6 +3,7 @@ package org.team401.robot2018.auto
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.DriverStation
 import openrio.powerup.MatchData
+import org.team401.robot2018.auto.motion.ProfileLoader
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.SubSequence
 import org.team401.robot2018.etc.StepAdder
@@ -25,11 +26,28 @@ import org.team401.robot2018.subsystems.Drivetrain
 
 object PowerUpAuto: RobotAuto() {
     override fun preAuto() {
-
+        fun profiles(target: Any) = arrayOf(
+                "/home/lvuser/profiles/$robotPos-${target}_L.csv",
+                "/home/lvuser/profiles/$robotPos-${target}_R.csv"
+        )
+        fun profilesSided(target: Any) = arrayOf(
+                "/home/lvuser/profiles/$robotPos-${target}_LEFT_L.csv",
+                "/home/lvuser/profiles/$robotPos-${target}_LEFT_R.csv",
+                "/home/lvuser/profiles/$robotPos-${target}_RIGHT_L.csv",
+                "/home/lvuser/profiles/$robotPos-${target}_RIGHT_R.csv"
+        )
+        //Here, we identify all possible first profiles and cache them
+        //This is done using the selected mode and starting position
+        when (target) {
+            AutoTarget.NOTHING -> {}
+            AutoTarget.BASELINE_ONLY -> ProfileLoader.preloadThese(*profiles("BASELINE"))
+            AutoTarget.SWITCH_ONLY -> ProfileLoader.preloadThese(*profilesSided("SWITCH"))
+            AutoTarget.SCALE_ONLY, AutoTarget.FULL -> ProfileLoader.preloadThese(*profilesSided("SCALE"))
+        }
     }
 
     private fun checkSensors(): Boolean {
-        if (Drivetrain.imu.state == PigeonIMU.PigeonState.NoComm) {
+        if (Drivetrain.imu.state != PigeonIMU.PigeonState.Ready) {
             DriverStation.reportWarning("IMU is not present!  Auto will not run", false)
             return false
         }
@@ -77,23 +95,40 @@ object PowerUpAuto: RobotAuto() {
 
             when (target) {
                 AutoTarget.BASELINE_ONLY -> {
-                    Routines.drive(robotPos, FieldElements.baseline(!switchSide), SubSequence(*Commands.HighLockDeployAndWait))
-                    //AUTO END
+                    if (robotPos != RobotPosition.DS_CENTER) {
+                        Routines.drive(robotPos, FieldElements.baseline(!switchSide), SubSequence(*Commands.HighLockDeployAndWait))
+                        add(Commands.HomeElevator)
+                    }
+                   //AUTO END
                 }
 
                 AutoTarget.SWITCH_ONLY -> {
                     Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
                     Routines.score() //Score cube
+                    add(DelayStep(1000))
+                    Routines.drive("BACK_UP")
+                    add(Commands.HomeElevator)
                     //AUTO END
                 }
 
                 AutoTarget.SCALE_ONLY -> {
                     Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
                     Routines.score()
+                    add(DelayStep(1000))
+                    Routines.drive("BACK_UP")
+                    add(Commands.HomeElevator)
                     //AUTO END
                 }
 
                 AutoTarget.FULL -> {
+                    //Drive to scale while deploying and then move carriage to scale position
+                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                    //Score the cube
+                    Routines.score()
+                    add(DelayStep(1000))
+                    Routines.drive("BACK_UP")
+                    add(Commands.HomeElevator)
+                    /*
                     if (scaleFirst()) {
                         Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
                         Routines.score()
@@ -116,6 +151,7 @@ object PowerUpAuto: RobotAuto() {
                         Routines.drive(FieldElements.backFromSwitchFront(scaleSide), FieldElements.scale(scaleSide), Commands.ElevatorToScale)
                         Routines.score()
                     }
+                    */
                     //AUTO END
                 }
 

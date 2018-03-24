@@ -69,7 +69,6 @@ val RightStick = HumanControls.t16000m(1) {
     val elevatorKickerMachine = ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE)
     val intakeFolding = IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE)
     val intakeWheels = IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE)
-    val rungsMachine = RungsSubsystem.machine(RUNGS_MACHINE)
     val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
     val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
     val elevatorRatchetMachine = ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE)
@@ -95,7 +94,6 @@ val Gamepad = HumanControls.f310(2) {
     val elevatorKickerMachine = ElevatorSubsystem.machine(ELEVATOR_KICKER_MACHINE)
     val intakeFolding = IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE)
     val intakeWheels = IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE)
-    val rungsMachine = RungsSubsystem.machine(RUNGS_MACHINE)
     val elevatorShifterMachine = ElevatorSubsystem.machine(ELEVATOR_SHIFTER_MACHINE)
     val elevatorDeployMachine = ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE)
     val elevatorRatchetMachine = ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE)
@@ -109,12 +107,10 @@ val Gamepad = HumanControls.f310(2) {
             }
 
             Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
-            Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
+            //Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
             Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
-            Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE)
-
-        // Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
-        // Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
+            //Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE)
+            Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
         }
     }
 

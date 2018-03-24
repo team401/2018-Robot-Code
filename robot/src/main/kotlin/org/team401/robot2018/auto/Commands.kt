@@ -63,7 +63,7 @@ object Commands {
     val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
     val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
-    val HighLockDeployAndWait = arrayOf(ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
+    val HighLockDeployAndWait = arrayOf(BackgroundDelayStep(500), ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
 
     val ZeroIMU = LambdaStep { Drivetrain.imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 0); Thread.sleep(500) }
 }
