@@ -113,7 +113,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         //Empty state for when the drivetrain is being controlled by other processes
         state(DriveStates.EXTERNAL_CONTROL) {
             entry {
-                Drivetrain.setRampRate(0.0, 0.0)
+                Drivetrain.setRampRate(.25, .25)
             }
         }
 
