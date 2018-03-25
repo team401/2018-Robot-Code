@@ -200,14 +200,14 @@ abstract class ConstantsBase {
         val INTAKE_RATE = .7
         val RETAIN_RATE = .25
         val REVERSE_RATE = -0.7
-        val HOMING_RATE = -0.25
+        val HOMING_RATE = -0.5
 
         val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        val STOWED_POS = 0.0
-        val INTAKE_POS = 2010.0
-        val GRAB_POS = 1210.0
+        val STOWED_POS = 0.0 + 170.0
+        val INTAKE_POS = 2010.0 - 100.0
+        val GRAB_POS = 1210.0 + 150.0
 
         val HOMING_COUNT = 10
 

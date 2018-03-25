@@ -36,7 +36,7 @@ val LeftStick = HumanControls.t16000m(0) {
     //E STOP ELEVATOR
     //* . .
     //. . .
-    whenButton(Buttons.BASE_LEFT_TOP_1) {
+    whenButton(Buttons.STICK_BOTTOM) {
         pressed {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.OPEN_LOOP_CONTROL)
             Elevator.estop = true
@@ -47,7 +47,7 @@ val LeftStick = HumanControls.t16000m(0) {
     //DEPLOY ELEVATOR
     //. . .
     //* . .
-    whenButton(Buttons.BASE_LEFT_BOTTOM_1) {
+    whenButton(Buttons.STICK_LEFT) {
         pressed {
             ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).setState(ElevatorDeployStates.DEPLOY)
         }
@@ -56,7 +56,7 @@ val LeftStick = HumanControls.t16000m(0) {
     //HOME ELEVATOR
     //. . .
     //. . *
-    whenButton(Buttons.BASE_LEFT_BOTTOM_3) {
+    whenButton(Buttons.STICK_RIGHT) {
         pressed {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
@@ -75,7 +75,9 @@ val RightStick = HumanControls.t16000m(1) {
 
     whenButton(Buttons.STICK_LEFT) {
         pressed {
+            elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
             elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
             elevatorMachine.setState(ElevatorStates.START_CLIMB)
         }
     }
@@ -84,6 +86,10 @@ val RightStick = HumanControls.t16000m(1) {
         pressed {
             elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
             elevatorMachine.setState(ElevatorStates.CLIMB)
+        }
+
+        released {
+            elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
         }
     }
 }
@@ -109,15 +115,18 @@ val Gamepad = HumanControls.f310(2) {
             Direction.NORTH -> elevatorMachine.setState(ElevatorStates.POS_SCALE_HIGH)
             //Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
             Direction.SOUTH -> elevatorMachine.setState(ElevatorStates.POS_DRIVE)
-            //Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE)
-            Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
+            Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_SCALE)
+            Direction.EAST -> elevatorMachine.setState(ElevatorStates.POS_SWITCH)
+            //Direction.WEST -> elevatorMachine.setState(ElevatorStates.POS_VAULT_RUNNER)
         }
     }
 
     //Intake control
     whenButton(Buttons.A) {
         pressed {
-            elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
+            if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+                elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
+            }
             Thread.sleep(100)
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeFolding.setState(IntakeFoldingStates.GO_TO_INTAKE)
@@ -140,11 +149,13 @@ val Gamepad = HumanControls.f310(2) {
             intakeWheels.setState(IntakeWheelsStates.INTAKE)
         }
         released {
-            if (intakeWheels.getState() != IntakeWheelsStates.IDLE) {
-                intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
-            }
-            if (intakeFolding.getState() != IntakeFoldingStates.STOWED) {
-                intakeFolding.setState(IntakeFoldingStates.GRAB)
+            if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER && !Elevator.estop) {
+                if (intakeWheels.getState() != IntakeWheelsStates.IDLE) {
+                    intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
+                }
+                if (intakeFolding.getState() != IntakeFoldingStates.STOWED) {
+                    intakeFolding.setState(IntakeFoldingStates.GRAB)
+                }
             }
         }
     }
@@ -190,6 +201,12 @@ val Gamepad = HumanControls.f310(2) {
     whenButton(Buttons.LEFT_BUMPER) {
         pressed {
             elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
+        }
+    }
+
+    whenButton(Buttons.BACK) {
+        pressed {
+            elevatorMachine.setState(ElevatorStates.POS_VAULT_RUNNER)
         }
     }
 }

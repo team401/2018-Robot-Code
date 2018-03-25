@@ -98,12 +98,15 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         right.configPeakCurrentDuration(Constants.IntakeParameters.RIGHT_PEAK_LIMIT_DUR, 0)
 
 
+        /*
         folding.pidf(
                 Constants.IntakeParameters.PIDF.P,
                 Constants.IntakeParameters.PIDF.I,
                 Constants.IntakeParameters.PIDF.D,
                 Constants.IntakeParameters.PIDF.F)
+                */
     }
+
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
         state(IntakeFoldingStates.GRAB) {
@@ -192,7 +195,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
                     inrushCounter++
                 } else {
-
                     //If all conditions are met to say we have a cube
                     if (left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_INTAKE &&
                         right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE) {
@@ -206,20 +208,15 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             timeout(Constants.IntakeParameters.CUBE_HELD_TIME, IntakeWheelsStates.HAVE_CUBE)
 
             action {
-                left.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
-                right.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                println("GOT  Clamp: ${folding.outputCurrent}  Left: ${left.outputCurrent}  Right: ${right.outputCurrent}")
-
-                /*
                 //If any of the conditions are met to say we don't have a cube
-                if (left.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_HOLD ||
-                    right.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_HOLD ||
-                    folding.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_CLAMP) {
+                if (left.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_INTAKE ||
+                    right.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE) {
 
                     setState(IntakeWheelsStates.INTAKE)
                 }
-                */
             }
         }
 
@@ -232,8 +229,8 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
                 if (!Elevator.estop && ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() != ElevatorStates.POS_VAULT_RUNNER) {
                     foldingMachine.setState(IntakeFoldingStates.STOWED)
-                    setState(IntakeWheelsStates.IDLE)
                 }
+                setState(IntakeWheelsStates.IDLE)
             }
         }
 

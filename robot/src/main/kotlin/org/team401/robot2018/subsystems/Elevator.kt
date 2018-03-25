@@ -267,6 +267,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.GO_TO_COLLECTION) {
+            rejectIf { isInState(ElevatorStates.POS_VAULT_RUNNER) }
+
             action {
                 if (Intake.stowed() || Intake.atGrab()) {
                     setState(ElevatorStates.POS_COLLECTION)
@@ -275,7 +277,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_COLLECTION) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.COLLECTION_POS)
@@ -283,7 +285,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_DRIVE) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
@@ -291,7 +293,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SWITCH) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
@@ -299,7 +301,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE_LOW) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_LOW)
@@ -307,7 +309,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
@@ -315,7 +317,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_SCALE_HIGH) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_HIGH)
@@ -323,7 +325,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_MAX) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.MAX_POS)
@@ -574,6 +576,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
         */
         //Assume we are already deployed
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
 
         if (!Elevator.homed) { //If we aren't homed
             Thread.sleep(1000) //Wait a second for us to back up
@@ -597,6 +600,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
     }
     on (RobotEvents.EJECT_CUBE){
-        elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+            elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        }
     }
 }
