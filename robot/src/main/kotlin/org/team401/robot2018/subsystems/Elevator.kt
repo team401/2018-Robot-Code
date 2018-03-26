@@ -588,7 +588,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         //Always put all machines in a known state on enable
-        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
         elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
     }
