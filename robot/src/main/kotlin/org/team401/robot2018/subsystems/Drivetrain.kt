@@ -27,6 +27,7 @@ import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.etc.getCurrent
 import org.team401.robot2018.etc.shiftUpdate
+import org.team401.robot2018.etc.withinTolerance
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -214,7 +215,31 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                 )
             }
         }
-        state("MEME_GOTEM") {
+
+        state("MeasureWheelSize") {
+            var posLeft = 0
+            var posRight = 0
+            var gain = 0.0
+            val setpoint = 3
+
+            entry {
+                gain = SmartDashboard.getNumber("measureWheelsP", 0.0)
+            }
+
+            action {
+                posLeft = left.getPosition()
+                posRight = right.getPosition()
+                left.set(ControlMode.PercentOutput, (setpoint - posLeft) * gain)
+                right.set(ControlMode.PercentOutput, (setpoint - posRight) * gain)
+                if ((left.getPosition().withinTolerance(setpoint, .1)) &&
+                        right.getPosition().withinTolerance(setpoint, .1)) {
+                    println("Done.  Left pos: $posLeft  Right pos: $posRight")
+                    setState(DriveStates.CHEESY)
+                }
+            }
+        }
+
+        state("MeasureTrackwidth") {
             var startTime = 0L
             var readingLeft = 0
             var readingRight = 0

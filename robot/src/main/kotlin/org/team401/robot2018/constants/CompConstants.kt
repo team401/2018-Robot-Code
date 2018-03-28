@@ -1,5 +1,6 @@
 package org.team401.robot2018.constants
 
+import org.team401.robot2018.auto.motion.DriveGains
 import org.team401.robot2018.auto.motion.PDVA
 
 /*
@@ -22,6 +23,7 @@ class CompConstants: ConstantsBase() {
 
         override val LEFT_PDVA = PDVA(.35, 0.0, 1/650.0, 0.0005)
         override val RIGHT_PDVA = PDVA(.35, 0.0, 1/650.0, 0.0005)
+        override val DRIVE_GAINS = DriveGains(0.4, 0.002, 1/500.0, .0005, .023)
 
         override val HEADING_GAIN = .017
         override val HEADING_D = .5

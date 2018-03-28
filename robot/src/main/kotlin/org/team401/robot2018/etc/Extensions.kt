@@ -88,4 +88,4 @@ fun TankDrivetrain.shiftUpdate(state: ShiftCommand): Boolean {
 
 fun Gearbox.encoderMissing() = (master as TalonSRX).sensorCollection.pulseWidthRiseToRiseUs == 0
 
-fun Double.withinTolerance(other: Double, tolerance: Double) = Math.abs(this - other) < tolerance
+fun Number.withinTolerance(other: Number, tolerance: Number) = Math.abs(this.toDouble() - other.toDouble()) < tolerance.toDouble()

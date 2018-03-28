@@ -62,32 +62,6 @@ object PowerUpAuto: RobotAuto() {
         return true
     }
 
-    private fun scaleFirst(): Boolean {
-        //If we are in the middle
-        if (robotPos == RobotPosition.DS_CENTER) {
-            return false
-        }
-
-        //If we aren't aligned with the switchSide, always go to the scaleSide
-        if (!robotPos.alignedWith(switchSide)) {
-            return true
-        }
-
-        //If we are aligned with the switchSide and the scaleSide, go to the scaleSide
-        if (robotPos.alignedWith(switchSide) && robotPos.alignedWith(scaleSide)) {
-            return true
-        }
-
-        //If we are aligned with the switchSide and not the scaleSide, evaluate whether or not our teammates can do switchSide in auto
-        if (robotPos.alignedWith(switchSide) && !robotPos.alignedWith(scaleSide)) {
-            return teammatesCanDoSwitch
-        }
-
-        //Some unhandled condition
-        DriverStation.reportWarning("Auto 'scaleFirst' found an unhandled condition!  Field: ${DriverStation.getInstance().gameSpecificMessage}  Robot: $robotPos  Partner Switch: $teammatesCanDoSwitch", false)
-        return false
-    }
-
     override fun assembleAuto(add: StepAdder) {
         add(DelayStep(baseDelay)) //Wait for the base delay
         if (checkSensors() && target != AutoTarget.NOTHING) {
@@ -105,7 +79,6 @@ object PowerUpAuto: RobotAuto() {
                 AutoTarget.SWITCH_ONLY -> {
                     Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
                     Routines.score() //Score cube
-                    add(DelayStep(1000))
                     Routines.drive("BACK_UP")
                     add(Commands.HomeElevator)
                     //AUTO END
@@ -114,7 +87,6 @@ object PowerUpAuto: RobotAuto() {
                 AutoTarget.SCALE_ONLY -> {
                     Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
                     Routines.score()
-                    add(DelayStep(1000))
                     Routines.drive("BACK_UP")
                     add(Commands.HomeElevator)
                     //AUTO END
@@ -125,33 +97,13 @@ object PowerUpAuto: RobotAuto() {
                     Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
                     //Score the cube
                     Routines.score()
-                    add(DelayStep(1000))
-                    Routines.drive("BACK_UP")
+                    Routines.drive(FieldElements.scale(scaleSide), FieldElements.backFromScale(scaleSide))
+                    Routines.drive(FieldElements.backFromScale(scaleSide), FieldElements.switch(switchSide), Commands.IntakeToGrab)
                     add(Commands.HomeElevator)
-                    /*
-                    if (scaleFirst()) {
-                        Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
-                        Routines.score()
-                        Routines.drive(FieldElements.scale(scaleSide), FieldElements.backFromScale(scaleSide)) //drive back from scaleSide
-                        add(Commands.IntakeToGrab) //Prepare intake for grabbing a cube
-                        Routines.drive(FieldElements.backFromScale(scaleSide), FieldElements.switch(switchSide), Commands.HomeElevator) //drive and home
-                        Routines.intake() //Intake the cube
-                        add(Commands.ElevatorToSwitch) //Go to switch
-                        add(Commands.WaitForAtSwitch) //Wait
-                        Routines.drive("SWITCH_FINAL") //Drive the final way to the switch
-                        Routines.score()
-                    } else {
-                        Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait))
-                        Routines.score()
-                        Routines.drive(FieldElements.switch(switchSide), FieldElements.backFromSwitch(switchSide))
-                        add(Commands.IntakeToGrab)
-                        Routines.drive(FieldElements.backFromSwitch(switchSide), FieldElements.switch(scaleSide), Commands.HomeElevator) //Drive to the side of the switch aligned with the scale
-                        Routines.intake()
-                        Routines.drive(FieldElements.switch(scaleSide), FieldElements.backFromSwitchFront(scaleSide)) //Drive back
-                        Routines.drive(FieldElements.backFromSwitchFront(scaleSide), FieldElements.scale(scaleSide), Commands.ElevatorToScale)
-                        Routines.score()
-                    }
-                    */
+                    Routines.intake()
+                    add(Commands.ElevatorToSwitch)
+                    add(Commands.WaitForAtSwitch)
+                    Routines.drive("SWITCH_FINAL")
                     //AUTO END
                 }
 

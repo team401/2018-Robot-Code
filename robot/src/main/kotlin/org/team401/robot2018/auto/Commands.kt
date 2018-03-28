@@ -40,6 +40,7 @@ object Commands {
         ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
     }
 
+
     val WaitForAtSwitch = WaitForStep(Elevator::atSwitch)
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)

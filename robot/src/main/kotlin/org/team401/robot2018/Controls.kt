@@ -95,7 +95,7 @@ val RightStick = HumanControls.t16000m(1) {
 
     whenButton(Buttons.STICK_BOTTOM) {
         pressed {
-            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("MEME_GOTEM")
+            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("MeasureWheelSize")
         }
 
         released {

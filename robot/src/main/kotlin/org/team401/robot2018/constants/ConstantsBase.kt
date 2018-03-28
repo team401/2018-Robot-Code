@@ -1,5 +1,6 @@
 package org.team401.robot2018.constants
 
+import org.team401.robot2018.auto.motion.DriveGains
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.etc.RobotMath
 
@@ -115,6 +116,9 @@ abstract class ConstantsBase {
 
         abstract val LEFT_PDVA: PDVA 
         abstract val RIGHT_PDVA: PDVA
+        abstract val DRIVE_GAINS: DriveGains
+        val DRIVE_MAGNITUDE = 0.8
+        val HEADING_MAGNITUDE = 0.2
 
         abstract val HEADING_GAIN: Double
         abstract val HEADING_D: Double
