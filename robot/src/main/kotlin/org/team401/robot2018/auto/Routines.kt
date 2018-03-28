@@ -24,14 +24,9 @@ object Routines {
     lateinit var add: StepAdder
 
     fun drive(profile: String, vararg otherActions: AutoStep) {
-        val leftMaster = Drivetrain.left.master
-        val rightMaster = Drivetrain.right.master
-        val imu = Drivetrain.imu
-
+        /*
         val step = RioProfileRunner(
-                leftMaster,
-                rightMaster,
-                imu,
+                Drivetrain,
                 Constants.DrivetrainParameters.LEFT_PDVA,
                 Constants.DrivetrainParameters.RIGHT_PDVA,
                 Constants.DrivetrainParameters.HEADING_GAIN,
@@ -44,6 +39,7 @@ object Routines {
         )
 
         add(StepGroup(step, *otherActions))
+        */
     }
 
     fun drive(start: Any, end: Any, vararg otherActions: AutoStep) = drive("$start-$end", *otherActions)

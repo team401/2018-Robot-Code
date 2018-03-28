@@ -92,6 +92,16 @@ val RightStick = HumanControls.t16000m(1) {
             elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
         }
     }
+
+    whenButton(Buttons.STICK_BOTTOM) {
+        pressed {
+            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("MEME_GOTEM")
+        }
+
+        released {
+            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY)
+        }
+    }
 }
 
 val Gamepad = HumanControls.f310(2) {
