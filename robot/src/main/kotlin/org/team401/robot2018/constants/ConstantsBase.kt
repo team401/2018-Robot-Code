@@ -83,7 +83,8 @@ abstract class ConstantsBase {
         val ELEVATOR_KICKER_SOLENOID = 6
         val ELEVATOR_CLAMP_SOLENOID = 5
 
-        val RUNGS_DEPLOY_SOLENOID = 7
+        val RUNGS_DEPLOY_SOLENOID = 7 //OLD
+        val ELEVATOR_RATCHET_SOLENOID = 7
     }
     val Pneumatics = PneumaticsConfig()
     
@@ -128,7 +129,7 @@ abstract class ConstantsBase {
     abstract class ElevatorParametersConfig {
         val DEPLOY_TIMER = 3500L //ms
         
-        val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
+        val MANUAL_RATE = 16 * .02 //inches per second (converted to inches per 20 ms)
         val CLIMB_MANUAL_RATE = 16 * .02
 
         val HOMING_RATE = -0.25
@@ -174,11 +175,11 @@ abstract class ConstantsBase {
         }
         val ClampMachine = ClampMachineConfig()
         
-        class RachetMachineConfig {
+        class RatchetMachineConfig {
             val LOCKED = true
             val UNLOCKED = false
         }
-        val RachetMachine = RachetMachineConfig()
+        val RatchetMachine = RatchetMachineConfig()
         
         class ShifterMachineConfig {
             val HIGH = true
@@ -199,14 +200,14 @@ abstract class ConstantsBase {
         val INTAKE_RATE = .7
         val RETAIN_RATE = .25
         val REVERSE_RATE = -0.7
-        val HOMING_RATE = -0.25
+        val HOMING_RATE = -0.5
 
         val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        val STOWED_POS = 0.0
-        val INTAKE_POS = 2010.0
-        val GRAB_POS = 1210.0
+        val STOWED_POS = 0.0 + 170.0
+        val INTAKE_POS = 2010.0 - 100.0
+        val GRAB_POS = 1210.0 + 150.0
 
         val HOMING_COUNT = 10
 
@@ -238,7 +239,7 @@ abstract class ConstantsBase {
         val RIGHT_PEAK_LIMIT_DUR = 50
 
         val INRUSH_COUNT = 30
-        val CUBE_HELD_TIME = 150L
+        val CUBE_HELD_TIME = 300L
         val HAVE_CUBE_CLAMP_DELAY = 70L
 
         abstract val PIDF: PIDF
