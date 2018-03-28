@@ -1,6 +1,9 @@
 package org.team401.robot2018.auto.motion
 
+import ch.qos.logback.core.status.StatusUtil
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.StatusFrame
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
 import com.google.gson.Gson
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -27,13 +30,14 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     
     private var leftGains = PDVA()
     private var rightGains = PDVA()
-    private var headingGain = 0.0
+    private var hP = 0.0
+    private var hD = 0.0
     private var leftPointfile = ""
     private var rightPointfile = ""
 
     private lateinit var runner: RioProfileRunner
-    private lateinit var leftCurrent: RioProfileRunner.Waypoint
-    private lateinit var rightCurrent: RioProfileRunner.Waypoint
+    private lateinit var leftCurrent: Waypoint
+    private lateinit var rightCurrent: Waypoint
 
     private val gson = Gson()
     
@@ -50,7 +54,8 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
                 SmartDashboard.getNumber("tuningRunner-$name-rightV", 0.0),
                 SmartDashboard.getNumber("tuningRunner-$name-rightA", 0.0)
         )
-        headingGain = SmartDashboard.getNumber("tuningRunner-$name-H", 0.0)
+        hP = SmartDashboard.getNumber("tuningRunner-$name-hP", 0.0)
+        hD = SmartDashboard.getNumber("tuningRunner-$name-hD", 0.0)
 
         leftPointfile = SmartDashboard.getString("tuningRunner-$name-lPoints", "")
         rightPointfile = SmartDashboard.getString("tuningRunner-$name-rPoints", "")
@@ -65,8 +70,8 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
                                    val head: Double,
                                    val desHead: Double,
                                    val time: Long) {
-        data class Side(val pos: Int,
-                        val vel: Int,
+        data class Side(val pos: Double,
+                        val vel: Double,
                         val desPos: Double,
                         val desVel: Double)
     }
@@ -76,14 +81,14 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
         imu.getYawPitchRoll(imuData)
         val currentData = PublishData(
             PublishData.Side(
-                RobotMath.UnitConversions.nativeUnitsToRevolutions(leftController.getSelectedSensorPosition(0).toDouble()).toInt(),
-                RobotMath.UnitConversions.nativeUnitsToRpm(leftController.getSelectedSensorVelocity(0).toDouble()).toInt(),
+                RobotMath.UnitConversions.nativeUnitsToRevolutions(leftController.getSelectedSensorPosition(0).toDouble()),
+                RobotMath.UnitConversions.nativeUnitsToRpm(leftController.getSelectedSensorVelocity(0).toDouble()),
                 leftCurrent.position,
                 leftCurrent.velocity
             ),
             PublishData.Side(
-                    RobotMath.UnitConversions.nativeUnitsToRevolutions(rightController.getSelectedSensorPosition(0).toDouble()).toInt(),
-                    RobotMath.UnitConversions.nativeUnitsToRpm(rightController.getSelectedSensorVelocity(0).toDouble()).toInt(),
+                    RobotMath.UnitConversions.nativeUnitsToRevolutions(rightController.getSelectedSensorPosition(0).toDouble()),
+                    RobotMath.UnitConversions.nativeUnitsToRpm(rightController.getSelectedSensorVelocity(0).toDouble()),
                     rightCurrent.position,
                     rightCurrent.velocity
             ), imuData[0], leftCurrent.heading, leftCurrent.timestep * runner.index().toLong()
@@ -94,11 +99,10 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     
     override fun entry() {
         done = false
-
         SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
-        runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, headingGain, rate)
+        runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, hP, hD, rate)
         runner.loadPoints(leftPointfile, rightPointfile)
         runner.entry()
     }

@@ -4,17 +4,15 @@ import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
-import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.Solenoid
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.Subsystem
 import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.event.Events
+import org.snakeskin.logic.Direction
 import org.snakeskin.logic.LockingDelegate
-import org.snakeskin.publish.Publisher
 import org.team401.robot2018.Gamepad
-import org.team401.robot2018.PDP
+import org.team401.robot2018.RightStick
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.*
 import java.io.File
@@ -61,6 +59,7 @@ object ElevatorStates {
     const val POS_SCALE = "scaleSide"
     const val POS_SCALE_HIGH = "scale_high"
     const val POS_MAX = "max"
+    const val POS_VAULT_RUNNER = "vault-outOfWay"
 
     const val START_CLIMB = "startClimb"
     const val CLIMB_MANUAL = "climbAlign"
@@ -95,7 +94,7 @@ object Elevator {
     lateinit var gearbox: Gearbox
     lateinit var shifter: Solenoid
     lateinit var deployer: Solenoid
-    lateinit var ratchet: Servo
+    lateinit var ratchet: Solenoid
     lateinit var kicker: Solenoid
     lateinit var clamp: Solenoid
 
@@ -122,8 +121,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
     val kicker = Solenoid(Constants.Pneumatics.ELEVATOR_KICKER_SOLENOID)
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
-
-    val ratchet = Servo(Constants.ElevatorParameters.RATCHET_SERVO_PORT)
+    val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
 
     fun runMode() {
         master.configMotionCruiseVelocity(21680, 0)
@@ -159,9 +157,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         master.configPeakOutputForward(1.0, 0)
         master.configPeakOutputReverse(-1.0, 0)
-
-
-
     }
 
     val elevatorDeployMachine = stateMachine(ELEVATOR_DEPLOY_MACHINE) {
@@ -272,6 +267,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.GO_TO_COLLECTION) {
+            rejectIf { isInState(ElevatorStates.POS_VAULT_RUNNER) }
+
             action {
                 if (Intake.stowed() || Intake.atGrab()) {
                     setState(ElevatorStates.POS_COLLECTION)
@@ -280,7 +277,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_COLLECTION) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.COLLECTION_POS)
@@ -288,30 +285,23 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_DRIVE) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
             }
-            action {
-                //println("UP: " + master.getSelectedSensorPosition(0))
-            }
         }
 
         state(ElevatorStates.POS_SWITCH) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
             }
-
-            action {
-                //println("DOWN: " + master.getSelectedSensorPosition(0))
-            }
         }
 
         state(ElevatorStates.POS_SCALE_LOW) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_LOW)
@@ -319,20 +309,15 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
             }
-
-            action {
-                //println("SCALE: " + master.getSelectedSensorPosition(0))
-
-            }
         }
 
         state (ElevatorStates.POS_SCALE_HIGH) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_HIGH)
@@ -340,7 +325,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_MAX) {
-            rejectIf (::notDeployed)
+            
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.MAX_POS)
@@ -357,6 +342,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.SCALE_POS_UNKNOWN) {
             entry {
                 mmSetpoint(Constants.ElevatorParameters.UNKNOWN_SCALE_POS)
+            }
+        }
+
+        state(ElevatorStates.POS_VAULT_RUNNER) {
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
             }
         }
 
@@ -448,8 +439,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 velocity = master.getSelectedSensorVelocity(0)
-                gearbox.set(ControlMode.PercentOutput, -0.25) //Run down at the homing rate
-                gearbox.set(ControlMode.PercentOutput, -0.25) //Run down at the homing rate
+                gearbox.set(ControlMode.PercentOutput, Constants.ElevatorParameters.HOMING_RATE) //Run down at the homing rate
 
                 if (velocity == 0) {
                     homingCounter++
@@ -498,13 +488,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
         state(ElevatorStates.CLIMB_MANUAL) {
             var position = 0
+            var scalar = 0.0
 
             entry {
+                scalar = 0.0
                 position = gearbox.getPosition()
             }
 
             action {
-                position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.CLIMB_MANUAL_RATE)).toInt()
+                scalar = when(RightStick.readHat { STICK_HAT }) {
+                    Direction.NORTH -> 1.0
+                    Direction.SOUTH -> -1.0
+                    else -> 0.0
+                }
+                position += RobotMath.Elevator.inchesToTicks(scalar * Constants.ElevatorParameters.CLIMB_MANUAL_RATE).toInt()
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
                 climbSetpoint(position)
@@ -514,7 +511,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.CLIMB) {
             rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
             entry {
-                finalClimbSetpoint(Constants.ElevatorParameters.SWITCH_POS)
+                finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_BOTTOM_POS)
             }
         }
 
@@ -528,19 +525,22 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
+                ratchet.set(Constants.ElevatorParameters.RatchetMachine.LOCKED)
+                //ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
+                ratchet.set(Constants.ElevatorParameters.RatchetMachine.UNLOCKED)
+                //ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
             }
         }
 
         default {
             entry {
-                ratchet.set(0.0)
+                ratchet.set(false)
+                //ratchet.set(0.0)
             }
         }
     }
@@ -567,14 +567,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
+        /*
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
                 Thread.sleep(10)
             }
         }
+        */
+        //Assume we are already deployed
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
 
         if (!Elevator.homed) { //If we aren't homed
+            Thread.sleep(1000) //Wait a second for us to back up
+            elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
             elevatorMachine.setState(ElevatorStates.HOMING) //Home
         } else {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
@@ -582,16 +588,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         //Always put all machines in a known state on enable
-        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
         elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
     }
 
     on (RobotEvents.HAVE_CUBE) {
-        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
-        elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
+        if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+            elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
+        }
     }
     on (RobotEvents.EJECT_CUBE){
-        elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+            elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        }
     }
 }

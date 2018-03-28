@@ -58,7 +58,7 @@ fun IMotorControllerEnhanced.pidf(pidf: ConstantsBase.PIDF) {
 }
 
 fun IMotorControllerEnhanced.voltageCompensation(desiredOutput : Double, nominal: Double) {
-    set(ControlMode.PercentOutput, desiredOutput * (nominal/ PDP.voltage))
+    set(ControlMode.PercentOutput, desiredOutput * (nominal/ busVoltage))
 }
 
 fun TankDrivetrain.getCurrent() = Math.max(left.master.outputCurrent, right.master.outputCurrent)
@@ -85,5 +85,7 @@ fun TankDrivetrain.shiftUpdate(state: ShiftCommand): Boolean {
     }
     return false
 }
+
+fun Gearbox.encoderMissing() = (master as TalonSRX).sensorCollection.pulseWidthRiseToRiseUs == 0
 
 fun Double.withinTolerance(other: Double, tolerance: Double) = Math.abs(this - other) < tolerance

@@ -19,11 +19,11 @@ import org.team401.robot2018.constants.Constants
 object RobotMath {
     object Elevator {
         fun inchesToTicks(inches: Double,
-                          pitchDiameter: Double = Constants.ElevatorParameters.PITCH_DIAMETER,
+                          pitchDiameter: Double = 1.805,
                           ticksPerRev: Double = 4096.0) = (ticksPerRev * inches) / (Math.PI * pitchDiameter)
 
         fun feetToTicks(feet: Double,
-                        pitchDiameter: Double = Constants.ElevatorParameters.PITCH_DIAMETER,
+                        pitchDiameter: Double = 1.805,
                         ticksPerRev: Double = 4096.0) = inchesToTicks(feet * 12.0, pitchDiameter, ticksPerRev)
     }
 
@@ -39,4 +39,10 @@ object RobotMath {
     }
 
     fun averageCurrent(vararg motors: IMotorControllerEnhanced): Double = motors.map { it.outputCurrent }.average()
+    fun limit180(degIn: Double): Double {
+        var degOut = degIn
+        while (degOut >= 180.0) degOut -= 360.0
+        while (degOut < -180.0) degOut += 360.0
+        return degOut
+    }
 }

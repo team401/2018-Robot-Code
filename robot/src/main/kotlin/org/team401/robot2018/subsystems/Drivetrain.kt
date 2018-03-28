@@ -4,10 +4,7 @@ package org.team401.robot2018.subsystems
 
 //import org.team401.robot2018.LeftStick
 //import org.team401.robot2018.RightStick
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.FeedbackDevice
-import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
-import com.ctre.phoenix.motorcontrol.NeutralMode
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.Solenoid
@@ -73,6 +70,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     val right = Gearbox(rightFront, rightMidF, rightMidR, rightRear)
     val imu = PigeonIMU(leftRear)
 
+    left.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
+    right.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
+
     val shifter = Solenoid(Constants.Pneumatics.SHIFTER_SOLENOID)
 
     fun shift(state: ShifterState) {
@@ -111,7 +111,11 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         //Empty state for when the drivetrain is being controlled by other processes
-        state(DriveStates.EXTERNAL_CONTROL) {}
+        state(DriveStates.EXTERNAL_CONTROL) {
+            entry {
+                Drivetrain.setRampRate(.25, .25)
+            }
+        }
 
         //Shouldn't be used unless cheesy drive stops working for some reason
         state(DriveStates.OPEN_LOOP) {
@@ -153,6 +157,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             entry {
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
+                Drivetrain.setRampRate(.25, .25)
                 cheesyParameters.reset()
             }
             action {
@@ -261,42 +266,13 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         }
     }
 
-    fun testMotor(controller: IMotorControllerEnhanced, name: String): Boolean {
-        left.unlink()
-        right.unlink()
-        controller.set(ControlMode.PercentOutput, 1.0)
-        Thread.sleep(1000)
-
-        val position = controller.getSelectedSensorPosition(0)
-        val velocity = controller.getSelectedSensorVelocity(0)
-        SmartDashboard.putNumber("$name Position", position.toDouble())
-        SmartDashboard.putNumber("$name Velocity", velocity.toDouble())
-
-        controller.set(ControlMode.PercentOutput, 0.0)
-
-        left.link()
-        right.link()
-
-        return true //TODO pick a condition to test here
-    }
-
-    test ("Drivetrain leftFront") { testMotor(leftFront, "leftFront") }
-    test ("Drivetrain leftMidF") { testMotor(leftMidF, "leftMidF") }
-    test ("Drivetrain leftMidR") { testMotor(leftMidR, "leftMidR") }
-    test ("Drivetrain leftRear") { testMotor(leftRear, "leftRear") }
-
-    test ("Drivetrain rightFront") { testMotor(rightFront, "rightFront") }
-    test ("Drivetrain rightMidF") { testMotor(rightMidF, "rightMidF") }
-    test("Drivetrain rightMidR") { testMotor(rightMidR, "rightMidR") }
-    test("Drivetrain rightRear") { testMotor(rightRear, "rightRear") }
-
     on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.CHEESY)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 
     on (Events.AUTO_ENABLED) {
-        driveMachine.setState("nothing")
+        driveMachine.setState(DriveStates.EXTERNAL_CONTROL)
         shiftMachine.setState(DriveShiftStates.HIGH)
     }
 }

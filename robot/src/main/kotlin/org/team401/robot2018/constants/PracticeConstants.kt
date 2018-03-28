@@ -24,6 +24,7 @@ class PracticeConstants: ConstantsBase() {
         override val RIGHT_PDVA = PDVA(1/19.0, 0/3.0, 1/1200.0, 0.0)
 
         override val HEADING_GAIN = .0025
+        override val HEADING_D = 0.5
 
         override val TIP_CORRECTION_SCALAR = 10
         override val PITCH_CORRECTION_MIN = 10
@@ -43,9 +44,12 @@ class PracticeConstants: ConstantsBase() {
     }
 
     override val IntakeParameters = object: IntakeParametersConfig() {
-        override val STOWED_POS = 780.0
-        override val INTAKE_POS = 2500.0
-        override val GRAB_POS = (STOWED_POS + INTAKE_POS) / 2.0
+        override val HAVE_CUBE_CURRENT_CLAMP = 0.0
+        override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.0
+        override val HAVE_CUBE_CURRENT_LEFT_INTAKE = 0.0
+        override val HAVE_CUBE_CURRENT_RIGHT_HOLD = 0.0
+        override val HAVE_CUBE_CURRENT_RIGHT_INTAKE = 0.0
+
         override val PIDF = object: PIDF {
             override val P = 3.5
             override val I = 0.0

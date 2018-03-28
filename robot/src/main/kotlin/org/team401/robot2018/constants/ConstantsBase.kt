@@ -1,6 +1,7 @@
 package org.team401.robot2018.constants
 
 import org.team401.robot2018.auto.motion.PDVA
+import org.team401.robot2018.etc.RobotMath
 
 /*
  * 2018-Robot-Code - Created on 3/7/18
@@ -82,7 +83,8 @@ abstract class ConstantsBase {
         val ELEVATOR_KICKER_SOLENOID = 6
         val ELEVATOR_CLAMP_SOLENOID = 5
 
-        val RUNGS_DEPLOY_SOLENOID = 7
+        val RUNGS_DEPLOY_SOLENOID = 7 //OLD
+        val ELEVATOR_RATCHET_SOLENOID = 7
     }
     val Pneumatics = PneumaticsConfig()
     
@@ -115,6 +117,7 @@ abstract class ConstantsBase {
         abstract val RIGHT_PDVA: PDVA
 
         abstract val HEADING_GAIN: Double
+        abstract val HEADING_D: Double
 
         abstract val TIP_CORRECTION_SCALAR: Int //fixme (testme)
 
@@ -126,8 +129,10 @@ abstract class ConstantsBase {
     abstract class ElevatorParametersConfig {
         val DEPLOY_TIMER = 3500L //ms
         
-        val MANUAL_RATE = 2 * .02 //inches per second (converted to inches per 20 ms)
+        val MANUAL_RATE = 16 * .02 //inches per second (converted to inches per 20 ms)
         val CLIMB_MANUAL_RATE = 16 * .02
+
+        val HOMING_RATE = -0.25
         
         val CURRENT_LIMIT_CONTINUOUS = 30 //A
         
@@ -138,13 +143,13 @@ abstract class ConstantsBase {
 
         val ZERO_POS = 0.0 //ticks
         val COLLECTION_POS = ZERO_POS + 500.0
-        val CUBE_POS = ZERO_POS + 6000.0 //ticks
+        val CUBE_POS = RobotMath.Elevator.inchesToTicks(6.0) //ticks
         val SWITCH_POS = ZERO_POS + 17500.0 //ticks
         val SCALE_POS = ZERO_POS + 48800 //ticks
         val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
         val CLIMB_PREP_POS = 40000.0
-        val CLIMB_BOTTOM_POS = 2000.0
+        val CLIMB_BOTTOM_POS = RobotMath.Elevator.inchesToTicks(36.0)
 
         val UNKNOWN_SCALE_POS = 25000.0
 
@@ -170,11 +175,11 @@ abstract class ConstantsBase {
         }
         val ClampMachine = ClampMachineConfig()
         
-        class RachetMachineConfig {
+        class RatchetMachineConfig {
             val LOCKED = true
             val UNLOCKED = false
         }
-        val RachetMachine = RachetMachineConfig()
+        val RatchetMachine = RatchetMachineConfig()
         
         class ShifterMachineConfig {
             val HIGH = true
@@ -195,16 +200,22 @@ abstract class ConstantsBase {
         val INTAKE_RATE = .7
         val RETAIN_RATE = .25
         val REVERSE_RATE = -0.7
+        val HOMING_RATE = -0.5
 
         val FOLDING_MIN_VELOCITY = -400.0 //RPM, negative
         val FOLDING_MAX_VELOCITY = 400.0 //RPM, positive
 
-        abstract val STOWED_POS: Double
-        abstract val INTAKE_POS: Double
-        abstract val GRAB_POS: Double
+        val STOWED_POS = 0.0 + 170.0
+        val INTAKE_POS = 2010.0 - 100.0
+        val GRAB_POS = 1210.0 + 150.0
 
-        val HAVE_CUBE_CURRENT_INTAKE = 3.0
-        val HAVE_CUBE_CURRENT_HOLD = 1.0
+        val HOMING_COUNT = 10
+
+        abstract val HAVE_CUBE_CURRENT_LEFT_HOLD: Double
+        abstract val HAVE_CUBE_CURRENT_RIGHT_HOLD: Double
+        abstract val HAVE_CUBE_CURRENT_LEFT_INTAKE: Double
+        abstract val HAVE_CUBE_CURRENT_RIGHT_INTAKE: Double
+        abstract val HAVE_CUBE_CURRENT_CLAMP: Double
 
         val INVERT_LEFT = true
         val INVERT_RIGHT = false
@@ -228,7 +239,7 @@ abstract class ConstantsBase {
         val RIGHT_PEAK_LIMIT_DUR = 50
 
         val INRUSH_COUNT = 30
-        val CUBE_HELD_TIME = 150L
+        val CUBE_HELD_TIME = 300L
         val HAVE_CUBE_CLAMP_DELAY = 70L
 
         abstract val PIDF: PIDF
