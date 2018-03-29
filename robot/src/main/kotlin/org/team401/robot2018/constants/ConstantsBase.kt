@@ -139,6 +139,11 @@ abstract class ConstantsBase {
         val HOMING_RATE = -0.25
         
         val CURRENT_LIMIT_CONTINUOUS = 30 //A
+
+        val CLIMB_OVERDRIVE_CURRENT = 10 //A
+        val CLIMB_OVERDRIVE_COUNT = 10
+        val CLIMB_OVERDRIVE_OFFSET = -100 //ticks to modify
+        val CLIMB_OVERDRIVE_COOLDOWN = 25
         
         val MIN_VELOCITY = -400.0
         val MAX_VELOCITY = 400.0

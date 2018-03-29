@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.HumanControls
 import org.snakeskin.dsl.machine
 import org.snakeskin.logic.Direction
+import org.team401.robot2018.etc.LED
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -79,6 +80,7 @@ val RightStick = HumanControls.t16000m(1) {
             elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
             elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
             elevatorMachine.setState(ElevatorStates.START_CLIMB)
+            LED.startClimb()
         }
     }
 
@@ -90,6 +92,7 @@ val RightStick = HumanControls.t16000m(1) {
 
         released {
             elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            LED.finishClimb()
         }
     }
 

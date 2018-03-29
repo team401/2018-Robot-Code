@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import openrio.powerup.MatchData
+import org.snakeskin.LightLink
 import org.snakeskin.component.Gearbox
 import org.snakeskin.component.TankDrivetrain
 import org.team401.robot2018.PDP
@@ -26,7 +27,6 @@ import org.team401.robot2018.subsystems.ShiftCommand
  * @version 1/17/18
  */
 typealias StepAdder = (AutoStep) -> Unit
-
 
 fun IMotorControllerEnhanced.configZeroPosOnReverseLimit(enable: Boolean, timeout: Int = 0) {
     configSetParameter(ParamEnum.eClearPosOnLimitR, if (enable) 1.0 else 0.0, 0, 0, timeout)

@@ -489,17 +489,36 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.CLIMB_MANUAL) {
             var position = 0
             var scalar = 0.0
+            var overdriveCounter = 0
+            var cooldownCounter = 0
 
             entry {
                 scalar = 0.0
                 position = gearbox.getPosition()
+                overdriveCounter = 0
+                cooldownCounter = 0
             }
 
             action {
-                scalar = when(RightStick.readHat { STICK_HAT }) {
-                    Direction.NORTH -> 1.0
-                    Direction.SOUTH -> -1.0
-                    else -> 0.0
+                if (master.outputCurrent > Constants.ElevatorParameters.CLIMB_OVERDRIVE_CURRENT) {
+                    overdriveCounter++
+                }
+                if (overdriveCounter >= Constants.ElevatorParameters.CLIMB_OVERDRIVE_COUNT) {
+                    overdriveCounter = 0
+                    cooldownCounter = Constants.ElevatorParameters.CLIMB_OVERDRIVE_COOLDOWN
+                    position = gearbox.getPosition() + Constants.ElevatorParameters.CLIMB_OVERDRIVE_OFFSET
+                    LED.gotClimb()
+                }
+
+                if (cooldownCounter > 0) {
+                    cooldownCounter--
+                    scalar = 0.0
+                } else {
+                    scalar = when (RightStick.readHat { STICK_HAT }) {
+                        Direction.NORTH -> 1.0
+                        Direction.SOUTH -> -1.0
+                        else -> 0.0
+                    }
                 }
                 position += RobotMath.Elevator.inchesToTicks(scalar * Constants.ElevatorParameters.CLIMB_MANUAL_RATE).toInt()
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
@@ -509,7 +528,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.CLIMB) {
-            rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
+            rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) || !isInState(ElevatorStates.OPEN_LOOP_CONTROL) }
             entry {
                 finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_BOTTOM_POS)
             }

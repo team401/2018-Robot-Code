@@ -112,6 +112,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         state(IntakeFoldingStates.GRAB) {
             entry {
                 camera.set(1.0)
+                LED.intakeGrab()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
             }
         }
@@ -128,6 +129,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         state(IntakeFoldingStates.INTAKE) {
             entry {
                 camera.set(1.0)
+                LED.intakeOut()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
             }
         }
@@ -135,6 +137,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
         state(IntakeFoldingStates.STOWED) {
             entry {
                 camera.set(.65)
+                LED.intakeRetract()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
             }
         }
