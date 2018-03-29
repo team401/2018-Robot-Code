@@ -69,7 +69,7 @@ fun setup() {
 
     //CameraServer.getInstance().startAutomaticCapture(0)
 
-    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem, RungsSubsystem)
+    Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem)
     Controllers.add(LeftStick, RightStick, Gamepad)
 
     /*

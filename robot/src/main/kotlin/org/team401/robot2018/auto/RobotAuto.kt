@@ -32,9 +32,10 @@ abstract class RobotAuto: AutoLoop() {
         val ds = DriverStation.getInstance()
         executor.scheduleAtFixedRate({
             if (ds.isDisabled) {
+                fetchSD()
                 preAuto()
             }
-        }, 0L, 20L, TimeUnit.MILLISECONDS)
+        }, 0L, 100L, TimeUnit.MILLISECONDS)
     }
 
     fun publish() {
@@ -67,12 +68,10 @@ abstract class RobotAuto: AutoLoop() {
      * Gets various info from SmartDashboard
      */
     private fun fetchSD() {
-        //TODO add back proper SD reading
-        println("FETCH SD")
         robotPos = robotPosSelector.selected
         target = autoTargetSelector.selected
         teammatesCanDoSwitch = SmartDashboard.getBoolean("Partner Switch", false)
-        baseDelay = 0L//SmartDashboard.getNumber("Base Delay", 0.0).toLong()
+        baseDelay = SmartDashboard.getNumber("Base Delay", 0.0).toLong()
     }
 
     //AUTO MANAGER
@@ -90,7 +89,6 @@ abstract class RobotAuto: AutoLoop() {
         done = false
         fetchSD()
         fetchFieldLayout()
-        println("FETCH DONE")
         sequence.clear()
         sequenceIdx = 0
         assembleAuto(adder)

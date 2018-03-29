@@ -16,10 +16,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
  * @version 1/23/18
  */
 enum class AutoTarget(val prettyName: String) {
+    SWITCH_ONLY("Switch Only"),
     FULL("Full Auto"),
     NOTHING("Do Nothing"),
     BASELINE_ONLY("Baseline Only"),
-    SWITCH_ONLY("Switch Only"),
     SCALE_ONLY("Scale Only");
 
     companion object {
