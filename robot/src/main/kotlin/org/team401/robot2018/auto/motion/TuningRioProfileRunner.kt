@@ -7,6 +7,8 @@ import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced
 import com.ctre.phoenix.sensors.PigeonIMU
 import com.google.gson.Gson
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import org.snakeskin.component.TankDrivetrain
+import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.etc.RobotMath
 
 /*
@@ -22,16 +24,13 @@ import org.team401.robot2018.etc.RobotMath
  * @version 2/22/18
  */
 
-class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanced,
-                             override val rightController: IMotorControllerEnhanced, 
-                             val imu: PigeonIMU,
+class TuningRioProfileRunner(val drivetrain: TankDrivetrain,
                              val name: String,
-                             val rate: Long = 20L): TankMotionStep() {
+                             val rate: Long = 20L): AutoStep() {
     
-    private var leftGains = PDVA()
-    private var rightGains = PDVA()
-    private var hP = 0.0
-    private var hD = 0.0
+    private var gains = DriveGains()
+    private var driveMagnitude = 0.0
+    private var headingMagnitude = 0.0
     private var leftPointfile = ""
     private var rightPointfile = ""
 
@@ -42,20 +41,15 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     private val gson = Gson()
     
     private fun fetchGains() {
-        leftGains = PDVA(
-                SmartDashboard.getNumber("tuningRunner-$name-leftP", 0.0),
-                SmartDashboard.getNumber("tuningRunner-$name-leftD", 0.0),
-                SmartDashboard.getNumber("tuningRunner-$name-leftV", 0.0),
-                SmartDashboard.getNumber("tuningRunner-$name-leftA", 0.0)
+        gains = DriveGains(
+                SmartDashboard.getNumber("tuningRunner-$name-P", 0.0),
+                SmartDashboard.getNumber("tuningRunner-$name-V", 0.0),
+                SmartDashboard.getNumber("tuningRunner-$name-ffV", 0.0),
+                SmartDashboard.getNumber("tuningRunner-$name-ffA", 0.0),
+                SmartDashboard.getNumber("tuningRunner-$name-H", 0.0)
         )
-        rightGains = PDVA(
-                SmartDashboard.getNumber("tuningRunner-$name-rightP", 0.0),
-                SmartDashboard.getNumber("tuningRunner-$name-rightD", 0.0),
-                SmartDashboard.getNumber("tuningRunner-$name-rightV", 0.0),
-                SmartDashboard.getNumber("tuningRunner-$name-rightA", 0.0)
-        )
-        hP = SmartDashboard.getNumber("tuningRunner-$name-hP", 0.0)
-        hD = SmartDashboard.getNumber("tuningRunner-$name-hD", 0.0)
+        driveMagnitude = SmartDashboard.getNumber("tuningRunner-$name-driveMagnitude", 0.0)
+        headingMagnitude = SmartDashboard.getNumber("tuningRunner-$name-headingMagnitude", 0.0)
 
         leftPointfile = SmartDashboard.getString("tuningRunner-$name-lPoints", "")
         rightPointfile = SmartDashboard.getString("tuningRunner-$name-rPoints", "")
@@ -78,17 +72,17 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
     
     private fun publishData() {
         val imuData = DoubleArray(3)
-        imu.getYawPitchRoll(imuData)
+        drivetrain.imu.getYawPitchRoll(imuData)
         val currentData = PublishData(
             PublishData.Side(
-                RobotMath.UnitConversions.nativeUnitsToRevolutions(leftController.getSelectedSensorPosition(0).toDouble()),
-                RobotMath.UnitConversions.nativeUnitsToRpm(leftController.getSelectedSensorVelocity(0).toDouble()),
+                RobotMath.UnitConversions.nativeUnitsToRevolutions(drivetrain.left.getPosition(0).toDouble()),
+                RobotMath.UnitConversions.nativeUnitsToRpm(drivetrain.left.getVelocity(0).toDouble()),
                 leftCurrent.position,
                 leftCurrent.velocity
             ),
             PublishData.Side(
-                    RobotMath.UnitConversions.nativeUnitsToRevolutions(rightController.getSelectedSensorPosition(0).toDouble()),
-                    RobotMath.UnitConversions.nativeUnitsToRpm(rightController.getSelectedSensorVelocity(0).toDouble()),
+                    RobotMath.UnitConversions.nativeUnitsToRevolutions(drivetrain.right.getPosition(0).toDouble()),
+                    RobotMath.UnitConversions.nativeUnitsToRpm(drivetrain.right.getVelocity(0).toDouble()),
                     rightCurrent.position,
                     rightCurrent.velocity
             ), imuData[0], leftCurrent.heading, leftCurrent.timestep * runner.index().toLong()
@@ -102,7 +96,7 @@ class TuningRioProfileRunner(override val leftController: IMotorControllerEnhanc
         SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
-        runner = RioProfileRunner(leftController, rightController, imu, leftGains, rightGains, hP, hD, rate)
+        runner = RioProfileRunner(drivetrain, gains, headingMagnitude, driveMagnitude, null, rate)
         runner.loadPoints(leftPointfile, rightPointfile)
         runner.entry()
     }

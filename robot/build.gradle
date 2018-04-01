@@ -40,6 +40,7 @@ dependencies {
     compile group: "org.snakeskin", name: "SnakeSkin-Core", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-FRC", version: SNAKESKIN_VERSION
     compile group: "org.snakeskin", name: "SnakeSkin-CTRE", version: SNAKESKIN_VERSION
+    compile group: "org.team401", name: "lightlink", version: "1.0"
 
     compile group: 'org.zeromq', name: 'jeromq', version: '0.4.3'
 }
