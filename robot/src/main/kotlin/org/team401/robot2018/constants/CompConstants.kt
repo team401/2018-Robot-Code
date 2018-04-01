@@ -23,7 +23,7 @@ class CompConstants: ConstantsBase() {
 
         override val LEFT_PDVA = PDVA(.35, 0.0, 1/650.0, 0.0005)
         override val RIGHT_PDVA = PDVA(.35, 0.0, 1/650.0, 0.0005)
-        override val DRIVE_GAINS = DriveGains(0.4, 0.002, 1/500.0, .0005, .023)
+        override val DRIVE_GAINS = DriveGains(0.65, 0.0026, 1/450.0, .0005, .045)
 
         override val HEADING_GAIN = .017
         override val HEADING_D = .5
@@ -47,9 +47,9 @@ class CompConstants: ConstantsBase() {
 
     override val IntakeParameters = object: IntakeParametersConfig() {
         override val HAVE_CUBE_CURRENT_CLAMP = 10.0
-        override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.3
+        override val HAVE_CUBE_CURRENT_LEFT_HOLD = 0.0
         override val HAVE_CUBE_CURRENT_LEFT_INTAKE = 4.5
-        override val HAVE_CUBE_CURRENT_RIGHT_HOLD = 0.3
+        override val HAVE_CUBE_CURRENT_RIGHT_HOLD = 0.0
         override val HAVE_CUBE_CURRENT_RIGHT_INTAKE = 4.5
 
         override val PIDF = object: PIDF {

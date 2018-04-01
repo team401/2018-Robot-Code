@@ -180,8 +180,8 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
         state(IntakeWheelsStates.INTAKE_PRE) {
             action {
-                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
-                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_LEFT, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_RIGHT, Constants.IntakeParameters.INTAKE_VOLTAGE)
             }
         }
 
@@ -192,8 +192,8 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
-                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_LEFT, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_RIGHT, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
                 if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
                     inrushCounter++
@@ -211,15 +211,19 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             timeout(Constants.IntakeParameters.CUBE_HELD_TIME, IntakeWheelsStates.HAVE_CUBE)
 
             action {
-                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
-                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                left.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
+                right.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
+                //println("GOT CURRENT:  LEFT: ${left.outputCurrent}  RIGHT: ${right.outputCurrent}")
+
+                /*
                 //If any of the conditions are met to say we don't have a cube
-                if (left.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_INTAKE ||
-                    right.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE) {
+                if (left.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_HOLD &&
+                    right.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_HOLD) {
 
                     setState(IntakeWheelsStates.INTAKE)
                 }
+                */
             }
         }
 

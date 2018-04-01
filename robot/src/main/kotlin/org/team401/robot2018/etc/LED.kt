@@ -3,7 +3,7 @@ package org.team401.robot2018.etc
 import org.snakeskin.LightLink
 
 object LED {
-    val ll = LightLink()
+    private val ll = LightLink()
     const val LEFT_STRIP = 0
     const val TOP_STRIP = 1
     const val RIGHT_STRIP = 2
@@ -36,10 +36,22 @@ object LED {
         offAll()
     }
 
+    fun signalWantCube() {
+        ll.signal(LightLink.Color.YELLOW, LEFT_STRIP)
+        ll.signal(LightLink.Color.YELLOW, TOP_STRIP)
+        ll.signal(LightLink.Color.YELLOW, RIGHT_STRIP)
+    }
+
     fun signalHaveCube() {
         ll.signal(LightLink.Color.GREEN, LEFT_STRIP)
         ll.signal(LightLink.Color.GREEN, TOP_STRIP)
         ll.signal(LightLink.Color.GREEN, RIGHT_STRIP)
+    }
+
+    fun signalScoreCube() {
+        ll.signal(LightLink.Color.BLUE, LEFT_STRIP)
+        ll.signal(LightLink.Color.BLUE, TOP_STRIP)
+        ll.signal(LightLink.Color.BLUE, RIGHT_STRIP)
     }
 
     fun signalEjectCube() {

@@ -98,11 +98,13 @@ val RightStick = HumanControls.t16000m(1) {
 
     whenButton(Buttons.STICK_BOTTOM) {
         pressed {
-            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState("MeasureWheelSize")
+            elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+            elevatorMachine.setState(ElevatorStates.CLIMB_HIGH)
         }
 
         released {
-            DrivetrainSubsystem.machine(DRIVE_MACHINE).setState(DriveStates.CHEESY)
+            elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            LED.finishClimb()
         }
     }
 }
@@ -177,15 +179,16 @@ val Gamepad = HumanControls.f310(2) {
     whenButton(Buttons.Y) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+            elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
             intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
+            LED.signalWantCube()
         }
     }
 
     //Reset
     whenButton(Buttons.X) {
         pressed {
-            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeWheels.setState(IntakeWheelsStates.IDLE)
             intakeFolding.setState(IntakeFoldingStates.STOWED)
         }
@@ -203,6 +206,7 @@ val Gamepad = HumanControls.f310(2) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
+            LED.signalScoreCube()
         }
 
         released {

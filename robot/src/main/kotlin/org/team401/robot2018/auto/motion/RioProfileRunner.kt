@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
 import org.snakeskin.component.TankDrivetrain
+import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.etc.RobotMath
 
 /*
@@ -24,10 +25,23 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
                        val gains: DriveGains,
                        val headingMagnitude: Double = 1.0,
                        val driveMagnitude: Double = 1.0,
+                       val completion: CompletionTask? = null,
                        val rate: Long = 20): TankMotionStep() {
     override val leftController = drivetrain.left.master
     override val rightController = drivetrain.right.master
     val imu = drivetrain.imu
+
+    class CompletionTask(val velocity: Double, val task: AutoStep) {
+        fun tick(pointIdx: Int, numPoints: Int, leftVel: Double, rightVel: Double) {
+            if (pointIdx > numPoints / 2) {
+                if (Math.abs((leftVel + rightVel) / 2) < velocity) {
+                    task.tick()
+                }
+            }
+        }
+
+        fun done() = task.done
+    }
 
     /**
      * Represents one side of the drivetrain.
@@ -61,6 +75,7 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
         fun numPoints() = points.size
 
         fun activeHeading() = currentWaypoint.heading
+        fun activeVelocity() = currentWaypoint.velocity
 
         fun calculate(index: Int) {
             currentWaypoint = points[index]
@@ -139,6 +154,7 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
 
     override fun action() {
         currentTime = System.currentTimeMillis()
+        completion?.tick(pointIdx, left.numPoints(), left.activeVelocity(), right.activeVelocity())
 
         if (pointIdx < Math.min(left.numPoints(), right.numPoints())) {
             left.calculate(pointIdx)

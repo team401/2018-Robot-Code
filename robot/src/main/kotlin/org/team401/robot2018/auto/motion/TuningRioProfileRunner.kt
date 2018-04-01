@@ -96,7 +96,7 @@ class TuningRioProfileRunner(val drivetrain: TankDrivetrain,
         SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
-        runner = RioProfileRunner(drivetrain, gains, headingMagnitude, driveMagnitude, rate)
+        runner = RioProfileRunner(drivetrain, gains, headingMagnitude, driveMagnitude, null, rate)
         runner.loadPoints(leftPointfile, rightPointfile)
         runner.entry()
     }

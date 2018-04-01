@@ -3,8 +3,10 @@ package org.team401.robot2018.auto
 import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
+import org.team401.robot2018.auto.steps.LambdaStep
 import org.team401.robot2018.auto.steps.StepGroup
 import org.team401.robot2018.constants.Constants
+import org.team401.robot2018.etc.LED
 import org.team401.robot2018.etc.StepAdder
 import org.team401.robot2018.subsystems.Drivetrain
 
@@ -23,12 +25,13 @@ import org.team401.robot2018.subsystems.Drivetrain
 object Routines {
     lateinit var add: StepAdder
 
-    fun drive(profile: String, vararg otherActions: AutoStep) {
+    fun drive(profile: String, completion: RioProfileRunner.CompletionTask? = null, vararg otherActions: AutoStep) {
         val step = RioProfileRunner(
                 Drivetrain,
                 Constants.DrivetrainParameters.DRIVE_GAINS,
                 Constants.DrivetrainParameters.HEADING_MAGNITUDE,
-                Constants.DrivetrainParameters.DRIVE_MAGNITUDE
+                Constants.DrivetrainParameters.DRIVE_MAGNITUDE,
+                completion
         )
 
         step.loadPoints(
@@ -39,11 +42,14 @@ object Routines {
         add(StepGroup(step, *otherActions))
     }
 
-    fun drive(start: Any, end: Any, vararg otherActions: AutoStep) = drive("$start-$end", *otherActions)
+    fun drive(start: Any, end: Any, vararg otherActions: AutoStep) = drive("$start-$end", null, *otherActions)
+    fun drive(start: Any, end: Any, completion: RioProfileRunner.CompletionTask?) = drive("$start-$end", completion)
+    fun drive(start: Any, end: Any, completion: RioProfileRunner.CompletionTask?, vararg otherActions: AutoStep) = drive("$start-$end", completion, *otherActions)
 
     fun score() {
         add(Commands.ElevatorHolderUnclamp)
         add(Commands.ElevatorKickerScore)
+        add(LambdaStep { LED.signalScoreCube() })
         add(DelayStep(AutoDelays.SCORE_DELAY))
         add(Commands.ElevatorKickerRetract)
     }

@@ -4,6 +4,7 @@ import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.DriverStation
 import openrio.powerup.MatchData
 import org.team401.robot2018.auto.motion.ProfileLoader
+import org.team401.robot2018.auto.motion.RioProfileRunner
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.SubSequence
 import org.team401.robot2018.etc.StepAdder
@@ -85,25 +86,47 @@ object PowerUpAuto: RobotAuto() {
                 }
 
                 AutoTarget.SCALE_ONLY -> {
-                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
-                    Routines.score()
-                    Routines.drive("BACK_UP")
+                    if (robotPos.alignedWith(scaleSide)) {
+                        Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                        Routines.score()
+                        Routines.drive("BACK_UP")
+                    } else {
+                        Routines.drive(robotPos, FieldElements.baseline(scaleSide), SubSequence(*Commands.HighLockDeployAndWait))
+                    }
                     add(Commands.HomeElevator)
                     //AUTO END
                 }
 
                 AutoTarget.FULL -> {
-                    //Drive to scale while deploying and then move carriage to scale position
-                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
-                    //Score the cube
-                    Routines.score()
-                    Routines.drive(FieldElements.scale(scaleSide), FieldElements.backFromScale(scaleSide))
-                    Routines.drive(FieldElements.backFromScale(scaleSide), FieldElements.switch(switchSide), Commands.IntakeToGrab)
-                    add(Commands.HomeElevator)
-                    Routines.intake()
-                    add(Commands.ElevatorToSwitch)
-                    add(Commands.WaitForAtSwitch)
-                    Routines.drive("SWITCH_FINAL")
+                    when (robotPos) {
+                        //Center switch
+                        RobotPosition.DS_CENTER -> {
+                            Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
+                            Routines.score() //Score cube
+                            Routines.drive("BACK_UP")
+                            add(Commands.HomeElevator)
+                        }
+                        //Attepmt two cube
+                        RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
+                            if (robotPos.alignedWith(scaleSide)) {
+                                //Do same side two cube auto
+                                Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                                Routines.score()
+                                Routines.drive("BACK_UP")
+                                add(Commands.HomeElevator)
+                            } else if (robotPos == RobotPosition.DS_CENTER || robotPos.alignedWith(switchSide)) {
+                                //Do side switch only
+                                Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait))
+                                Routines.score()
+                                Routines.drive("BACK_UP")
+                                add(Commands.HomeElevator)
+                            } else {
+                                //Baseline only
+                                Routines.drive(robotPos, FieldElements.baseline(switchSide), SubSequence(*Commands.HighLockDeployAndWait))
+                                add(Commands.HomeElevator)
+                            }
+                        }
+                    }
                     //AUTO END
                 }
 

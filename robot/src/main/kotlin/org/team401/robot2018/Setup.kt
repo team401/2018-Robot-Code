@@ -55,16 +55,16 @@ fun setup() {
     //Constants = PracticeConstants()
 
     //Uncomment which one you are using
-    //AutoManager.auto = PowerUpAuto //Real auto
-    AutoManager.auto = TestAuto //Test auto
+    AutoManager.auto = PowerUpAuto //Real auto
+    //AutoManager.auto = TestAuto //Test auto
 
     //Uncomment which one you are using
-    //PowerUpAuto.publish() //Real auto
-    TestAuto.publish() //Test auto
+    PowerUpAuto.publish() //Real auto
+    //TestAuto.publish() //Test auto
 
     //Uncomment which one you are using
-    //PowerUpAuto.startTasks() //Real auto
-    TestAuto.startTasks() //Test auto
+    PowerUpAuto.startTasks() //Real auto
+    //TestAuto.startTasks() //Test auto
 
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
