@@ -24,7 +24,7 @@ import java.util.*
 /*
  * 2018-Robot-Code - Created on 1/15/18
  * Author: Cameron Earle
- * 
+ *
  * This code is licensed under the GNU GPL v3
  * You can find more info in the LICENSE file at project root
  */
@@ -64,6 +64,7 @@ object ElevatorStates {
     const val START_CLIMB = "startClimb"
     const val CLIMB_MANUAL = "climbAlign"
     const val CLIMB = "climb"
+    const val CLIMB_HIGH = "climbHigh"
 }
 
 const val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
@@ -145,7 +146,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         Elevator.ratchet = ratchet
         Elevator.kicker = kicker
         Elevator.clamp = clamp
-        
+
         gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
         runMode()
@@ -277,7 +278,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_COLLECTION) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.COLLECTION_POS)
@@ -285,7 +286,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_DRIVE) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
@@ -293,7 +294,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SWITCH) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
@@ -301,7 +302,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE_LOW) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_LOW)
@@ -309,7 +310,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
@@ -317,7 +318,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_SCALE_HIGH) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_HIGH)
@@ -325,7 +326,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_MAX) {
-            
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.MAX_POS)
@@ -464,7 +465,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 if (Gamepad.readButton { LEFT_STICK }) {
-                    position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
+                    position += RobotMath.Elevator.inchesToTicks(Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE).toInt()
                 }
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
@@ -496,22 +497,30 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                scalar = when(RightStick.readHat { STICK_HAT }) {
+                scalar = when (RightStick.readHat { STICK_HAT }) {
                     Direction.NORTH -> 1.0
                     Direction.SOUTH -> -1.0
                     else -> 0.0
                 }
                 position += RobotMath.Elevator.inchesToTicks(scalar * Constants.ElevatorParameters.CLIMB_MANUAL_RATE).toInt()
-                if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
+                if (position > Constants.ElevatorParameters.CLIMB_MAX_POS) {
+                    position = Constants.ElevatorParameters.CLIMB_MAX_POS.toInt()
+                    LED.gotClimb()
+                }
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
                 climbSetpoint(position)
             }
         }
 
         state(ElevatorStates.CLIMB) {
-            rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
             entry {
                 finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_BOTTOM_POS)
+            }
+        }
+
+        state(ElevatorStates.CLIMB_HIGH) {
+            entry {
+                finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_VERY_BOTTOM_POS)
             }
         }
 

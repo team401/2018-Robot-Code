@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import org.snakeskin.dsl.HumanControls
 import org.snakeskin.dsl.machine
 import org.snakeskin.logic.Direction
+import org.team401.robot2018.etc.LED
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -79,6 +80,7 @@ val RightStick = HumanControls.t16000m(1) {
             elevatorShifterMachine.setState(ElevatorShifterStates.LOW)
             elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
             elevatorMachine.setState(ElevatorStates.START_CLIMB)
+            LED.startClimb()
         }
     }
 
@@ -90,6 +92,19 @@ val RightStick = HumanControls.t16000m(1) {
 
         released {
             elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            LED.finishClimb()
+        }
+    }
+
+    whenButton(Buttons.STICK_BOTTOM) {
+        pressed {
+            elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+            elevatorMachine.setState(ElevatorStates.CLIMB_HIGH)
+        }
+
+        released {
+            elevatorMachine.setState(ElevatorStates.OPEN_LOOP_CONTROL)
+            LED.finishClimb()
         }
     }
 }
@@ -164,15 +179,16 @@ val Gamepad = HumanControls.f310(2) {
     whenButton(Buttons.Y) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+            elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
             intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
+            LED.signalWantCube()
         }
     }
 
     //Reset
     whenButton(Buttons.X) {
         pressed {
-            elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             intakeWheels.setState(IntakeWheelsStates.IDLE)
             intakeFolding.setState(IntakeFoldingStates.STOWED)
         }
@@ -190,6 +206,7 @@ val Gamepad = HumanControls.f310(2) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             elevatorKickerMachine.setState(ElevatorKickerStates.KICK)
+            LED.signalScoreCube()
         }
 
         released {

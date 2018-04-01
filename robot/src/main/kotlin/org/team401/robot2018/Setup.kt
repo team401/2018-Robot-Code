@@ -23,7 +23,9 @@ import org.team401.robot2018.auto.TestAuto
 //import org.team401.robot2018.auto.TestAuto
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.constants.CompConstants
+import org.team401.robot2018.etc.LED
 import org.team401.robot2018.etc.Reporting
+import org.team401.robot2018.etc.RobotEvents
 import org.team401.robot2018.subsystems.*
 import org.team401.robot2018.vision.MjpegServer
 import org.team401.robot2018.vision.VisionController
@@ -53,16 +55,16 @@ fun setup() {
     //Constants = PracticeConstants()
 
     //Uncomment which one you are using
-    //AutoManager.auto = PowerUpAuto //Real auto
-    AutoManager.auto = TestAuto //Test auto
+    AutoManager.auto = PowerUpAuto //Real auto
+    //AutoManager.auto = TestAuto //Test auto
 
     //Uncomment which one you are using
-    //PowerUpAuto.publish() //Real auto
-    TestAuto.publish() //Test auto
+    PowerUpAuto.publish() //Real auto
+    //TestAuto.publish() //Test auto
 
     //Uncomment which one you are using
-    //PowerUpAuto.startTasks() //Real auto
-    TestAuto.startTasks() //Test auto
+    PowerUpAuto.startTasks() //Real auto
+    //TestAuto.startTasks() //Test auto
 
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
@@ -79,6 +81,22 @@ fun setup() {
     */
 
     LiveWindow.disableTelemetry(PDP) //Fix bugs with PDP errors
+
+    on(Events.DISABLED) {
+        LED.rainbowAll()
+    }
+
+    on(Events.ENABLED) {
+        LED.offAll()
+    }
+
+    on(RobotEvents.HAVE_CUBE) {
+        LED.signalHaveCube()
+    }
+
+    on(RobotEvents.EJECT_CUBE) {
+        LED.signalEjectCube()
+    }
 }
 
 //@PostStartup private fun startReporting() = Reporting.start()

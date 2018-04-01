@@ -2,6 +2,7 @@ package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
 import org.team401.robot2018.auto.steps.*
+import org.team401.robot2018.etc.LED
 import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.*
 
@@ -40,6 +41,7 @@ object Commands {
         ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
     }
 
+
     val WaitForAtSwitch = WaitForStep(Elevator::atSwitch)
 
     val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
@@ -64,6 +66,8 @@ object Commands {
     val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
     val HighLockDeployAndWait = arrayOf(BackgroundDelayStep(500), ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
+
+    val Score = arrayOf(ElevatorHolderUnclamp, ElevatorKickerScore, LambdaStep { LED.signalScoreCube() }, DelayStep(AutoDelays.SCORE_DELAY), ElevatorKickerRetract)
 
     val ZeroIMU = LambdaStep { Drivetrain.imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 0); Thread.sleep(500) }
 }
