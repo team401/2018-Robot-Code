@@ -18,11 +18,16 @@ import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.dsl.cheesy
 import org.snakeskin.event.Events
 import org.snakeskin.logic.scalars.CubicScalar
+import org.snakeskin.logic.scalars.Scalar
+import org.snakeskin.logic.scalars.ScalarGroup
+import org.snakeskin.logic.scalars.SquareScalar
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
 import org.team401.robot2018.constants.Constants
+import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.etc.getCurrent
 import org.team401.robot2018.etc.shiftUpdate
+import org.team401.robot2018.etc.withinTolerance
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -151,7 +156,9 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                     5.0,
                     3,
                     2,
-                    quickTurnScalar = CubicScalar
+                    quickTurnScalar = ScalarGroup(SquareScalar, object : Scalar {
+                        override fun scale(input: Double) = input / 3.33
+                    })
             )
 
             entry {
@@ -206,6 +213,71 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
                         RightStick.readAxis { ROLL },
                         RightStick.readButton { TRIGGER}
                 )
+            }
+        }
+
+        state("MeasureWheelSize") {
+            var posLeft = 0
+            var posRight = 0
+            var gain = 0.0
+            val setpoint = 3
+
+            entry {
+                gain = SmartDashboard.getNumber("measureWheelsP", 0.0)
+            }
+
+            action {
+                posLeft = left.getPosition()
+                posRight = right.getPosition()
+                left.set(ControlMode.PercentOutput, (setpoint - posLeft) * gain)
+                right.set(ControlMode.PercentOutput, (setpoint - posRight) * gain)
+                if ((left.getPosition().withinTolerance(setpoint, .1)) &&
+                        right.getPosition().withinTolerance(setpoint, .1)) {
+                    println("Done.  Left pos: $posLeft  Right pos: $posRight")
+                    setState(DriveStates.CHEESY)
+                }
+            }
+        }
+
+        state("MeasureTrackwidth") {
+            var startTime = 0L
+            var readingLeft = 0
+            var readingRight = 0
+
+            var error = 0.0
+            val desired = 360
+            val yaw = DoubleArray(3)
+
+            //timeout(1500, DriveStates.OPEN_LOOP)
+            entry {
+                startTime = System.currentTimeMillis()
+                readingLeft = 0
+                readingRight = 0
+                error = 0.0
+
+                left.setPosition(0)
+                right.setPosition(0)
+
+                imu.setYaw(0.0, 0)
+            }
+
+            action {
+                //Drivetrain.arcade(ControlMode.PercentOutput, 1.0, 0.0)
+                imu.getYawPitchRoll(yaw)
+
+                error = (desired - yaw[0])
+
+                left.set(ControlMode.PercentOutput, (-error/desired) * 0.5)
+                right.set(ControlMode.PercentOutput, (error/desired) * 0.5)
+
+                readingLeft = Drivetrain.left.getPosition()
+                readingRight = Drivetrain.right.getPosition()
+            }
+
+            exit {
+                System.out.println("${yaw[0]},$readingLeft,$readingRight")
+
+                Drivetrain.stop()
             }
         }
 
@@ -265,6 +337,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             }
         }
     }
+
 
     on (Events.TELEOP_ENABLED) {
         driveMachine.setState(DriveStates.CHEESY)

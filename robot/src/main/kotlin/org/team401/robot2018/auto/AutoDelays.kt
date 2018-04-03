@@ -13,5 +13,5 @@ package org.team401.robot2018.auto
  * @version 3/3/18
  */
 object AutoDelays {
-    const val SCORE_DELAY = 1000L
+    const val SCORE_DELAY = 500L
 }

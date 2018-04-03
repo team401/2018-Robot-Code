@@ -4,19 +4,14 @@ import com.ctre.phoenix.ParamEnum
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.motorcontrol.can.VictorSPX
-import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.Solenoid
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.snakeskin.component.Gearbox
 import org.snakeskin.dsl.Subsystem
 import org.snakeskin.dsl.buildSubsystem
 import org.snakeskin.event.Events
 import org.snakeskin.logic.Direction
 import org.snakeskin.logic.LockingDelegate
-import org.snakeskin.publish.Publisher
 import org.team401.robot2018.Gamepad
-import org.team401.robot2018.LeftStick
-import org.team401.robot2018.PDP
 import org.team401.robot2018.RightStick
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.*
@@ -29,7 +24,7 @@ import java.util.*
 /*
  * 2018-Robot-Code - Created on 1/15/18
  * Author: Cameron Earle
- * 
+ *
  * This code is licensed under the GNU GPL v3
  * You can find more info in the LICENSE file at project root
  */
@@ -69,6 +64,7 @@ object ElevatorStates {
     const val START_CLIMB = "startClimb"
     const val CLIMB_MANUAL = "climbAlign"
     const val CLIMB = "climb"
+    const val CLIMB_HIGH = "climbHigh"
 }
 
 const val ELEVATOR_SHIFTER_MACHINE = "elevator_shifter"
@@ -99,7 +95,7 @@ object Elevator {
     lateinit var gearbox: Gearbox
     lateinit var shifter: Solenoid
     lateinit var deployer: Solenoid
-    lateinit var ratchet: Servo
+    lateinit var ratchet: Solenoid
     lateinit var kicker: Solenoid
     lateinit var clamp: Solenoid
 
@@ -126,8 +122,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val deployer = Solenoid(Constants.Pneumatics.ELEVATOR_DEPLOY_SOLENOID)
     val kicker = Solenoid(Constants.Pneumatics.ELEVATOR_KICKER_SOLENOID)
     val clamp = Solenoid(Constants.Pneumatics.ELEVATOR_CLAMP_SOLENOID)
-
-    val ratchet = Servo(Constants.ElevatorParameters.RATCHET_SERVO_PORT)
+    val ratchet = Solenoid(Constants.Pneumatics.ELEVATOR_RATCHET_SOLENOID)
 
     fun runMode() {
         master.configMotionCruiseVelocity(21680, 0)
@@ -151,7 +146,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         Elevator.ratchet = ratchet
         Elevator.kicker = kicker
         Elevator.clamp = clamp
-        
+
         gearbox.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
 
         runMode()
@@ -273,6 +268,8 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.GO_TO_COLLECTION) {
+            rejectIf { isInState(ElevatorStates.POS_VAULT_RUNNER) }
+
             action {
                 if (Intake.stowed() || Intake.atGrab()) {
                     setState(ElevatorStates.POS_COLLECTION)
@@ -281,7 +278,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_COLLECTION) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.COLLECTION_POS)
@@ -289,7 +286,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_DRIVE) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.CUBE_POS)
@@ -297,7 +294,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SWITCH) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
@@ -305,7 +302,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE_LOW) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_LOW)
@@ -313,7 +310,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_SCALE) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS)
@@ -321,7 +318,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_SCALE_HIGH) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.SCALE_POS_HIGH)
@@ -329,7 +326,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state (ElevatorStates.POS_MAX) {
-            rejectIf (::notDeployed)
+
 
             entry {
                 mmSetpoint(Constants.ElevatorParameters.MAX_POS)
@@ -346,6 +343,12 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         state(ElevatorStates.SCALE_POS_UNKNOWN) {
             entry {
                 mmSetpoint(Constants.ElevatorParameters.UNKNOWN_SCALE_POS)
+            }
+        }
+
+        state(ElevatorStates.POS_VAULT_RUNNER) {
+            entry {
+                mmSetpoint(Constants.ElevatorParameters.SWITCH_POS)
             }
         }
 
@@ -462,7 +465,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 if (Gamepad.readButton { LEFT_STICK }) {
-                    position += RobotMath.Elevator.inchesToTicks((Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE)).toInt()
+                    position += RobotMath.Elevator.inchesToTicks(Gamepad.readAxis { LEFT_Y } * Constants.ElevatorParameters.MANUAL_RATE).toInt()
                 }
                 if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
@@ -494,22 +497,30 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             }
 
             action {
-                scalar = when(RightStick.readHat { STICK_HAT }) {
+                scalar = when (RightStick.readHat { STICK_HAT }) {
                     Direction.NORTH -> 1.0
                     Direction.SOUTH -> -1.0
                     else -> 0.0
                 }
                 position += RobotMath.Elevator.inchesToTicks(scalar * Constants.ElevatorParameters.CLIMB_MANUAL_RATE).toInt()
-                if (position > Constants.ElevatorParameters.MAX_POS) position = Constants.ElevatorParameters.MAX_POS.toInt()
+                if (position > Constants.ElevatorParameters.CLIMB_MAX_POS) {
+                    position = Constants.ElevatorParameters.CLIMB_MAX_POS.toInt()
+                    LED.gotClimb()
+                }
                 if (position < Constants.ElevatorParameters.ZERO_POS) position = Constants.ElevatorParameters.ZERO_POS.toInt()
                 climbSetpoint(position)
             }
         }
 
         state(ElevatorStates.CLIMB) {
-            rejectIf { !isInState(ElevatorStates.CLIMB_MANUAL) }
             entry {
                 finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_BOTTOM_POS)
+            }
+        }
+
+        state(ElevatorStates.CLIMB_HIGH) {
+            entry {
+                finalClimbSetpoint(Constants.ElevatorParameters.CLIMB_VERY_BOTTOM_POS)
             }
         }
 
@@ -523,19 +534,22 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     val elevatorRatchetMachine = stateMachine(ELEVATOR_RATCHET_MACHINE) {
         state(ElevatorRatchetStates.LOCKED) {
             entry {
-                ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
+                ratchet.set(Constants.ElevatorParameters.RatchetMachine.LOCKED)
+                //ratchet.angle = Constants.ElevatorParameters.RATCHET_LOCKED_SERVO_POS
             }
         }
 
         state(ElevatorRatchetStates.UNLOCKED) {
             entry {
-                ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
+                ratchet.set(Constants.ElevatorParameters.RatchetMachine.UNLOCKED)
+                //ratchet.angle = Constants.ElevatorParameters.RATCHET_UNLOCKED_SERVO_POS
             }
         }
 
         default {
             entry {
-                ratchet.set(0.0)
+                ratchet.set(false)
+                //ratchet.set(0.0)
             }
         }
     }
@@ -562,14 +576,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
     }
 
     on (Events.TELEOP_ENABLED) {
+        /*
         if (notDeployed()) { //If we aren't deployed
             elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOY) //Deploy
             while (notDeployed()) { //Wait for deploy to finish
                 Thread.sleep(10)
             }
         }
+        */
+        //Assume we are already deployed
+        elevatorDeployMachine.setState(ElevatorDeployStates.DEPLOYED)
 
         if (!Elevator.homed) { //If we aren't homed
+            Thread.sleep(1000) //Wait a second for us to back up
+            elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
             elevatorMachine.setState(ElevatorStates.HOMING) //Home
         } else {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
@@ -577,16 +597,20 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         //Always put all machines in a known state on enable
-        elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
+        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
         elevatorKickerMachine.setState(ElevatorKickerStates.STOW)
         elevatorRatchetMachine.setState(ElevatorRatchetStates.UNLOCKED)
     }
 
     on (RobotEvents.HAVE_CUBE) {
-        elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
-        elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
+        if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+            elevatorMachine.setState(ElevatorStates.GO_TO_DRIVE)
+        }
     }
     on (RobotEvents.EJECT_CUBE){
-        elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+            elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
+        }
     }
 }

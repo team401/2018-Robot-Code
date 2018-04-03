@@ -4,6 +4,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import com.ctre.phoenix.sensors.PigeonIMU
+import org.snakeskin.component.TankDrivetrain
+import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.etc.RobotMath
 
 /*
@@ -19,68 +21,74 @@ import org.team401.robot2018.etc.RobotMath
  * @version 2/6/18
  */
 
-class RioProfileRunner(override val leftController: IMotorControllerEnhanced, override val rightController: IMotorControllerEnhanced, val imu: PigeonIMU, val leftGains: PDVA, val rightGains: PDVA, val hP: Double = 0.0, val hD: Double = 0.0, val rate: Long = 20): TankMotionStep() {
+class RioProfileRunner(drivetrain: TankDrivetrain,
+                       val gains: DriveGains,
+                       val headingMagnitude: Double = 1.0,
+                       val driveMagnitude: Double = 1.0,
+                       val completion: CompletionTask? = null,
+                       val rate: Long = 20): TankMotionStep() {
+    override val leftController = drivetrain.left.master
+    override val rightController = drivetrain.right.master
+    val imu = drivetrain.imu
+
+    class CompletionTask(val velocity: Double, val task: AutoStep) {
+        fun tick(pointIdx: Int, numPoints: Int, leftVel: Double, rightVel: Double) {
+            if (pointIdx > numPoints / 2) {
+                if (Math.abs((leftVel + rightVel) / 2) < velocity) {
+                    task.tick()
+                }
+            }
+        }
+
+        fun done() = task.done
+    }
+
     /**
      * Represents one side of the drivetrain.
      * Contains all of the points, controllers, and gains for that side.
      */
-    private inner class MpSide(val controller: IMotorControllerEnhanced, val gains: PDVA, val polarity: Double) {
+    private inner class MpSide(val controller: IMotorControllerEnhanced, val polarity: Double) {
         private val points = arrayListOf<Waypoint>()
         private var promise: ProfileLoader.LoadPromise? = null
+        private val driveController = DriveController(gains, driveMagnitude)
         fun awaitLoading() = promise?.await()
 
         fun loadPoints(profile: String) {
             promise = ProfileLoader.populateLater(profile, points)
         }
 
-        var lastTime = 0L
-        var time = 0L
-        var error = 0.0
-        var lastError = 0.0
-        var sensor = 0.0
-        var value = 0.0
         var currentWaypoint = Waypoint(0.0, 0.0, 0, 0.0, 0.0)
-        var saturated = false
         var done = false
+        var position = 0.0
+        var velocity = 0.0
+        var value = 0.0
 
         fun reset() {
             controller.set(ControlMode.PercentOutput, 0.0)
-
-            error = 0.0
-            lastError = 0.0
-            sensor = 0.0
+            position = 0.0
+            velocity = 0.0
             value = 0.0
             currentWaypoint = Waypoint(0.0, 0.0, 0, 0.0, 0.0)
-            saturated = false
             done = false
         }
 
         fun numPoints() = points.size
 
         fun activeHeading() = currentWaypoint.heading
+        fun activeVelocity() = currentWaypoint.velocity
 
-        fun calculate(index: Int, time: Long, lastTime: Long): Boolean {
-            saturated = false
+        fun calculate(index: Int) {
             currentWaypoint = points[index]
-            sensor = RobotMath.UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
+            position = RobotMath.UnitConversions.nativeUnitsToRevolutions(controller.getSelectedSensorPosition(0).toDouble())
+            velocity = RobotMath.UnitConversions.nativeUnitsToRpm(controller.getSelectedSensorVelocity(0).toDouble())
 
-            error = currentWaypoint.position - sensor
-            value =
-                    gains.p * error +
-                    gains.d * ((error - lastError) / (time - lastTime)) +
-                    gains.v * currentWaypoint.velocity +
-                    gains.a * currentWaypoint.acceleration
-
-            if (value > 1.0) {
-                value = 1.0
-                saturated = true
-            }
-            if (value < -1.0) {
-                value = -1.0
-                saturated = true
-            }
-            lastError = error
-            return saturated
+            value = driveController.calculate(
+                    position,
+                    velocity,
+                    currentWaypoint.position,
+                    currentWaypoint.velocity,
+                    currentWaypoint.acceleration
+            )
         }
 
         fun done() {
@@ -101,8 +109,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
         }
     }
 
-    private val left = MpSide(leftController, leftGains, -1.0)
-    private val right = MpSide(rightController, rightGains, 1.0)
+    private val left = MpSide(leftController, -1.0)
+    private val right = MpSide(rightController, 1.0)
 
     fun leftCurrentWaypoint() = left.currentWaypoint
     fun rightCurrentWaypoint() = right.currentWaypoint
@@ -115,12 +123,12 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
     private var lastUpdate = 0L
     private var currentTime = 0L
-    private var lastTime = 0L
     private var pointIdx = 0
     private var headingError = 0.0
     private var lastHeadingError = 0.0
     private var headingAdjustment = 0.0
     private val imuValue = DoubleArray(3)
+    private val headingController = HeadingController(gains, headingMagnitude)
 
     override fun entry() {
         done = false
@@ -129,10 +137,8 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
         lastUpdate = 0L
         currentTime = 0L
-        lastTime = 0L
         pointIdx = 0
         headingError = 0.0
-        lastHeadingError = 0.0
         headingAdjustment = 0.0
 
         imuValue[0] = 0.0
@@ -148,23 +154,18 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
 
     override fun action() {
         currentTime = System.currentTimeMillis()
+        completion?.tick(pointIdx, left.numPoints(), left.activeVelocity(), right.activeVelocity())
 
         if (pointIdx < Math.min(left.numPoints(), right.numPoints())) {
-            left.calculate(pointIdx, currentTime, lastTime)
-            right.calculate(pointIdx, currentTime, lastTime)
+            left.calculate(pointIdx)
+            right.calculate(pointIdx)
         } else {
             left.done()
             right.done()
             done = true
         }
-
         imu.getYawPitchRoll(imuValue)
-        headingError = RobotMath.limit180(left.activeHeading() - imuValue[0])
-
-        headingAdjustment = (hP * headingError) +
-                            (hD * (headingError - lastHeadingError) / (currentTime - lastTime))
-
-        lastHeadingError = headingError
+        headingAdjustment = headingController.calculate(imuValue[0], left.activeHeading())
 
         left.updateController(headingAdjustment)
         right.updateController(headingAdjustment)
@@ -173,7 +174,6 @@ class RioProfileRunner(override val leftController: IMotorControllerEnhanced, ov
             pointIdx++
             lastUpdate = currentTime
         }
-        lastTime = currentTime
     }
 
     override fun exit() {

@@ -20,7 +20,7 @@ object TestAuto : RobotAuto() {
 
     override fun assembleAuto(add: StepAdder) {
         add(Commands.ZeroIMU)
-        add(TuningRioProfileRunner(Drivetrain.left.master, Drivetrain.right.master, Drivetrain.imu, "step0"))
+        add(TuningRioProfileRunner(Drivetrain, "testing"))
         //Routines.drive("DS_LEFT", "SCALE_LEFT")
         //Routines.drive("SCALE_LEFT", "SCALE_OFFSET_LEFT")
         //Routines.drive("SCALE_OFFSET_LEFT", "SWITCH_LEFT")
