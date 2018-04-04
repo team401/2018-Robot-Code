@@ -149,7 +149,10 @@ val Gamepad = HumanControls.f310(2) {
         }
         released {
             intakeWheels.setState(IntakeWheelsStates.IDLE)
-            intakeFolding.setState(IntakeFoldingStates.STOWED)
+
+            if(elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER){
+                intakeFolding.setState(IntakeFoldingStates.STOWED)
+            }
         }
     }
 
