@@ -1,6 +1,6 @@
 apply plugin: "jaci.openrio.gradle.GradleRIO"
 
-def SNAKESKIN_VERSION = "1.2.6"
+def SNAKESKIN_VERSION = "1.2.7"
 def SNAKESKIN_MAIN = "org.snakeskin.Robot"
 
 def TEAM_NUMBER = 401

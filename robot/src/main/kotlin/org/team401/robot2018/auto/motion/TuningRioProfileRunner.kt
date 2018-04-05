@@ -91,27 +91,27 @@ class TuningRioProfileRunner(val drivetrain: TankDrivetrain,
         SmartDashboard.putString("tuningRunner-$name-current", gson.toJson(currentData))
     }
     
-    override fun entry() {
+    override fun entry(currentTime: Double) {
         done = false
         SmartDashboard.putString("tuningRunner-$name-current", "{}")
         loading()
         fetchGains()
-        runner = RioProfileRunner(drivetrain, gains, headingMagnitude, driveMagnitude, null, rate)
+        runner = RioProfileRunner(drivetrain, gains, headingMagnitude, driveMagnitude, rate)
         runner.loadPoints(leftPointfile, rightPointfile)
-        runner.entry()
+        runner.entry(currentTime)
     }
     
-    override fun action() {
+    override fun action(currentTime: Double, lastTime: Double) {
         running()
-        runner.action()
+        runner.action(currentTime, lastTime)
         leftCurrent = runner.leftCurrentWaypoint()
         rightCurrent = runner.rightCurrentWaypoint()
         publishData()
         done = runner.done
     }
     
-    override fun exit() {
-        runner.exit()
+    override fun exit(currentTime: Double) {
+        runner.exit(currentTime)
         ready()
     }
 }

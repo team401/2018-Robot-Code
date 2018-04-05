@@ -22,15 +22,15 @@ import org.team401.robot2018.subsystems.*
 object Commands {
     val DeployElevator = StateStep(ElevatorSubsystem, ELEVATOR_DEPLOY_MACHINE, ElevatorDeployStates.DEPLOY)
     val HomeElevator = object : AutoStep() {
-        override fun entry() {
+        override fun entry(currentTime: Double) {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
 
-        override fun action() {
+        override fun action(currentTime: Double, lastTime: Double) {
             done = Elevator.homed
         }
 
-        override fun exit() {}
+        override fun exit(currentTime: Double) {}
     }
 
     val WaitForDeploy = WaitForStep {
@@ -65,7 +65,7 @@ object Commands {
     val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
     val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
-    val HighLockDeployAndWait = arrayOf(BackgroundDelayStep(500), ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
+    val HighLockDeployAndWait = arrayOf(DelayStep(.5), ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
 
     val Score = arrayOf(ElevatorHolderUnclamp, ElevatorKickerScore, LambdaStep { LED.signalScoreCube() }, DelayStep(AutoDelays.SCORE_DELAY), ElevatorKickerRetract)
 

@@ -13,17 +13,17 @@ package org.team401.robot2018.auto.steps
  * @version 2/20/18
  */
 
-class SubSequence(vararg val steps: AutoStep): AutoStep() {
+class SequentialSteps(vararg val steps: AutoStep): AutoStep() {
     private var idx = 0
 
-    override fun entry() {
+    override fun entry(currentTime: Double) {
         done = false
         idx = 0
     }
 
-    override fun action() {
+    override fun action(currentTime: Double, lastTime: Double) {
         if (idx < steps.size) {
-            steps[idx].tick()
+            steps[idx].tick(currentTime, lastTime)
             if (steps[idx].doContinue()) {
                 idx++
             }
@@ -32,10 +32,10 @@ class SubSequence(vararg val steps: AutoStep): AutoStep() {
         }
     }
 
-    override fun exit() {
+    override fun exit(currentTime: Double) {
         steps.forEach {
             if (it.state != AutoStep.State.CONTINUE) {
-                it.exit()
+                it.exit(currentTime)
             }
         }
     }

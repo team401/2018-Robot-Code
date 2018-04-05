@@ -14,11 +14,11 @@ package org.team401.robot2018.auto.steps
  */
 
 interface IAutoStep {
-    fun entry()
-    fun action()
-    fun exit()
+    fun entry(currentTime: Double)
+    fun action(currentTime: Double, lastTime: Double)
+    fun exit(currentTime: Double)
 
-    fun tick()
+    fun tick(currentTime: Double, lastTime: Double)
     fun reset()
 
     var done: Boolean

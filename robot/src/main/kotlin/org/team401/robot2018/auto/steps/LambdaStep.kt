@@ -14,7 +14,7 @@ package org.team401.robot2018.auto.steps
  */
 
 class LambdaStep(val lambda: () -> Unit): SingleStep() {
-    override fun entry() {
+    override fun entry(currentTime: Double) {
         lambda()
     }
 }

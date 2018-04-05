@@ -13,7 +13,7 @@ package org.team401.robot2018.auto.steps
  * @version 1/25/18
  */
 
-class StepGroup(): AutoStep() {
+class ParallelSteps(): AutoStep() {
     constructor(stepsIn: List<AutoStep>) : this() {
         steps.addAll(stepsIn)
     }
@@ -24,16 +24,16 @@ class StepGroup(): AutoStep() {
 
     private val steps = arrayListOf<AutoStep>()
 
-    override fun entry() {
+    override fun entry(currentTime: Double) {
         steps.forEach {
-            it.entry()
+            it.entry(currentTime)
         }
     }
 
-    override fun action() {
+    override fun action(currentTime: Double, lastTime: Double) {
         steps.forEach {
             if (!it.done) {
-                it.action()
+                it.action(currentTime, lastTime)
             }
         }
         if (steps.all { it.done } || steps.size == 0) {
@@ -41,9 +41,9 @@ class StepGroup(): AutoStep() {
         }
     }
 
-    override fun exit() {
+    override fun exit(currentTime: Double) {
         steps.forEach {
-            it.exit()
+            it.exit(currentTime)
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
@@ -50,7 +51,7 @@ abstract class RobotAuto: AutoLoop() {
     protected var switchSide = MatchData.OwnedSide.UNKNOWN; private set
     protected var scaleSide = MatchData.OwnedSide.UNKNOWN; private set
     protected var teammatesCanDoSwitch = false; private set
-    protected var baseDelay = 0L; private set
+    protected var baseDelay = 0.0; private set
 
     /**
      * Polls the field for data until valid data is found
@@ -71,7 +72,7 @@ abstract class RobotAuto: AutoLoop() {
         robotPos = robotPosSelector.selected
         target = autoTargetSelector.selected
         teammatesCanDoSwitch = SmartDashboard.getBoolean("Partner Switch", false)
-        baseDelay = SmartDashboard.getNumber("Base Delay", 0.0).toLong()
+        baseDelay = SmartDashboard.getNumber("Base Delay", 0.0)
     }
 
     //AUTO MANAGER
@@ -97,9 +98,9 @@ abstract class RobotAuto: AutoLoop() {
         }
     }
 
-    override fun action() {
+    override fun action(currentTime: Double, lastTime: Double) {
         if (sequenceIdx < sequence.size) {
-            sequence[sequenceIdx].tick()
+            sequence[sequenceIdx].tick(currentTime, lastTime)
             if (sequence[sequenceIdx].doContinue()) {
                 sequenceIdx++
             }
@@ -109,9 +110,10 @@ abstract class RobotAuto: AutoLoop() {
     }
 
     override fun exit() {
+        val time = Timer.getFPGATimestamp()
         sequence.forEach {
             if (it.state != AutoStep.State.CONTINUE) {
-                it.exit()
+                it.exit(time)
             }
         }
     }

@@ -17,9 +17,9 @@ package org.team401.robot2018.auto.steps
  * Waits for a condition to become true before continuing
  */
 class WaitForStep(val condition: () -> Boolean): AutoStep() {
-    override fun entry() {}
-    override fun action() {
+    override fun entry(currentTime: Double) {}
+    override fun action(currentTime: Double, lastTime: Double) {
         done = condition()
     }
-    override fun exit() {}
+    override fun exit(currentTime: Double) {}
 }
