@@ -1,5 +1,7 @@
 package org.team401.robot2018.constants
 
+import org.opencv.core.Rect
+import org.opencv.core.Scalar
 import org.team401.robot2018.auto.motion.DriveGains
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.etc.RobotMath
@@ -267,4 +269,13 @@ abstract class ConstantsBase {
         val REPORTING_RATE = 100L //ms
     }
     val ReportingParameters = ReportingParametersConfig()
+
+    class VisionParametersConfig {
+        val CUBE_COLOR_MIN = Scalar(0.0, 0.0, 0.0)
+        val CUBE_COLOR_MAX = Scalar(0.0, 0.0, 0.0)
+
+        val CLOSE_ARMS_RECT = Rect()
+        val HAVE_CUBE_RECT = Rect()
+    }
+    val VisionParameters = VisionParametersConfig()
 }

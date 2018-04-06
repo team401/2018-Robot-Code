@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
+import edu.wpi.first.wpilibj.vision.VisionRunner
+import edu.wpi.first.wpilibj.vision.VisionThread
 import org.snakeskin.annotation.PostStartup
 import org.snakeskin.annotation.Setup
 import org.snakeskin.auto.AutoManager
@@ -27,6 +29,7 @@ import org.team401.robot2018.etc.LED
 import org.team401.robot2018.etc.Reporting
 import org.team401.robot2018.etc.RobotEvents
 import org.team401.robot2018.subsystems.*
+import org.team401.robot2018.vision.CubeDetectorPipeline
 import org.team401.robot2018.vision.MjpegServer
 import org.team401.robot2018.vision.VisionController
 
@@ -69,7 +72,9 @@ fun setup() {
     //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
     //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
 
-    //CameraServer.getInstance().startAutomaticCapture(0)
+    val camera = CameraServer.getInstance().startAutomaticCapture(0)
+    val visionThread = VisionThread(camera, CubeDetectorPipeline, VisionRunner.Listener<CubeDetectorPipeline> {})
+    visionThread.start()
 
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem)
     Controllers.add(LeftStick, RightStick, Gamepad)
