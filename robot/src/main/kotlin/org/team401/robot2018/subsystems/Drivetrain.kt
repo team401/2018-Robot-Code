@@ -24,10 +24,7 @@ import org.snakeskin.logic.scalars.SquareScalar
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
 import org.team401.robot2018.constants.Constants
-import org.team401.robot2018.etc.RobotMath
-import org.team401.robot2018.etc.getCurrent
-import org.team401.robot2018.etc.shiftUpdate
-import org.team401.robot2018.etc.withinTolerance
+import org.team401.robot2018.etc.*
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -119,6 +116,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         state(DriveStates.EXTERNAL_CONTROL) {
             entry {
                 Drivetrain.setRampRate(0.0, 0.0)
+                Drivetrain.linkSensors()
             }
         }
 
@@ -162,6 +160,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             )
 
             entry {
+                Drivetrain.unlinkSensors()
+                Drivetrain.unlinkSides()
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
                 Drivetrain.setRampRate(.25, .25)

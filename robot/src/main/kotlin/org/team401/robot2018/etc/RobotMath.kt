@@ -27,6 +27,18 @@ object RobotMath {
                         ticksPerRev: Double = 4096.0) = inchesToTicks(feet * 12.0, pitchDiameter, ticksPerRev)
     }
 
+    object Drivetrain {
+        /**
+         * Converts an input inches to native units (ticks), based on the constants encoder ticks per rev and wheel diameter
+         */
+        fun inchesToNativeUnits(inches: Double) = (Constants.DrivetrainParameters.ENCODER_TICKS * inches) / (Math.PI * Constants.DrivetrainParameters.WHEEL_DIAMETER)
+
+        /**
+         * Converts an input inches per second to native units (ticks / 100ms), based on the constants encoder ticks per rev and wheel diameter
+         */
+        fun ipsToNativeUnits(ips: Double) = (Constants.DrivetrainParameters.ENCODER_TICKS * ips) / (10.0 * Math.PI * Constants.DrivetrainParameters.WHEEL_DIAMETER)
+    }
+
     object UnitConversions {
         fun revolutionsToNativeUnits(rotations: Double, ticksPerRev: Double = 4096.0) = rotations * ticksPerRev
 

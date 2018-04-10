@@ -1,0 +1,52 @@
+package org.team401.robot2018.auto.motionprofile
+
+/*
+ * 2018-Robot-Code - Created on 4/9/18
+ * Author: Cameron Earle
+ * 
+ * This code is licensed under the GNU GPL v3
+ * You can find more info in the LICENSE file at project root
+ */
+
+/**
+ * @author Cameron Earle
+ * @version 4/9/18
+ */
+
+data class MotionProfile(val points: List<Waypoint> = arrayListOf()) {
+    private fun pointsAsArrayList() = points as ArrayList<Waypoint>
+    private var idx = 0
+
+    private fun fixHeadings() {
+        val adapter = HeadingAdapter()
+        val newHeadings = adapter.findNewHeadings(points.map { it.heading })
+        newHeadings.forEachIndexed {
+            index, heading ->
+            points[index].heading = heading
+        }
+    }
+
+    fun fromCSV(lines: List<String>) {
+        val points = pointsAsArrayList()
+        points.clear()
+        lines.forEach {
+            points.add(Waypoint.fromCSVLine(it))
+        }
+        fixHeadings()
+    }
+
+    fun fromPoints(pointsIn: List<Waypoint>) {
+        val points = pointsAsArrayList()
+        points.clear()
+        points.addAll(pointsIn)
+        fixHeadings()
+    }
+
+    fun numPoints() = points.size
+    fun lastIndex() = points.size - 1
+
+    fun isFirst(idx: Int) = idx == 0
+    fun isLast(idx: Int) = idx == lastIndex()
+
+    fun getPoint(idx: Int) = points[idx]
+}

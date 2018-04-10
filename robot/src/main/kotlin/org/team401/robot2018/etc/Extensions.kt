@@ -1,8 +1,7 @@
 package org.team401.robot2018.etc
 
 import com.ctre.phoenix.ParamEnum
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import openrio.powerup.MatchData
@@ -84,6 +83,41 @@ fun TankDrivetrain.shiftUpdate(state: ShiftCommand): Boolean {
         return true
     }
     return false
+}
+
+fun TankDrivetrain.linkSensors() {
+    val timeout = 20
+    val localFeedbackDevice = FeedbackDevice.CTRE_MagEncoder_Relative
+
+    left.master.configSelectedFeedbackSensor(localFeedbackDevice, TalonEnums.DISTANCE_PID, timeout)
+    right.master.configRemoteFeedbackFilter(left.master.deviceID, RemoteSensorSource.TalonSRX_SelectedSensor, TalonEnums.REMOTE_O, timeout)
+    right.master.configRemoteFeedbackFilter(imu.deviceID, RemoteSensorSource.GadgeteerPigeon_Yaw, TalonEnums.REMOTE_1, timeout)
+    right.master.configSensorTerm(SensorTerm.Sum0, localFeedbackDevice, timeout)
+    right.master.configSensorTerm(SensorTerm.Sum1, FeedbackDevice.RemoteSensor0, timeout)
+
+    right.master.configSelectedFeedbackSensor(FeedbackDevice.SensorSum, TalonEnums.DISTANCE_PID, timeout)
+    right.master.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor1, TalonEnums.HEADING_PID, timeout)
+
+    right.master.configSelectedFeedbackCoefficient(.5, TalonEnums.DISTANCE_PID, timeout)
+    right.master.configSelectedFeedbackCoefficient(3600.0/8192.0, TalonEnums.HEADING_PID, timeout)
+}
+
+fun TankDrivetrain.linkSides() {
+    (left.master as TalonSRX).follow(right.master, FollowerType.AuxOutput1)
+}
+
+fun TankDrivetrain.unlinkSides() {
+    right.master.set(ControlMode.PercentOutput, 0.0)
+    left.master.set(ControlMode.PercentOutput, 0.0)
+}
+
+fun TankDrivetrain.unlinkSensors() {
+    val timeout = 20
+
+    left.master.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, TalonEnums.DISTANCE_PID, timeout)
+    right.master.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, TalonEnums.DISTANCE_PID, timeout)
+    left.master.configSelectedFeedbackCoefficient(1.0, TalonEnums.DISTANCE_PID, timeout)
+    right.master.configSelectedFeedbackCoefficient(1.0, TalonEnums.DISTANCE_PID, timeout)
 }
 
 fun Gearbox.encoderMissing() = (master as TalonSRX).sensorCollection.pulseWidthRiseToRiseUs == 0

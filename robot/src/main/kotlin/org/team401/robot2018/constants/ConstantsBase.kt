@@ -97,6 +97,10 @@ abstract class ConstantsBase {
         abstract val SPEED_SPLIT: Double //f/s
         //above should be some value between the low gear speed and the high gear speed
 
+        abstract val WHEEL_DIAMETER: Double //in
+
+        val ENCODER_TICKS = 4096.0
+
         val MIN_VELOCITY = -500.0 //RPM, negative
         val MAX_VELOCITY = 500.0 //RPM, positive
 
