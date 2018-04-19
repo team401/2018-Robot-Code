@@ -93,9 +93,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     fun low() = shift(ShifterState.LOW)
 
     setup {
-        left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
-        right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
-
         //left.master.pidf(f = .20431, p = .15)
         //right.master.pidf(f = .22133,p = .15)
 
@@ -109,6 +106,21 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
 
         Drivetrain.setNeutralMode(NeutralMode.Coast)
+
+        val timeout = 20
+        val localFeedbackDevice = FeedbackDevice.CTRE_MagEncoder_Relative
+
+        leftFront.configSelectedFeedbackSensor(localFeedbackDevice, TalonEnums.DISTANCE_PID, timeout)
+        rightFront.configRemoteFeedbackFilter(leftFront.deviceID, RemoteSensorSource.TalonSRX_SelectedSensor, TalonEnums.REMOTE_O, timeout)
+        rightFront.configRemoteFeedbackFilter(imu.deviceID, RemoteSensorSource.GadgeteerPigeon_Yaw, TalonEnums.REMOTE_1, timeout)
+        rightFront.configSensorTerm(SensorTerm.Sum0, localFeedbackDevice, timeout)
+        rightFront.configSensorTerm(SensorTerm.Sum1, FeedbackDevice.RemoteSensor0, timeout)
+
+        rightFront.configSelectedFeedbackSensor(FeedbackDevice.SensorSum, TalonEnums.DISTANCE_PID, timeout)
+        rightFront.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor1, TalonEnums.HEADING_PID, timeout)
+
+        rightFront.configSelectedFeedbackCoefficient(.5, TalonEnums.DISTANCE_PID, timeout)
+        rightFront.configSelectedFeedbackCoefficient(3600.0/8192.0, TalonEnums.HEADING_PID, timeout)
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
@@ -116,7 +128,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         state(DriveStates.EXTERNAL_CONTROL) {
             entry {
                 Drivetrain.setRampRate(0.0, 0.0)
-                Drivetrain.linkSensors()
             }
         }
 
@@ -160,7 +171,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             )
 
             entry {
-                Drivetrain.unlinkSensors()
                 Drivetrain.unlinkSides()
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)

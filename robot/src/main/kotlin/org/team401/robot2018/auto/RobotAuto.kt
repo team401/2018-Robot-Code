@@ -80,7 +80,7 @@ abstract class RobotAuto: AutoLoop() {
     private var sequenceIdx = 0
     private val adder: (AutoStep) -> Unit = { sequence.add(it) }
 
-    override val rate = 10L
+    override val rate = 5L
 
     abstract fun preAuto()
     abstract fun assembleAuto(add: (AutoStep) -> Unit)

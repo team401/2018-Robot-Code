@@ -2,7 +2,7 @@ package org.team401.robot2018.constants
 
 import org.opencv.core.Rect
 import org.opencv.core.Scalar
-import org.team401.robot2018.auto.motion.DriveGains
+import  org.team401.robot2018.auto.motion.DriveGains
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.etc.RobotMath
 
@@ -18,7 +18,8 @@ import org.team401.robot2018.etc.RobotMath
  * @author Cameron Earle
  * @version 3/7/18
  */
-abstract class ConstantsBase {
+abstract class
+ConstantsBase {
     interface PIDF {
         val P: Double
         val I: Double
@@ -56,6 +57,16 @@ abstract class ConstantsBase {
         val INTAKE_FOLDING_CAN = 4
     }
     val MotorControllers = MotorControllersConfig()
+
+    class DIOConfig {
+        val CUBE_BEAM_BREAK = 0
+        val CUBE_LEFT_SENSOR = 1
+        val CUBE_RIGHT_SENSOR = 2
+
+        val CUBE_TRIGGERED = false
+        val BEAM_BREAK_TRIGGERED = false
+    }
+    val DIO = DIOConfig()
     
     class PDPChannelsConfig {
         val DRIVE_LEFT_REAR_PDP = 15
@@ -226,8 +237,11 @@ abstract class ConstantsBase {
         val STOWED_POS = 0.0 + 170.0
         val INTAKE_POS = 2010.0 - 50.0
         val GRAB_POS = 1210.0 + 150.0
+        val PAST_ELEVATOR_RAIL_POS = 1000.0
 
         val HOMING_COUNT = 10
+        val BEAM_BREAK_COUNT = 5
+        val HAVE_CUBE_COUNT = 15
 
         abstract val HAVE_CUBE_CURRENT_LEFT_HOLD: Double
         abstract val HAVE_CUBE_CURRENT_RIGHT_HOLD: Double

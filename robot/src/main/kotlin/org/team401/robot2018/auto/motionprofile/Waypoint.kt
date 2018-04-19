@@ -17,10 +17,10 @@ import org.team401.robot2018.etc.TalonEnums
  * @version 4/9/18
  */
 
-data class Waypoint(val position: Double,
-                    val velocity: Double,
-                    val timestep: Int,
-                    val acceleration: Double,
+data class Waypoint(var position: Double,
+                    var velocity: Double,
+                    var timestep: Int,
+                    var acceleration: Double,
                     var heading: Double) {
 
     fun toTrajectoryPoint(isFirst: Boolean, isLast: Boolean): TrajectoryPoint {
@@ -28,6 +28,7 @@ data class Waypoint(val position: Double,
         tp.position = RobotMath.Drivetrain.inchesToNativeUnits(position)
         tp.velocity = RobotMath.Drivetrain.ipsToNativeUnits(velocity)
         tp.auxiliaryPos = heading * 10.0
+        tp.headingDeg = heading
         tp.timeDur = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms.valueOf(timestep)
         tp.profileSlotSelect0 = 0
         tp.profileSlotSelect1 = 1

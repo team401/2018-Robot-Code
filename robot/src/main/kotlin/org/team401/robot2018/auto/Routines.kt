@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import org.team401.robot2018.auto.motion.RioProfileRunner
+import org.team401.robot2018.auto.motionprofile.ArcProfileFollower
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.auto.steps.DelayStep
 import org.team401.robot2018.auto.steps.LambdaStep
@@ -26,17 +27,9 @@ object Routines {
     lateinit var add: StepAdder
 
     fun drive(profile: String, vararg otherActions: AutoStep) {
-        val step = RioProfileRunner(
-                Drivetrain,
-                Constants.DrivetrainParameters.DRIVE_GAINS,
-                Constants.DrivetrainParameters.HEADING_MAGNITUDE,
-                Constants.DrivetrainParameters.DRIVE_MAGNITUDE
-        )
+        val step = ArcProfileFollower(Drivetrain)
 
-        step.loadPoints(
-                "/home/lvuser/profiles/${profile}_L.csv",
-                "/home/lvuser/profiles/${profile}_R.csv"
-        )
+        step.load("/home/lvuser/profiles/${profile}_C.csv")
 
         add(ParallelSteps(step, *otherActions))
     }

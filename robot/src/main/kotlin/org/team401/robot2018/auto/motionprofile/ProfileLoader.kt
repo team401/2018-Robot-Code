@@ -2,6 +2,7 @@ package org.team401.robot2018.auto.motionprofile
 
 import org.snakeskin.factory.ExecutorFactory
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 
@@ -36,7 +37,11 @@ object ProfileLoader {
     private val executor = ExecutorFactory.getExecutor("Talon Point loader")
 
     @Synchronized private fun loadFromFile(filename: String): ArrayList<Waypoint> {
+        println("ProfileLoader: Loading '$filename'")
         val f = File(filename)
+        if (!f.exists()) {
+            throw FileNotFoundException("Could not find profile '$filename'")
+        }
         val points = arrayListOf<Waypoint>()
         val lines = f.readLines()
         lines.forEach {
@@ -105,10 +110,14 @@ object ProfileLoader {
     fun populateLater(profile: String, mp: MotionProfile): LoadPromise {
         val promise = LoadPromise(mp)
         executor.submit {
-            if (cache.containsKey(profile)) {
-                promise.load(cache[profile]!!)
-            } else {
-                promise.load(loadFromFile(profile))
+            try {
+                if (cache.containsKey(profile)) {
+                    promise.load(cache[profile]!!)
+                } else {
+                    promise.load(loadFromFile(profile))
+                }
+            } catch(e: FileNotFoundException) {
+                e.printStackTrace()
             }
         }
         return promise

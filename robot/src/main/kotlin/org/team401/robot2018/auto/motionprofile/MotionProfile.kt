@@ -1,5 +1,7 @@
 package org.team401.robot2018.auto.motionprofile
 
+import com.ctre.phoenix.motion.TrajectoryPoint
+
 /*
  * 2018-Robot-Code - Created on 4/9/18
  * Author: Cameron Earle
@@ -47,6 +49,10 @@ data class MotionProfile(val points: List<Waypoint> = arrayListOf()) {
 
     fun isFirst(idx: Int) = idx == 0
     fun isLast(idx: Int) = idx == lastIndex()
+
+    fun getFirstTimestep() = TrajectoryPoint.TrajectoryDuration.Trajectory_Duration_0ms.valueOf(
+            points.getOrNull(0)?.timestep ?: 0
+    )
 
     fun getPoint(idx: Int) = points[idx]
 }

@@ -3,12 +3,10 @@ package org.team401.robot2018.subsystems
 import com.ctre.phoenix.motorcontrol.ControlMode
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
-import edu.wpi.first.wpilibj.Servo
+import edu.wpi.first.wpilibj.DigitalInput
 import org.snakeskin.dsl.*
 import org.snakeskin.event.Events
-import org.snakeskin.logic.History
 import org.snakeskin.logic.LockingDelegate
-import org.team401.robot2018.PDP
 import org.team401.robot2018.constants.Constants
 import org.team401.robot2018.etc.*
 
@@ -27,18 +25,17 @@ import org.team401.robot2018.etc.*
 
 const val INTAKE_WHEELS_MACHINE = "intake"
 object IntakeWheelsStates {
-    const val INTAKE_PRE = "grabIntake"
     const val INTAKE = "intake"
     const val REVERSE = "reverse"
     const val IDLE = "idle"
-    const val GOT_CUBE = "gotem"
-    const val HAVE_CUBE = "haveCube"
+    const val HAVE_CUBE = "gotem"
 }
 
 const val INTAKE_FOLDING_MACHINE = "intake_folding"
 object IntakeFoldingStates {
     const val GRAB = "wide"
-    const val INTAKE = "out"
+    const val INTAKE_FORCE = "out"
+    const val INTAKE = "intakeAuto"
     const val STOWED = "in"
     const val HOMING = "homing"
     const val GO_TO_INTAKE = "goToIntake"
@@ -60,8 +57,10 @@ var cubeCount = 0
 
 val IntakeSubsystem: Subsystem = buildSubsystem {
     val folding = TalonSRX(Constants.MotorControllers.INTAKE_FOLDING_CAN)
-    val camera = Servo(1)
 
+    val cubeLeft = DigitalInput(Constants.DIO.CUBE_LEFT_SENSOR)
+    val cubeRight = DigitalInput(Constants.DIO.CUBE_RIGHT_SENSOR)
+    val cubeBeamBreak = DigitalInput(Constants.DIO.CUBE_BEAM_BREAK)
 
     val left = TalonSRX(Constants.MotorControllers.INTAKE_LEFT_CAN)
     val right = TalonSRX(Constants.MotorControllers.INTAKE_RIGHT_CAN)
@@ -110,10 +109,25 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
     val foldingMachine = stateMachine(INTAKE_FOLDING_MACHINE) {
         state(IntakeFoldingStates.GRAB) {
+            var counter = 0
+
             entry {
-                camera.set(1.0)
                 LED.intakeGrab()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.GRAB_POS)
+                counter = 0
+            }
+
+            action {
+                if (folding.getSelectedSensorPosition(0) >= Constants.IntakeParameters.PAST_ELEVATOR_RAIL_POS) {
+                    if (cubeBeamBreak.get() == Constants.DIO.BEAM_BREAK_TRIGGERED) {
+                        counter++
+                    } else {
+                        counter = 0
+                    }
+                    if (counter >= Constants.IntakeParameters.BEAM_BREAK_COUNT) {
+                        setState(IntakeFoldingStates.INTAKE)
+                    }
+                }
             }
         }
 
@@ -121,24 +135,39 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
             action {
                 if (Elevator.estop || Elevator.atCollection() || ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_VAULT_RUNNER) {
                     Thread.sleep(100)
-                    setState(IntakeFoldingStates.INTAKE)
+                    setState(IntakeFoldingStates.INTAKE_FORCE)
                 }
             }
         }
 
-        state(IntakeFoldingStates.INTAKE) {
+        state(IntakeFoldingStates.INTAKE_FORCE) {
             entry {
-                camera.set(1.0)
                 LED.intakeOut()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
             }
         }
 
+        state(IntakeFoldingStates.INTAKE) {
+            entry {
+                LED.intakeOut()
+                folding.set(ControlMode.Position, Constants.IntakeParameters.INTAKE_POS)
+            }
+
+            action {
+                if (cubeBeamBreak.get() != Constants.DIO.BEAM_BREAK_TRIGGERED) {
+                    setState(IntakeFoldingStates.GRAB)
+                }
+            }
+        }
+
         state(IntakeFoldingStates.STOWED) {
             entry {
-                camera.set(.65)
                 LED.intakeRetract()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
+            }
+
+            action {
+                println("BB: ${cubeBeamBreak.get()}  L: ${cubeLeft.get()}  R: ${cubeRight.get()}")
             }
         }
 
@@ -171,59 +200,31 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
 
         default {
             entry {
-                camera.set(0.0)
                 folding.set(ControlMode.PercentOutput, 0.0)
             }
         }
     }
 
     val intakeMachine = stateMachine(INTAKE_WHEELS_MACHINE) {
-        state(IntakeWheelsStates.INTAKE_PRE) {
-            action {
-                left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_LEFT, Constants.IntakeParameters.INTAKE_VOLTAGE)
-                right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_RIGHT, Constants.IntakeParameters.INTAKE_VOLTAGE)
-            }
-        }
-
         state(IntakeWheelsStates.INTAKE) {
-            var inrushCounter = 0
+            var counter = 0
             entry {
-                inrushCounter = 0
+                counter = 0
             }
 
             action {
                 left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_LEFT, Constants.IntakeParameters.INTAKE_VOLTAGE)
                 right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_RIGHT, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                if (inrushCounter < Constants.IntakeParameters.INRUSH_COUNT) {
-                    inrushCounter++
+                if (cubeBeamBreak.get() == Constants.DIO.BEAM_BREAK_TRIGGERED && (cubeLeft.get() == Constants.DIO.CUBE_TRIGGERED || cubeRight.get() == Constants.DIO.CUBE_TRIGGERED)) {
+                    counter++
                 } else {
-                    //If all conditions are met to say we have a cube
-                    if (left.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_INTAKE &&
-                        right.outputCurrent >= Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_INTAKE) {
-                        setState(IntakeWheelsStates.GOT_CUBE)
-                    }
+                    counter = 0
                 }
-            }
-        }
 
-        state(IntakeWheelsStates.GOT_CUBE) {
-            timeout(Constants.IntakeParameters.CUBE_HELD_TIME, IntakeWheelsStates.HAVE_CUBE)
-
-            action {
-                left.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
-                right.voltageCompensation(Constants.IntakeParameters.RETAIN_RATE, Constants.IntakeParameters.INTAKE_VOLTAGE)
-
-                //println("GOT CURRENT:  LEFT: ${left.outputCurrent}  RIGHT: ${right.outputCurrent}")
-
-                /*
-                //If any of the conditions are met to say we don't have a cube
-                if (left.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_LEFT_HOLD &&
-                    right.outputCurrent < Constants.IntakeParameters.HAVE_CUBE_CURRENT_RIGHT_HOLD) {
-
-                    setState(IntakeWheelsStates.INTAKE)
+                if (counter >= Constants.IntakeParameters.HAVE_CUBE_COUNT) {
+                    setState(IntakeWheelsStates.HAVE_CUBE)
                 }
-                */
             }
         }
 

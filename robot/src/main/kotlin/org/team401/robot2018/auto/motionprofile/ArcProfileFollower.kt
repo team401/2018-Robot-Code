@@ -3,10 +3,14 @@ package org.team401.robot2018.auto.motionprofile
 import com.ctre.phoenix.motion.MotionProfileStatus
 import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.ControlMode
+import com.ctre.phoenix.motorcontrol.FollowerType
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.component.TankDrivetrain
+import org.snakeskin.factory.ExecutorFactory
 import org.team401.robot2018.auto.steps.AutoStep
-import org.team401.robot2018.etc.linkSides
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 /*
  * 2018-Robot-Code - Created on 4/10/18
@@ -22,12 +26,13 @@ import org.team401.robot2018.etc.linkSides
  */
 
 class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
-    private val controller = drivetrain.right.master as TalonSRX
     private var setValue = SetValueMotionProfile.Disable
-    private val status = MotionProfileStatus()
     private val profile = MotionProfile()
     private var loadPromise: ProfileLoader.LoadPromise? = null
     private var streamIdx = 0
+
+    val controller = drivetrain.right.master as TalonSRX
+    val status = MotionProfileStatus()
 
     fun load(filename: String) {
         loadPromise = ProfileLoader.populateLater(filename, profile)
@@ -44,38 +49,28 @@ class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
 
     private fun controllerSet() = controller.set(ControlMode.MotionProfileArc, setValue.value.toDouble())
 
-    private fun resetAll() {
-        setValue = SetValueMotionProfile.Disable
-        mpState = MpState.NOT_SETUP
-        streamIdx = 0
-        controller.clearMotionProfileTrajectories()
-        controller.clearMotionProfileHasUnderrun(0)
-        controller.configMotionProfileTrajectoryPeriod(0, 0)
-    }
-
     private fun streamPoints() {
-        while (streamIdx < profile.numPoints() && !controller.isMotionProfileTopLevelBufferFull) {
+        while (!done && streamIdx < profile.numPoints() && !controller.isMotionProfileTopLevelBufferFull) {
             controller.pushMotionProfileTrajectory(profile.getPoint(streamIdx).toTrajectoryPoint(profile.isFirst(streamIdx), profile.isLast(streamIdx)))
             streamIdx++
         }
     }
 
-    private fun checkMinPoints(minTimeRequired: Int): Boolean {
-        val duration = profile.getPoint(0).timestep
-        val numPoints = status.btmBufferCnt
-        if (numPoints * duration > minTimeRequired) {
-            return true
-        }
-        return false
-    }
-
     private fun checkHold() = status.activePointValid && status.isLast
 
     override fun entry(currentTime: Double) {
+        drivetrain.tank(ControlMode.PercentOutput, 0.0, 0.0)
         controllerSet()
-        resetAll()
-        drivetrain.linkSides()
+        setValue = SetValueMotionProfile.Disable
+        mpState = MpState.NOT_SETUP
+        streamIdx = 0
+        controller.clearMotionProfileTrajectories()
+        controller.clearMotionProfileHasUnderrun(0)
+        controller.changeMotionControlFramePeriod(5)
+        controller.configMotionProfileTrajectoryPeriod(0, 0)
         loadPromise?.await()
+        (drivetrain.left.master as TalonSRX).follow(controller, FollowerType.AuxOutput1)
+        mpState = MpState.STREAMING
     }
 
     override fun action(currentTime: Double, lastTime: Double) {
@@ -89,26 +84,31 @@ class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
             }
             MpState.STREAMING -> {
                 setValue = SetValueMotionProfile.Disable
-                if (checkMinPoints(500)) {
+                println("STREAMING POINTS TO BOTTOM BUFFER: ${status.btmBufferCnt}")
+                if (status.btmBufferCnt > 5) {
                     //Require 500ms of points
                     mpState = MpState.RUNNING
                 }
             }
             MpState.RUNNING -> {
                 setValue = SetValueMotionProfile.Enable
+                println("RUNNING PROFILE.  DT: ${(currentTime - lastTime) * 1000}")
                 if (checkHold()) {
                     mpState = MpState.HOLDING
                 }
             }
             MpState.HOLDING -> {
+                println("PROFILE DONE: HOLDING")
                 setValue = SetValueMotionProfile.Hold
                 done = true
             }
         }
         controllerSet()
+        println("RAN")
     }
 
     override fun exit(currentTime: Double) {
-
+        drivetrain.left.master.set(ControlMode.PercentOutput, 0.0)
+        drivetrain.right.master.set(ControlMode.PercentOutput, 0.0)
     }
 }

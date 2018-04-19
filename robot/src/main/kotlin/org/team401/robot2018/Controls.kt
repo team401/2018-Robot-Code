@@ -169,7 +169,7 @@ val Gamepad = HumanControls.f310(2) {
         released {
             if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER && !Elevator.estop) {
                 if (intakeWheels.getState() != IntakeWheelsStates.IDLE) {
-                    intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
+                    intakeWheels.setState(IntakeWheelsStates.INTAKE)
                 }
                 if (intakeFolding.getState() != IntakeFoldingStates.STOWED) {
                     intakeFolding.setState(IntakeFoldingStates.GRAB)
@@ -183,7 +183,7 @@ val Gamepad = HumanControls.f310(2) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
-            intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
+            intakeWheels.setState(IntakeWheelsStates.INTAKE)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
             LED.signalWantCube()
         }
