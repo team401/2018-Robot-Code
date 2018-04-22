@@ -37,24 +37,23 @@ object Routines {
     fun drive(start: Any, end: Any, vararg otherActions: AutoStep) = drive("$start-$end", *otherActions)
 
     fun score() {
-        add(Commands.ElevatorHolderUnclamp)
-        add(Commands.ElevatorKickerScore)
+        add(Commands.ElevatorHolderUnclamp())
+        add(Commands.ElevatorKickerScore())
         add(LambdaStep { LED.signalScoreCube() })
-        add(DelayStep(AutoDelays.SCORE_DELAY))
-        add(Commands.ElevatorKickerRetract)
+        //add(DelayStep(AutoDelays.SCORE_DELAY))
+        add(Commands.ElevatorKickerRetract())
     }
 
     fun intake() {
-        add(Commands.ElevatorToGround)
-        add(Commands.IntakeWheelsRun)
-        add(Commands.IntakeToIntake)
-        add(Commands.WaitForHasCube)
+        add(Commands.ElevatorToGround())
+        add(Commands.IntakeWheelsRun())
+        add(Commands.IntakeToGrab())
+        //add(Commands.WaitForHasCube)
     }
 
     fun setup() {
-        add(Commands.ZeroIMU)
-        add(Commands.IntakeToStow)
-        add(Commands.ElevatorHigh)
-        add(Commands.HoldElevator)
+        add(Commands.UnhomeElevator())
+        add(Commands.ZeroIMU())
+        add(Commands.IntakeToStow())
     }
 }

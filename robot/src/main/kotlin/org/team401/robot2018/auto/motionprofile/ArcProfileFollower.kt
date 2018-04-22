@@ -2,12 +2,13 @@ package org.team401.robot2018.auto.motionprofile
 
 import com.ctre.phoenix.motion.MotionProfileStatus
 import com.ctre.phoenix.motion.SetValueMotionProfile
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.FollowerType
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.component.TankDrivetrain
 import org.snakeskin.factory.ExecutorFactory
 import org.team401.robot2018.auto.steps.AutoStep
+import org.team401.robot2018.etc.TalonEnums
+import org.team401.robot2018.subsystems.Drivetrain
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit
  * @version 4/10/18
  */
 
-class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
+open class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
     private var setValue = SetValueMotionProfile.Disable
     private val profile = MotionProfile()
     private var loadPromise: ProfileLoader.LoadPromise? = null
@@ -59,7 +60,23 @@ class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
     private fun checkHold() = status.activePointValid && status.isLast
 
     override fun entry(currentTime: Double) {
-        drivetrain.tank(ControlMode.PercentOutput, 0.0, 0.0)
+        val timeout = 100
+        val localFeedbackDevice = FeedbackDevice.CTRE_MagEncoder_Relative
+
+        drivetrain.left.setSensor(localFeedbackDevice, timeout = timeout)
+        drivetrain.right.setSensor(localFeedbackDevice, timeout = timeout)
+        drivetrain.left.setPosition(0, 0, timeout)
+        drivetrain.right.setPosition(0, 0, timeout)
+
+        drivetrain.right.master.configRemoteFeedbackFilter(drivetrain.left.master.deviceID, RemoteSensorSource.TalonSRX_SelectedSensor, TalonEnums.REMOTE_O, timeout)
+        drivetrain.right.master.configRemoteFeedbackFilter(drivetrain.imu.deviceID, RemoteSensorSource.GadgeteerPigeon_Yaw, TalonEnums.REMOTE_1, timeout)
+        drivetrain.right.master.configSensorTerm(SensorTerm.Sum0, localFeedbackDevice, timeout)
+        drivetrain.right.master.configSensorTerm(SensorTerm.Sum1, FeedbackDevice.RemoteSensor0, timeout)
+        drivetrain.right.master.configSelectedFeedbackSensor(FeedbackDevice.SensorSum, TalonEnums.DISTANCE_PID, timeout)
+        drivetrain.right.master.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor1, TalonEnums.HEADING_PID, timeout)
+        drivetrain.right.master.configSelectedFeedbackCoefficient(.5, TalonEnums.DISTANCE_PID, timeout)
+        drivetrain.right.master.configSelectedFeedbackCoefficient(3600.0/8192.0, TalonEnums.HEADING_PID, timeout)
+
         controllerSet()
         setValue = SetValueMotionProfile.Disable
         mpState = MpState.NOT_SETUP
@@ -71,6 +88,7 @@ class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
         loadPromise?.await()
         (drivetrain.left.master as TalonSRX).follow(controller, FollowerType.AuxOutput1)
         mpState = MpState.STREAMING
+        println("RUNNING PROFILE")
     }
 
     override fun action(currentTime: Double, lastTime: Double) {
@@ -84,7 +102,6 @@ class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
             }
             MpState.STREAMING -> {
                 setValue = SetValueMotionProfile.Disable
-                println("STREAMING POINTS TO BOTTOM BUFFER: ${status.btmBufferCnt}")
                 if (status.btmBufferCnt > 5) {
                     //Require 500ms of points
                     mpState = MpState.RUNNING
@@ -92,19 +109,16 @@ class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
             }
             MpState.RUNNING -> {
                 setValue = SetValueMotionProfile.Enable
-                println("RUNNING PROFILE.  DT: ${(currentTime - lastTime) * 1000}")
                 if (checkHold()) {
                     mpState = MpState.HOLDING
                 }
             }
             MpState.HOLDING -> {
-                println("PROFILE DONE: HOLDING")
                 setValue = SetValueMotionProfile.Hold
                 done = true
             }
         }
         controllerSet()
-        println("RAN")
     }
 
     override fun exit(currentTime: Double) {

@@ -69,29 +69,29 @@ object PowerUpAuto: RobotAuto() {
             when (target) {
                 AutoTarget.BASELINE_ONLY -> {
                     if (robotPos != RobotPosition.DS_CENTER) {
-                        Routines.drive(robotPos, FieldElements.baseline(!switchSide), SequentialSteps(*Commands.HighLockDeployAndWait))
-                        add(Commands.HomeElevator)
+                        Routines.drive(robotPos, FieldElements.baseline(!switchSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                        add(Commands.HomeElevator())
                     }
                    //AUTO END
                 }
 
                 AutoTarget.SWITCH_ONLY -> {
-                    Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait)) //Drive and deploy
+                    Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait())) //Drive and deploy
                     Routines.score() //Score cube
                     Routines.drive("BACK_UP")
-                    add(Commands.HomeElevator)
+                    add(Commands.HomeElevator())
                     //AUTO END
                 }
 
                 AutoTarget.SCALE_ONLY -> {
                     if (robotPos.alignedWith(scaleSide)) {
-                        Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                        Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
                         Routines.score()
                         Routines.drive("BACK_UP")
                     } else {
-                        Routines.drive(robotPos, FieldElements.baseline(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait))
+                        Routines.drive(robotPos, FieldElements.baseline(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
                     }
-                    add(Commands.HomeElevator)
+                    add(Commands.HomeElevator())
                     //AUTO END
                 }
 
@@ -99,29 +99,29 @@ object PowerUpAuto: RobotAuto() {
                     when (robotPos) {
                         //Center switch
                         RobotPosition.DS_CENTER -> {
-                            Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait)) //Drive and deploy
+                            Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait())) //Drive and deploy
                             Routines.score() //Score cube
                             Routines.drive("BACK_UP")
-                            add(Commands.HomeElevator)
+                            add(Commands.HomeElevator())
                         }
                         //Attepmt two cube
                         RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
                             if (robotPos.alignedWith(scaleSide)) {
                                 //Do same side two cube auto
-                                Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                                Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
                                 Routines.score()
                                 Routines.drive("BACK_UP")
-                                add(Commands.HomeElevator)
+                                add(Commands.HomeElevator())
                             } else if (robotPos == RobotPosition.DS_CENTER || robotPos.alignedWith(switchSide)) {
                                 //Do side switch only
-                                Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait))
+                                Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
                                 Routines.score()
                                 Routines.drive("BACK_UP")
-                                add(Commands.HomeElevator)
+                                add(Commands.HomeElevator())
                             } else {
                                 //Baseline only
-                                Routines.drive(robotPos, FieldElements.baseline(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait))
-                                add(Commands.HomeElevator)
+                                Routines.drive(robotPos, FieldElements.baseline(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                                add(Commands.HomeElevator())
                             }
                         }
                     }

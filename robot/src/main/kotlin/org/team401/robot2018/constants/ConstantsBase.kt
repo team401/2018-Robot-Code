@@ -171,7 +171,7 @@ ConstantsBase {
         val ZERO_POS = 0.0 //ticks
         val COLLECTION_POS = ZERO_POS + 500.0
         val CUBE_POS = RobotMath.Elevator.inchesToTicks(6.0) //ticks
-        val SWITCH_POS = ZERO_POS + 17500.0 //ticks
+        val SWITCH_POS = ZERO_POS + RobotMath.Elevator.inchesToTicks(32.0) //ticks
         val SCALE_POS = ZERO_POS + 48800 //ticks
         val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks

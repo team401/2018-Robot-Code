@@ -1,5 +1,6 @@
 package org.team401.robot2018.auto.motionprofile
 
+import org.team401.robot2018.etc.withinTolerance
 import java.io.File
 
 /*
@@ -35,6 +36,7 @@ class HeadingAdapter {
     }
 
     fun findNewHeadings(headings: List<Double>): List<Double> {
+        if ((headings.getOrNull(0) ?: 0.0).withinTolerance(360, 0.1)) numRotations--
         val newHeadings = arrayListOf<Double>()
         for (i in 0 until headings.size) {
             val lastAngle = headings.getOrNull(i - 1) ?: headings[i]

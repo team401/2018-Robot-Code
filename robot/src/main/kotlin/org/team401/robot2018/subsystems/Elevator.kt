@@ -593,7 +593,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             elevatorMachine.setState(ElevatorStates.HOMING) //Home
         } else {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
-            elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
+            elevatorMachine.back() //Go to last state
         }
 
         //Always put all machines in a known state on enable

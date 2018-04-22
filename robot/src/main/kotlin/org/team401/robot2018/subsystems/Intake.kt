@@ -216,7 +216,7 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 left.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_LEFT, Constants.IntakeParameters.INTAKE_VOLTAGE)
                 right.voltageCompensation(Constants.IntakeParameters.INTAKE_RATE_RIGHT, Constants.IntakeParameters.INTAKE_VOLTAGE)
 
-                if (cubeBeamBreak.get() == Constants.DIO.BEAM_BREAK_TRIGGERED && (cubeLeft.get() == Constants.DIO.CUBE_TRIGGERED || cubeRight.get() == Constants.DIO.CUBE_TRIGGERED)) {
+                if (cubeLeft.get() == Constants.DIO.CUBE_TRIGGERED && cubeRight.get() == Constants.DIO.CUBE_TRIGGERED) {
                     counter++
                 } else {
                     counter = 0

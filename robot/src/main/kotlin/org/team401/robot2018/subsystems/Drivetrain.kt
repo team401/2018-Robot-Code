@@ -72,6 +72,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     val right = Gearbox(rightFront, rightMidF, rightMidR, rightRear)
     val imu = PigeonIMU(leftRear)
 
+    rightFront.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, 5, 1000)
+
     left.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
     right.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
 
@@ -107,20 +109,10 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
 
         Drivetrain.setNeutralMode(NeutralMode.Coast)
 
-        val timeout = 20
-        val localFeedbackDevice = FeedbackDevice.CTRE_MagEncoder_Relative
-
-        leftFront.configSelectedFeedbackSensor(localFeedbackDevice, TalonEnums.DISTANCE_PID, timeout)
-        rightFront.configRemoteFeedbackFilter(leftFront.deviceID, RemoteSensorSource.TalonSRX_SelectedSensor, TalonEnums.REMOTE_O, timeout)
-        rightFront.configRemoteFeedbackFilter(imu.deviceID, RemoteSensorSource.GadgeteerPigeon_Yaw, TalonEnums.REMOTE_1, timeout)
-        rightFront.configSensorTerm(SensorTerm.Sum0, localFeedbackDevice, timeout)
-        rightFront.configSensorTerm(SensorTerm.Sum1, FeedbackDevice.RemoteSensor0, timeout)
-
-        rightFront.configSelectedFeedbackSensor(FeedbackDevice.SensorSum, TalonEnums.DISTANCE_PID, timeout)
-        rightFront.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor1, TalonEnums.HEADING_PID, timeout)
-
-        rightFront.configSelectedFeedbackCoefficient(.5, TalonEnums.DISTANCE_PID, timeout)
-        rightFront.configSelectedFeedbackCoefficient(3600.0/8192.0, TalonEnums.HEADING_PID, timeout)
+        left.setSensor(FeedbackDevice.CTRE_MagEncoder_Relative)
+        right.setSensor(FeedbackDevice.CTRE_MagEncoder_Relative)
+        left.setPosition(0, 0, 10)
+        right.setPosition(0, 0, 10)
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
