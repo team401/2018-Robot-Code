@@ -60,6 +60,8 @@ open class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
     private fun checkHold() = status.activePointValid && status.isLast
 
     override fun entry(currentTime: Double) {
+        HeadingTracker.configureImu()
+
         val timeout = 100
         val localFeedbackDevice = FeedbackDevice.CTRE_MagEncoder_Relative
 
@@ -122,6 +124,7 @@ open class ArcProfileFollower(val drivetrain: TankDrivetrain) : AutoStep() {
     }
 
     override fun exit(currentTime: Double) {
+        HeadingTracker.finishedProfile(profile)
         drivetrain.left.master.set(ControlMode.PercentOutput, 0.0)
         drivetrain.right.master.set(ControlMode.PercentOutput, 0.0)
     }

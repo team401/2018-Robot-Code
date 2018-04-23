@@ -26,22 +26,22 @@ import java.io.File
 class HeadingAdapter {
     private var numRotations = 0
 
-    private fun track(lastAngle: Double, angle: Double): Double {
+    private fun track(lastAngle: Double, angle: Double, subtract: Double): Double {
         if (angle - lastAngle > 180) {
             numRotations--
         } else if (angle - lastAngle < -180) {
             numRotations++
         }
-        return (numRotations * 360.0) + angle
+        return ((numRotations * 360.0) + angle) - subtract
     }
 
     fun findNewHeadings(headings: List<Double>): List<Double> {
-        if ((headings.getOrNull(0) ?: 0.0).withinTolerance(360, 0.1)) numRotations--
+        val subtract = (headings.getOrNull(0) ?: 0.0) % 360.0
         val newHeadings = arrayListOf<Double>()
         for (i in 0 until headings.size) {
-            val lastAngle = headings.getOrNull(i - 1) ?: headings[i]
-            val angle = headings[i]
-            newHeadings.add(track(lastAngle, angle))
+            val lastAngle = (headings.getOrNull(i - 1) ?: headings[i]) % 360
+            val angle = headings[i] % 360
+            newHeadings.add(track(lastAngle, angle, subtract))
         }
         return newHeadings
     }

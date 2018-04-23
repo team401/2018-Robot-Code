@@ -53,7 +53,7 @@ object Routines {
 
     fun setup() {
         add(Commands.UnhomeElevator())
-        add(Commands.ZeroIMU())
+        add(Commands.ResetHeading())
         add(Commands.IntakeToStow())
     }
 }

@@ -54,5 +54,7 @@ data class MotionProfile(val points: List<Waypoint> = arrayListOf()) {
             points.getOrNull(0)?.timestep ?: 0
     )
 
+    fun getLastHeading() = points.lastOrNull()?.heading ?: 0.0
+
     fun getPoint(idx: Int) = points[idx]
 }

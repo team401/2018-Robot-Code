@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
+import org.team401.robot2018.auto.motionprofile.HeadingTracker
 import org.team401.robot2018.auto.steps.*
 import org.team401.robot2018.etc.LED
 import org.team401.robot2018.etc.RobotMath
@@ -70,5 +71,5 @@ object Commands {
 
     fun Score() = arrayOf(ElevatorHolderUnclamp(), ElevatorKickerScore(), LambdaStep { LED.signalScoreCube() }, DelayStep(AutoDelays.SCORE_DELAY), ElevatorKickerRetract())
 
-    fun ZeroIMU() = LambdaStep { Drivetrain.imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 0); Thread.sleep(100) }
+    fun ResetHeading() = LambdaStep { HeadingTracker.reset() }
 }
