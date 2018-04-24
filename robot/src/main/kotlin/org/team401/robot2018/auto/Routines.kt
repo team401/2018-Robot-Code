@@ -40,7 +40,6 @@ object Routines {
         add(Commands.ElevatorHolderUnclamp())
         add(Commands.ElevatorKickerScore())
         add(LambdaStep { LED.signalScoreCube() })
-        //add(DelayStep(AutoDelays.SCORE_DELAY))
         add(Commands.ElevatorKickerRetract())
     }
 
@@ -48,12 +47,11 @@ object Routines {
         add(Commands.ElevatorToGround())
         add(Commands.IntakeWheelsRun())
         add(Commands.IntakeToGrab())
-        //add(Commands.WaitForHasCube)
     }
 
     fun setup() {
         add(Commands.UnhomeElevator())
         add(Commands.ResetHeading())
-        add(Commands.IntakeToStow())
+        add(Commands.IntakeToStow()) //This actually homes the intake, not stow
     }
 }

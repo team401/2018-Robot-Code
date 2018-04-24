@@ -16,30 +16,15 @@ import openrio.powerup.MatchData
  * @version 1/23/18
  */
 
-enum class RobotPosition(val prettyName: String) {
-    DS_CENTER("Center"),
-    DS_LEFT("Left"),
-    DS_RIGHT("Right");
+enum class RobotPosition() {
+    DS_CENTER,
+    DS_LEFT,
+    DS_RIGHT;
 
-    fun alignedWith(side: MatchData.OwnedSide) =
+    infix fun alignedWith(side: MatchData.OwnedSide) =
             when (this) {
                 DS_LEFT -> side == MatchData.OwnedSide.LEFT
                 DS_CENTER -> false
                 DS_RIGHT -> side == MatchData.OwnedSide.RIGHT
             }
-
-    companion object {
-        fun toSendableChooser(): SendableChooser<RobotPosition> {
-            val chooser = SendableChooser<RobotPosition>()
-            values().forEachIndexed {
-                index, robotPosition ->
-                if (index == 0) {
-                    chooser.addDefault(robotPosition.prettyName, robotPosition)
-                } else {
-                    chooser.addObject(robotPosition.prettyName, robotPosition)
-                }
-            }
-            return chooser
-        }
-    }
 }

@@ -69,7 +69,7 @@ object ProfileLoader {
      * Preloads a set of profiles, removing any that aren't in the set
      * @param profiles The names of the profiles to load
      */
-    fun preloadThese(vararg profiles: String) {
+    fun preloadThese(profiles: List<String>) {
         //Remove any values that shouldn't be in the cache
         val toRemove = arrayListOf<String>()
         cache.forEach {

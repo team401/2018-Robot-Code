@@ -16,9 +16,8 @@ import openrio.powerup.MatchData
  */
 object FieldElements {
     fun switch(side: MatchData.OwnedSide) = "SWITCH_$side"
+    fun switch(side: MatchData.OwnedSide, stepNumber: Int) = "SWITCH_${side}_TWOCUBE$stepNumber"
     fun scale(side: MatchData.OwnedSide) = "SCALE_$side"
-    fun baseline(side: MatchData.OwnedSide) = "BASELINE"
-    fun backFromScale(side: MatchData.OwnedSide) = "SCALE_OFFSET_$side"
-    fun backFromSwitch(side: MatchData.OwnedSide) = "SWITCH_OFFSET_$side"
-    fun backFromSwitchFront(side: MatchData.OwnedSide) = "SWITCH_FRONT_OFFSET_$side"
+    fun scale(side: MatchData.OwnedSide, stepNumber: Int) = "SCALE_${side}_TWOCUBE$stepNumber"
+    fun baseline() = "BASELINE"
 }
