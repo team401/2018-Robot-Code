@@ -165,10 +165,6 @@ val IntakeSubsystem: Subsystem = buildSubsystem {
                 LED.intakeRetract()
                 folding.set(ControlMode.Position, Constants.IntakeParameters.STOWED_POS)
             }
-
-            action {
-                println("BB: ${cubeBeamBreak.get()}  L: ${cubeLeft.get()}  R: ${cubeRight.get()}")
-            }
         }
 
         state(IntakeFoldingStates.HOMING) {

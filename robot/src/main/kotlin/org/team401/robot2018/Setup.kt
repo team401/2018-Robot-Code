@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistributionPanel
 import edu.wpi.first.wpilibj.Servo
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.vision.VisionRunner
 import edu.wpi.first.wpilibj.vision.VisionThread
 import org.snakeskin.annotation.PostStartup
@@ -106,6 +107,10 @@ fun setup() {
     on(RobotEvents.EJECT_CUBE) {
         LED.signalEjectCube()
     }
+
+    SmartDashboard.putNumber("ztkF", 0.0)
+    SmartDashboard.putNumber("ztkP", 0.0)
+    SmartDashboard.putNumber("ztkD", 0.0)
 }
 
-//@PostStartup private fun startReporting() = Reporting.start()
+@PostStartup private fun startReporting() = Reporting.start()

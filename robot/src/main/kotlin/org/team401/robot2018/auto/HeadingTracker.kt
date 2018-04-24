@@ -1,5 +1,6 @@
-package org.team401.robot2018.auto.motionprofile
+package org.team401.robot2018.auto
 
+import org.team401.robot2018.auto.motionprofile.MotionProfile
 import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.Drivetrain
 
@@ -21,8 +22,10 @@ object HeadingTracker {
             TIMEOUT
     )
 
-    fun finishedProfile(profile: MotionProfile) {
+    fun finishedHeading(headingSetpoint: Double) {
         imu.getYawPitchRoll(imuData)
-        headingError = profile.getLastHeading() - imuData[0]
+        headingError = headingSetpoint - imuData[0]
     }
+
+    fun finishedProfile(profile: MotionProfile) = finishedHeading(profile.getLastHeading())
 }

@@ -18,6 +18,7 @@ import com.ctre.phoenix.motion.TrajectoryPoint
 data class MotionProfile(val points: List<Waypoint> = arrayListOf()) {
     private fun pointsAsArrayList() = points as ArrayList<Waypoint>
     private var idx = 0
+    var name = ""; private set
 
     private fun fixHeadings() {
         val adapter = HeadingAdapter()
@@ -37,10 +38,11 @@ data class MotionProfile(val points: List<Waypoint> = arrayListOf()) {
         fixHeadings()
     }
 
-    fun fromPoints(pointsIn: List<Waypoint>) {
+    fun fromPoints(pointsIn: List<Waypoint>, name: String = "") {
         val points = pointsAsArrayList()
         points.clear()
         points.addAll(pointsIn)
+        this.name = name
         fixHeadings()
     }
 

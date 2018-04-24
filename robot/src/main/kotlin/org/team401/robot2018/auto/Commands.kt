@@ -1,10 +1,8 @@
 package org.team401.robot2018.auto
 
 import org.snakeskin.dsl.machine
-import org.team401.robot2018.auto.motionprofile.HeadingTracker
 import org.team401.robot2018.auto.steps.*
 import org.team401.robot2018.etc.LED
-import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -43,7 +41,7 @@ object Commands {
     }
 
 
-    fun WaitForAtSwitch() = WaitForStep(Elevator::atSwitch)
+    fun WaitForAtSwitch() = WaitForStep { Elevator.atSwitch() }
 
     fun HoldElevator() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
     fun ScaleAfterUnfold() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
@@ -72,4 +70,9 @@ object Commands {
     fun Score() = arrayOf(ElevatorHolderUnclamp(), ElevatorKickerScore(), LambdaStep { LED.signalScoreCube() }, DelayStep(AutoDelays.SCORE_DELAY), ElevatorKickerRetract())
 
     fun ResetHeading() = LambdaStep { HeadingTracker.reset() }
+    fun PrintTime(name: String) = object : SingleStep() {
+        override fun entry(currentTime: Double) {
+            println("$name: $currentTime")
+        }
+    }
 }

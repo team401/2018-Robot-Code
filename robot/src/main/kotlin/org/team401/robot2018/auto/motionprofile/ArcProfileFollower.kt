@@ -5,13 +5,9 @@ import com.ctre.phoenix.motion.SetValueMotionProfile
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import org.snakeskin.component.TankDrivetrain
-import org.snakeskin.factory.ExecutorFactory
+import org.team401.robot2018.auto.HeadingTracker
 import org.team401.robot2018.auto.steps.AutoStep
 import org.team401.robot2018.etc.TalonEnums
-import org.team401.robot2018.subsystems.Drivetrain
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 
 /*
  * 2018-Robot-Code - Created on 4/10/18
