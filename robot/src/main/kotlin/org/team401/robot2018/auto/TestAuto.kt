@@ -16,46 +16,15 @@ object TestAuto : RobotAuto() {
 
     override fun assembleAuto(add: StepAdder) {
         Routines.setup()
-        add(ZeroPoint(-90.0, SmartDashboard.getNumber("ztkF", 0.0),
-                SmartDashboard.getNumber("ztkP", 0.0),
-                SmartDashboard.getNumber("ztkD", 0.0),
-                2.0))
-        /*
-        Routines.setup()
-        Routines.drive("TWOSWITCH_1", *Commands.HighLockDeployAndWait())
+        Routines.drive("DS_LEFT-SCALE_LEFT", SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
         Routines.score()
-        Routines.drive("TWOSWITCH_2", Commands.HomeElevator())
+        add(ParallelSteps(ZeroPoint(-105.0, 0.0, .006, 0.0, 0.0, 20.0, 2.0, 1.5),
+                SequentialSteps(DelayStep(.1), Commands.HomeElevator()))) //1
         Routines.intake()
-        Routines.drive("TWOSWITCH_3")
+        Routines.drive("SCALE_LEFT-SCALE_LEFT_TWOCUBE2")
         add(Commands.WaitForHasCube())
-        Routines.drive("TWOSWITCH_4", Commands.ElevatorToSwitch())
-        add(Commands.WaitForAtSwitch())
-        Routines.drive("TWOSWITCH_5")
+        add(ParallelSteps(ZeroPoint(165.0, 0.0, .006, 0.0, 0.0, 20.0, 2.0, 1.5), Commands.ElevatorToScale()))
+        Routines.drive("SCALE_LEFT_TWOCUBE3-SCALE_LEFT")
         Routines.score()
-        Routines.drive("BACK_UP")
-*/
-/*
-        Routines.setup()
-        Routines.drive("TWOSCALE_1", SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
-        add(Commands.PrintTime("TWOSCALE_1"))
-        Routines.score()
-        add(Commands.PrintTime("SCORE"))
-        Routines.drive("TWOSCALE_2", SequentialSteps(DelayStep(.25), Commands.HomeElevator()))
-        add(Commands.PrintTime("TWOSCALE_2, ELEVATOR HOME"))
-        Routines.intake()
-        add(Commands.PrintTime("INTAKE"))
-        Routines.drive("TWOSCALE_3")
-        add(Commands.PrintTime("TWOSCALE_3"))
-        add(Commands.WaitForHasCube())
-        add(Commands.PrintTime("CUBE"))
-        Routines.drive("TWOSCALE_4", Commands.ElevatorToScale())
-        add(Commands.PrintTime("TWOSCALE_4, ELEVATOR SCALE"))
-        Routines.drive("TWOSCALE_5")
-        add(Commands.PrintTime("TWOSCALE_5"))
-        Routines.score()
-        add(Commands.PrintTime("SCORE"))
-        Routines.drive("BACK_UP")
-        add(Commands.PrintTime("BACK_UP"))
-        */
     }
 }

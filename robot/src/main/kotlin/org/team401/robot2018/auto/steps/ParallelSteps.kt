@@ -13,37 +13,25 @@ package org.team401.robot2018.auto.steps
  * @version 1/25/18
  */
 
-class ParallelSteps(): AutoStep() {
-    constructor(stepsIn: List<AutoStep>) : this() {
-        steps.addAll(stepsIn)
-    }
-
-    constructor(vararg stepsIn: AutoStep) : this() {
-        steps.addAll(stepsIn)
-    }
-
-    private val steps = arrayListOf<AutoStep>()
-
+class ParallelSteps(vararg val steps: AutoStep): AutoStep() {
     override fun entry(currentTime: Double) {
-        steps.forEach {
-            it.entry(currentTime)
-        }
+        done = false
     }
 
     override fun action(currentTime: Double, lastTime: Double) {
         steps.forEach {
-            if (!it.done) {
-                it.action(currentTime, lastTime)
-            }
+            it.tick(currentTime, lastTime)
         }
-        if (steps.all { it.done } || steps.size == 0) {
+        if (steps.all { it.doContinue() } || steps.isEmpty()) {
             done = true
         }
     }
 
     override fun exit(currentTime: Double) {
         steps.forEach {
-            it.exit(currentTime)
+            if (it.state != AutoStep.State.CONTINUE) {
+                it.exit(currentTime)
+            }
         }
     }
 }

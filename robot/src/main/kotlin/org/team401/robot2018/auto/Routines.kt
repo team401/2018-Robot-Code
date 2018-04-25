@@ -40,6 +40,7 @@ object Routines {
         add(Commands.ElevatorHolderUnclamp())
         add(Commands.ElevatorKickerScore())
         add(LambdaStep { LED.signalScoreCube() })
+        add(DelayStep(0.5))
         add(Commands.ElevatorKickerRetract())
     }
 

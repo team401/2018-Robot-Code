@@ -66,8 +66,6 @@ object PowerUpAuto: RobotAuto() {
                     add(Commands.WaitForHasCube())
                     //Back up from cube, raise elevator
                     Routines.drive(FieldElements.switch(switchSide, 2), FieldElements.switch(switchSide, 3), Commands.ElevatorToSwitch())
-                    //Wait for elevator at switch
-                    add(Commands.WaitForAtSwitch())
                     //Drive to switch
                     Routines.drive(FieldElements.switch(switchSide, 3), FieldElements.switch(switchSide))
                     //Score cube
@@ -97,14 +95,28 @@ object PowerUpAuto: RobotAuto() {
 
                 //Two cube scale auto near or one cube scale auto far from left or right position
                 AutoTarget.FULL_SCALE_LEFT, AutoTarget.FULL_SCALE_RIGHT -> {
-                    //Drive to scale while deploying
-                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                    //Drive to scale while deploying and move elevator up
+                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
                     //Score cube
                     Routines.score()
                     //Check side
                     if (robotPos alignedWith scaleSide) {
-                        //TODO replace drive steps with zero turns
-                        //TODO actually add drive steps
+                        //Back up and turn from scale while homing elevator
+                        Routines.drive(FieldElements.scale(scaleSide), FieldElements.scale(scaleSide, 1), SequentialSteps(DelayStep(0.2), Commands.HomeElevator()))
+                        //Open intake
+                        Routines.intake()
+                        //Drive to cube
+                        Routines.drive(FieldElements.scale(scaleSide, 1), FieldElements.scale(scaleSide, 2))
+                        //Wait for cube
+                        add(Commands.WaitForHasCube())
+                        //Drive back to scale while bringing elevator up
+                        Routines.drive(FieldElements.scale(scaleSide, 2), FieldElements.scale(scaleSide, 3), Commands.ElevatorToScale())
+                        //Turn to scale
+                        Routines.drive(FieldElements.scale(scaleSide, 3), FieldElements.scale(scaleSide))
+                        //Score cube
+                        Routines.score()
+                        //Back up
+                        Routines.drive("BACK_UP")
                     } else {
                         //Back up
                         Routines.drive("BACK_UP")
@@ -119,7 +131,26 @@ object PowerUpAuto: RobotAuto() {
                     when {
                         //Go to scale
                         robotPos alignedWith scaleSide -> {
-                            //TODO full scale
+                            //Drive to scale while deploying and move elevator up
+                            Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
+                            //Score cube
+                            Routines.score()
+                            //Back up and turn from scale while homing elevator
+                            Routines.drive(FieldElements.scale(scaleSide), FieldElements.scale(scaleSide, 1), SequentialSteps(DelayStep(0.2), Commands.HomeElevator()))
+                            //Open intake
+                            Routines.intake()
+                            //Drive to cube
+                            Routines.drive(FieldElements.scale(scaleSide, 1), FieldElements.scale(scaleSide, 2))
+                            //Wait for cube
+                            add(Commands.WaitForHasCube())
+                            //Drive back to scale while bringing elevator up
+                            Routines.drive(FieldElements.scale(scaleSide, 2), FieldElements.scale(scaleSide, 3), Commands.ElevatorToScale())
+                            //Turn to scale
+                            Routines.drive(FieldElements.scale(scaleSide, 3), FieldElements.scale(scaleSide))
+                            //Score cube
+                            Routines.score()
+                            //Back up
+                            Routines.drive("BACK_UP")
                         }
                         //Go to switch
                         robotPos alignedWith switchSide -> {

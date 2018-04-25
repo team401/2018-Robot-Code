@@ -218,9 +218,20 @@ val Gamepad = HumanControls.f310(2) {
     }
 
     //Manual clamp
-    whenButton(Buttons.LEFT_BUMPER) {
+    whenButton(Buttons.START) {
         pressed {
             elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
+        }
+    }
+
+    //Manual got cube
+    whenButton(Buttons.LEFT_BUMPER) {
+        pressed {
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+            intakeWheels.setState(IntakeWheelsStates.IDLE)
+            intakeFolding.setState(IntakeFoldingStates.STOWED)
+            elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+            LED.signalHaveCube()
         }
     }
 

@@ -29,7 +29,9 @@ object Commands {
             done = Elevator.homed
         }
 
-        override fun exit(currentTime: Double) {}
+        override fun exit(currentTime: Double) {
+            println("Auto: Elevator Homed")
+        }
     }
 
     fun WaitForDeploy() = WaitForStep {
