@@ -70,25 +70,10 @@ fun setup() {
     PowerUpAuto.startTasks() //Real auto
     //TestAuto.startTasks() //Test auto
 
-    //val mjpeg = Array(1) { Constants.Setup.MJPEGParameters.FULL_ADDRESS }
-    //NetworkTableInstance.getDefault().getEntry("MJPEG STREAMER").setStringArray(mjpeg)
-
-
-
-    val camera = CameraServer.getInstance().startAutomaticCapture(0)
-    /*
-    val visionThread = VisionThread(camera, CubeDetectorPipeline, VisionRunner.Listener<CubeDetectorPipeline> {})
-    visionThread.start()
-    */
+    val camera = CameraServer.getInstance().startAutomaticCapture()
 
     Subsystems.add(DrivetrainSubsystem, ElevatorSubsystem, IntakeSubsystem)
     Controllers.add(LeftStick, RightStick, Gamepad)
-
-    /*
-    on(Events.TELEOP_ENABLED) {
-        MJPEG.start()
-    }
-    */
 
     LiveWindow.disableTelemetry(PDP) //Fix bugs with PDP errors
 
@@ -108,12 +93,4 @@ fun setup() {
         LED.signalEjectCube()
     }
 
-    SmartDashboard.putNumber("ztkF", 0.0)
-    SmartDashboard.putNumber("ztkP", 0.0)
-    SmartDashboard.putNumber("ztkI", 0.0)
-    SmartDashboard.putNumber("ztkD", 0.0)
-    SmartDashboard.putNumber("ztkIZone", 0.0)
-
 }
-
-@PostStartup private fun startReporting() = Reporting.start()

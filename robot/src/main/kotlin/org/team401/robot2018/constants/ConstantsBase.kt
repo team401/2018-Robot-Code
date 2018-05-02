@@ -150,7 +150,7 @@ ConstantsBase {
     abstract class ElevatorParametersConfig {
         val DEPLOY_TIMER = 2700L //ms
         
-        val MANUAL_RATE = 32 * .02 //inches per second (converted to inches per 20 ms)
+        val MANUAL_RATE = 48 * .02 //inches per second (converted to inches per 20 ms)
         val CLIMB_MANUAL_RATE = 16 * .02
 
         val HOMING_RATE = -0.25
@@ -161,7 +161,7 @@ ConstantsBase {
         val CLIMB_OVERDRIVE_COUNT = 10
         val CLIMB_OVERDRIVE_OFFSET = -100 //ticks to modify
         val CLIMB_OVERDRIVE_COOLDOWN = 25
-        val CLIMB_MAX_POS = 46500.0
+        val CLIMB_MAX_POS = 47250.0
         
         val MIN_VELOCITY = -400.0
         val MAX_VELOCITY = 400.0
@@ -177,7 +177,7 @@ ConstantsBase {
         val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
         val CLIMB_PREP_POS = 40000.0
         val CLIMB_BOTTOM_POS = RobotMath.Elevator.inchesToTicks(36.0)
-        val CLIMB_VERY_BOTTOM_POS = ZERO_POS + 0.0
+        val CLIMB_VERY_BOTTOM_POS = RobotMath.Elevator.inchesToTicks(9.0) //Accounting for platform height and 2 inch extra clearance
 
         val UNKNOWN_SCALE_POS = 25000.0
 
