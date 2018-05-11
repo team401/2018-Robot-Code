@@ -25,8 +25,8 @@ val CubeVisionSensor = Sensors.booleanSensor({ VisionData.read().isCubePresent})
 
     whenTriggered {
 
-        IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.INTAKE)
-        IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.INTAKE)
+        IntakeSubsystem.machine(INTAKE_WHEELS_MACHINE).setState(IntakeWheelsStates.INTAKE_FORCE)
+        IntakeSubsystem.machine(INTAKE_FOLDING_MACHINE).setState(IntakeFoldingStates.INTAKE_FORCE)
     }
 
     whenUntriggered {

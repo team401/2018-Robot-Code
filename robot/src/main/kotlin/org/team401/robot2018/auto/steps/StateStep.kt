@@ -17,7 +17,7 @@ import org.snakeskin.dsl.Subsystem
  */
 
 class StateStep(val subsystem: Subsystem, val machine: String, val toState: String, val wait: Boolean = false): SingleStep() {
-    override fun entry() {
+    override fun entry(currentTime: Double) {
         val waitable = subsystem.getStateMachine(machine).setState(toState)
         if (wait) {
             waitable.waitFor()

@@ -1,6 +1,7 @@
 package org.team401.robot2018.auto
 
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import openrio.powerup.MatchData
 import org.snakeskin.auto.AutoLoop
@@ -25,7 +26,6 @@ abstract class RobotAuto: AutoLoop() {
     private val executor = ExecutorFactory.getExecutor("Auto")
 
     //DATA
-    private val robotPosSelector = RobotPosition.toSendableChooser()
     private val autoTargetSelector = AutoTarget.toSendableChooser()
 
     fun startTasks() {
@@ -39,18 +39,15 @@ abstract class RobotAuto: AutoLoop() {
     }
 
     fun publish() {
-        SmartDashboard.putData("Robot Position", robotPosSelector)
-        SmartDashboard.putData("Auto Target", autoTargetSelector)
-        SmartDashboard.putBoolean("Partner Switch", teammatesCanDoSwitch)
+        SmartDashboard.putData("Auto Mode", autoTargetSelector)
         SmartDashboard.putNumber("Base Delay", 0.0)
     }
 
     protected var robotPos = RobotPosition.DS_CENTER; private set
-    protected var target = AutoTarget.SWITCH_ONLY; private set
+    protected var target = AutoTarget.NOTHING; private set
     protected var switchSide = MatchData.OwnedSide.UNKNOWN; private set
     protected var scaleSide = MatchData.OwnedSide.UNKNOWN; private set
-    protected var teammatesCanDoSwitch = false; private set
-    protected var baseDelay = 0L; private set
+    protected var baseDelay = 0.0; private set
 
     /**
      * Polls the field for data until valid data is found
@@ -68,10 +65,9 @@ abstract class RobotAuto: AutoLoop() {
      * Gets various info from SmartDashboard
      */
     private fun fetchSD() {
-        robotPos = robotPosSelector.selected
         target = autoTargetSelector.selected
-        teammatesCanDoSwitch = SmartDashboard.getBoolean("Partner Switch", false)
-        baseDelay = SmartDashboard.getNumber("Base Delay", 0.0).toLong()
+        robotPos = target.robotPosition
+        baseDelay = SmartDashboard.getNumber("Base Delay", 0.0)
     }
 
     //AUTO MANAGER
@@ -79,7 +75,7 @@ abstract class RobotAuto: AutoLoop() {
     private var sequenceIdx = 0
     private val adder: (AutoStep) -> Unit = { sequence.add(it) }
 
-    override val rate = 10L
+    override val rate = 5L
 
     abstract fun preAuto()
     abstract fun assembleAuto(add: (AutoStep) -> Unit)
@@ -97,9 +93,9 @@ abstract class RobotAuto: AutoLoop() {
         }
     }
 
-    override fun action() {
+    override fun action(currentTime: Double, lastTime: Double) {
         if (sequenceIdx < sequence.size) {
-            sequence[sequenceIdx].tick()
+            sequence[sequenceIdx].tick(currentTime, lastTime)
             if (sequence[sequenceIdx].doContinue()) {
                 sequenceIdx++
             }
@@ -109,9 +105,10 @@ abstract class RobotAuto: AutoLoop() {
     }
 
     override fun exit() {
+        val time = Timer.getFPGATimestamp()
         sequence.forEach {
             if (it.state != AutoStep.State.CONTINUE) {
-                it.exit()
+                it.exit(time)
             }
         }
     }

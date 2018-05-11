@@ -17,6 +17,8 @@ import org.team401.robot2018.auto.motion.PDVA
  */
 class CompConstants: ConstantsBase() {
     override val DrivetrainParameters = object: DrivetrainParametersConfig() {
+        override val WHEEL_DIAMETER = 5.95
+
         override val DELTA = 0.5
         override val SPEED_THRESHOLD = 7.5
         override val SPEED_SPLIT = 3.5

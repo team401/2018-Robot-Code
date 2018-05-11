@@ -34,6 +34,15 @@ val LeftStick = HumanControls.t16000m(0) {
         }
     }
 
+    /*
+    whenHatChanged(Hats.STICK_HAT) {
+        when (it) {
+            Direction.NORTH -> ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE).setState(ElevatorRatchetStates.LOCKED)
+            Direction.CENTER -> ElevatorSubsystem.machine(ELEVATOR_RATCHET_MACHINE).setState(ElevatorRatchetStates.UNLOCKED)
+        }
+    }
+    */
+
     //E STOP ELEVATOR
     //* . .
     //. . .
@@ -149,7 +158,13 @@ val Gamepad = HumanControls.f310(2) {
         }
         released {
             intakeWheels.setState(IntakeWheelsStates.IDLE)
-            intakeFolding.setState(IntakeFoldingStates.STOWED)
+            if (elevatorMachine.getState() == ElevatorStates.POS_COLLECTION) {
+                elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+            }
+
+            if(elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER){
+                intakeFolding.setState(IntakeFoldingStates.STOWED)
+            }
         }
     }
 
@@ -166,7 +181,7 @@ val Gamepad = HumanControls.f310(2) {
         released {
             if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER && !Elevator.estop) {
                 if (intakeWheels.getState() != IntakeWheelsStates.IDLE) {
-                    intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
+                    intakeWheels.setState(IntakeWheelsStates.INTAKE)
                 }
                 if (intakeFolding.getState() != IntakeFoldingStates.STOWED) {
                     intakeFolding.setState(IntakeFoldingStates.GRAB)
@@ -180,9 +195,18 @@ val Gamepad = HumanControls.f310(2) {
         pressed {
             elevatorClampMachine.setState(ElevatorClampStates.UNCLAMPED)
             elevatorMachine.setState(ElevatorStates.GO_TO_COLLECTION)
-            intakeWheels.setState(IntakeWheelsStates.INTAKE_PRE)
+            intakeWheels.setState(IntakeWheelsStates.INTAKE)
             intakeFolding.setState(IntakeFoldingStates.GRAB)
             LED.signalWantCube()
+        }
+        released {
+            intakeWheels.setState(IntakeWheelsStates.IDLE)
+            if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
+                intakeFolding.setState(IntakeFoldingStates.STOWED)
+            }
+            if (elevatorMachine.getState() == ElevatorStates.POS_COLLECTION) {
+                elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+            }
         }
     }
 
@@ -215,9 +239,20 @@ val Gamepad = HumanControls.f310(2) {
     }
 
     //Manual clamp
-    whenButton(Buttons.LEFT_BUMPER) {
+    whenButton(Buttons.START) {
         pressed {
             elevatorClampMachine.toggle(ElevatorClampStates.UNCLAMPED, ElevatorClampStates.CLAMPED)
+        }
+    }
+
+    //Manual got cube
+    whenButton(Buttons.LEFT_BUMPER) {
+        pressed {
+            elevatorClampMachine.setState(ElevatorClampStates.CLAMPED)
+            intakeWheels.setState(IntakeWheelsStates.IDLE)
+            intakeFolding.setState(IntakeFoldingStates.STOWED)
+            elevatorMachine.setState(ElevatorStates.POS_DRIVE)
+            LED.signalHaveCube()
         }
     }
 

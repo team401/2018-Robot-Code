@@ -148,7 +148,7 @@ class MotionProfileRunner(override val leftController: TalonSRX, override val ri
         right.controller.processMotionProfileBuffer()
     }
 
-    override fun entry() {
+    override fun entry(currentTime: Double) {
         left.resetController()
         right.resetController()
 
@@ -160,7 +160,7 @@ class MotionProfileRunner(override val leftController: TalonSRX, override val ri
         mpState = MpState.STREAMING
     }
 
-    override fun action() {
+    override fun action(currentTime: Double, lastTime: Double) {
         left.loadStatus()
         right.loadStatus()
 
@@ -198,7 +198,7 @@ class MotionProfileRunner(override val leftController: TalonSRX, override val ri
         }
     }
 
-    override fun exit() {
+    override fun exit(currentTime: Double) {
         future?.cancel(true)
         future = null
     }

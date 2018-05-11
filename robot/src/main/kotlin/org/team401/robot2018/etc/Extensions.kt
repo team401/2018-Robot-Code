@@ -1,8 +1,7 @@
 package org.team401.robot2018.etc
 
 import com.ctre.phoenix.ParamEnum
-import com.ctre.phoenix.motorcontrol.ControlMode
-import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced
+import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.TalonSRX
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import openrio.powerup.MatchData
@@ -84,6 +83,11 @@ fun TankDrivetrain.shiftUpdate(state: ShiftCommand): Boolean {
         return true
     }
     return false
+}
+
+fun TankDrivetrain.unlinkSides() {
+    right.master.set(ControlMode.PercentOutput, 0.0)
+    left.master.set(ControlMode.PercentOutput, 0.0)
 }
 
 fun Gearbox.encoderMissing() = (master as TalonSRX).sensorCollection.pulseWidthRiseToRiseUs == 0

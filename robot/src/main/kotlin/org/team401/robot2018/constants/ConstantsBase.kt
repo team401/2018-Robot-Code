@@ -1,6 +1,8 @@
 package org.team401.robot2018.constants
 
-import org.team401.robot2018.auto.motion.DriveGains
+import org.opencv.core.Rect
+import org.opencv.core.Scalar
+import  org.team401.robot2018.auto.motion.DriveGains
 import org.team401.robot2018.auto.motion.PDVA
 import org.team401.robot2018.etc.RobotMath
 
@@ -16,7 +18,8 @@ import org.team401.robot2018.etc.RobotMath
  * @author Cameron Earle
  * @version 3/7/18
  */
-abstract class ConstantsBase {
+abstract class
+ConstantsBase {
     interface PIDF {
         val P: Double
         val I: Double
@@ -54,6 +57,16 @@ abstract class ConstantsBase {
         val INTAKE_FOLDING_CAN = 4
     }
     val MotorControllers = MotorControllersConfig()
+
+    class DIOConfig {
+        val CUBE_BEAM_BREAK = 0
+        val CUBE_LEFT_SENSOR = 1
+        val CUBE_RIGHT_SENSOR = 2
+
+        val CUBE_TRIGGERED = false
+        val BEAM_BREAK_TRIGGERED = false
+    }
+    val DIO = DIOConfig()
     
     class PDPChannelsConfig {
         val DRIVE_LEFT_REAR_PDP = 15
@@ -95,6 +108,10 @@ abstract class ConstantsBase {
         abstract val SPEED_SPLIT: Double //f/s
         //above should be some value between the low gear speed and the high gear speed
 
+        abstract val WHEEL_DIAMETER: Double //in
+
+        val ENCODER_TICKS = 4096.0
+
         val MIN_VELOCITY = -500.0 //RPM, negative
         val MAX_VELOCITY = 500.0 //RPM, positive
 
@@ -133,7 +150,7 @@ abstract class ConstantsBase {
     abstract class ElevatorParametersConfig {
         val DEPLOY_TIMER = 2700L //ms
         
-        val MANUAL_RATE = 32 * .02 //inches per second (converted to inches per 20 ms)
+        val MANUAL_RATE = 48 * .02 //inches per second (converted to inches per 20 ms)
         val CLIMB_MANUAL_RATE = 16 * .02
 
         val HOMING_RATE = -0.25
@@ -144,7 +161,7 @@ abstract class ConstantsBase {
         val CLIMB_OVERDRIVE_COUNT = 10
         val CLIMB_OVERDRIVE_OFFSET = -100 //ticks to modify
         val CLIMB_OVERDRIVE_COOLDOWN = 25
-        val CLIMB_MAX_POS = 46500.0
+        val CLIMB_MAX_POS = 47250.0
         
         val MIN_VELOCITY = -400.0
         val MAX_VELOCITY = 400.0
@@ -154,13 +171,13 @@ abstract class ConstantsBase {
         val ZERO_POS = 0.0 //ticks
         val COLLECTION_POS = ZERO_POS + 500.0
         val CUBE_POS = RobotMath.Elevator.inchesToTicks(6.0) //ticks
-        val SWITCH_POS = ZERO_POS + 17500.0 //ticks
+        val SWITCH_POS = ZERO_POS + RobotMath.Elevator.inchesToTicks(32.0) //ticks
         val SCALE_POS = ZERO_POS + 48800 //ticks
         val SCALE_POS_HIGH = ZERO_POS + 60000.0 //ticks // MAX ELEVATOR POS
         val SCALE_POS_LOW = ZERO_POS + 37000.0 //ticks
         val CLIMB_PREP_POS = 40000.0
         val CLIMB_BOTTOM_POS = RobotMath.Elevator.inchesToTicks(36.0)
-        val CLIMB_VERY_BOTTOM_POS = ZERO_POS + 0.0
+        val CLIMB_VERY_BOTTOM_POS = RobotMath.Elevator.inchesToTicks(9.0) //Accounting for platform height and 2 inch extra clearance
 
         val UNKNOWN_SCALE_POS = 25000.0
 
@@ -220,8 +237,11 @@ abstract class ConstantsBase {
         val STOWED_POS = 0.0 + 170.0
         val INTAKE_POS = 2010.0 - 50.0
         val GRAB_POS = 1210.0 + 150.0
+        val PAST_ELEVATOR_RAIL_POS = 1000.0
 
         val HOMING_COUNT = 10
+        val BEAM_BREAK_COUNT = 5
+        val HAVE_CUBE_COUNT = 15
 
         abstract val HAVE_CUBE_CURRENT_LEFT_HOLD: Double
         abstract val HAVE_CUBE_CURRENT_RIGHT_HOLD: Double
@@ -267,4 +287,13 @@ abstract class ConstantsBase {
         val REPORTING_RATE = 100L //ms
     }
     val ReportingParameters = ReportingParametersConfig()
+
+    class VisionParametersConfig {
+        val CUBE_COLOR_MIN = Scalar(0.0, 0.0, 0.0)
+        val CUBE_COLOR_MAX = Scalar(0.0, 0.0, 0.0)
+
+        val CLOSE_ARMS_RECT = Rect()
+        val HAVE_CUBE_RECT = Rect()
+    }
+    val VisionParameters = VisionParametersConfig()
 }

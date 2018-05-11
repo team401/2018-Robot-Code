@@ -278,8 +278,6 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         }
 
         state(ElevatorStates.POS_COLLECTION) {
-
-
             entry {
                 mmSetpoint(Constants.ElevatorParameters.COLLECTION_POS)
             }
@@ -482,6 +480,9 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
 
             action {
                 if (master.getSelectedSensorPosition(0).toDouble().withinTolerance(Constants.ElevatorParameters.CLIMB_PREP_POS, 1000.0)) {
+                    ratchet.setPulseDuration(.25)
+                    ratchet.startPulse()
+                    Thread.sleep(250)
                     setState(ElevatorStates.CLIMB_MANUAL)
                 }
             }
@@ -593,7 +594,7 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
             elevatorMachine.setState(ElevatorStates.HOMING) //Home
         } else {
             elevatorShifterMachine.setState(ElevatorShifterStates.HIGH) //High gear
-            elevatorMachine.setState(ElevatorStates.POS_DRIVE) //Go to driving position
+            elevatorMachine.back() //Go to last state
         }
 
         //Always put all machines in a known state on enable
@@ -612,5 +613,11 @@ val ElevatorSubsystem: Subsystem = buildSubsystem {
         if (elevatorMachine.getState() != ElevatorStates.POS_VAULT_RUNNER) {
             elevatorMachine.setState(ElevatorStates.POS_COLLECTION)
         }
+    }
+
+    test("OPEN WALLRUNNER DEPLOY") {
+        elevatorRatchetMachine.setState(ElevatorRatchetStates.LOCKED)
+        Thread.sleep(10000) //Give some time to do it
+        true
     }
 }

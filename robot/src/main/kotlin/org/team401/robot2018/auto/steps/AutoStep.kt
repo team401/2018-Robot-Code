@@ -13,6 +13,7 @@ package org.team401.robot2018.auto.steps
  * @version 1/15/18
  */
 abstract class AutoStep(override var done: Boolean = false): IAutoStep {
+    val isSingleStep = done
     enum class State {
         ENTRY,
         ACTION,
@@ -24,31 +25,34 @@ abstract class AutoStep(override var done: Boolean = false): IAutoStep {
 
     override fun reset() {
         state = State.ENTRY
+        if (!isSingleStep) {
+            done = false
+        }
     }
 
-    fun doContinue() = state == State.CONTINUE
+    fun doContinue() = (state == State.CONTINUE)
 
-    override fun tick() {
+    override fun tick(currentTime: Double, lastTime: Double) {
         when (state) {
             State.ENTRY -> {
-                entry()
+                entry(currentTime)
                 state = State.ACTION
             }
             State.ACTION -> {
-                action()
+                action(currentTime, lastTime)
                 if (done) {
                     state = State.EXIT
                 }
             }
             State.EXIT -> {
-                exit()
+                exit(currentTime)
                 state = State.CONTINUE
             }
             else -> {}
         }
     }
 
-    override abstract fun entry()
-    override abstract fun exit()
-    override abstract fun action()
+    override abstract fun entry(currentTime: Double)
+    override abstract fun exit(currentTime: Double)
+    override abstract fun action(currentTime: Double, lastTime: Double)
 }

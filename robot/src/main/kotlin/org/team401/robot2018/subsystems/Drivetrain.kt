@@ -24,10 +24,7 @@ import org.snakeskin.logic.scalars.SquareScalar
 import org.team401.robot2018.LeftStick
 import org.team401.robot2018.RightStick
 import org.team401.robot2018.constants.Constants
-import org.team401.robot2018.etc.RobotMath
-import org.team401.robot2018.etc.getCurrent
-import org.team401.robot2018.etc.shiftUpdate
-import org.team401.robot2018.etc.withinTolerance
+import org.team401.robot2018.etc.*
 
 /*
  * 2018-Robot-Code - Created on 1/13/18
@@ -75,6 +72,8 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     val right = Gearbox(rightFront, rightMidF, rightMidR, rightRear)
     val imu = PigeonIMU(leftRear)
 
+    rightFront.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, 5, 1000)
+
     left.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
     right.master.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, 1000)
 
@@ -96,9 +95,6 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
     fun low() = shift(ShifterState.LOW)
 
     setup {
-        left.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
-        right.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute)
-
         //left.master.pidf(f = .20431, p = .15)
         //right.master.pidf(f = .22133,p = .15)
 
@@ -112,13 +108,18 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
         Drivetrain.setRampRate(Constants.DrivetrainParameters.CLOSED_LOOP_RAMP, Constants.DrivetrainParameters.OPEN_LOOP_RAMP)
 
         Drivetrain.setNeutralMode(NeutralMode.Coast)
+
+        left.setSensor(FeedbackDevice.CTRE_MagEncoder_Relative)
+        right.setSensor(FeedbackDevice.CTRE_MagEncoder_Relative)
+        left.setPosition(0, 0, 10)
+        right.setPosition(0, 0, 10)
     }
 
     val driveMachine = stateMachine(DRIVE_MACHINE) {
         //Empty state for when the drivetrain is being controlled by other processes
         state(DriveStates.EXTERNAL_CONTROL) {
             entry {
-                Drivetrain.setRampRate(0.0, 0.0)
+                Drivetrain.setRampRate(0.0, .25)
             }
         }
 
@@ -162,6 +163,7 @@ val DrivetrainSubsystem: Subsystem = buildSubsystem("Drivetrain") {
             )
 
             entry {
+                Drivetrain.unlinkSides()
                 Drivetrain.zero()
                 Drivetrain.setNeutralMode(NeutralMode.Coast)
                 Drivetrain.setRampRate(.25, .25)

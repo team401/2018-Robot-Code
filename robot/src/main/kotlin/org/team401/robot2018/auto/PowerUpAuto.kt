@@ -2,14 +2,11 @@ package org.team401.robot2018.auto
 
 import com.ctre.phoenix.sensors.PigeonIMU
 import edu.wpi.first.wpilibj.DriverStation
-import openrio.powerup.MatchData
-import org.team401.robot2018.auto.motion.ProfileLoader
-import org.team401.robot2018.auto.motion.RioProfileRunner
+import org.team401.robot2018.auto.motionprofile.ProfileLoader
 import org.team401.robot2018.auto.steps.DelayStep
-import org.team401.robot2018.auto.steps.SubSequence
+import org.team401.robot2018.auto.steps.SequentialSteps
 import org.team401.robot2018.etc.StepAdder
 import org.team401.robot2018.etc.encoderMissing
-import org.team401.robot2018.etc.not
 import org.team401.robot2018.subsystems.Drivetrain
 
 /*
@@ -27,24 +24,9 @@ import org.team401.robot2018.subsystems.Drivetrain
 
 object PowerUpAuto: RobotAuto() {
     override fun preAuto() {
-        fun profiles(target: Any) = arrayOf(
-                "/home/lvuser/profiles/$robotPos-${target}_L.csv",
-                "/home/lvuser/profiles/$robotPos-${target}_R.csv"
-        )
-        fun profilesSided(target: Any) = arrayOf(
-                "/home/lvuser/profiles/$robotPos-${target}_LEFT_L.csv",
-                "/home/lvuser/profiles/$robotPos-${target}_LEFT_R.csv",
-                "/home/lvuser/profiles/$robotPos-${target}_RIGHT_L.csv",
-                "/home/lvuser/profiles/$robotPos-${target}_RIGHT_R.csv"
-        )
         //Here, we identify all possible first profiles and cache them
-        //This is done using the selected mode and starting position
-        when (target) {
-            AutoTarget.NOTHING -> {}
-            AutoTarget.BASELINE_ONLY -> ProfileLoader.preloadThese(*profiles("BASELINE"))
-            AutoTarget.SWITCH_ONLY -> ProfileLoader.preloadThese(*profilesSided("SWITCH"))
-            AutoTarget.SCALE_ONLY, AutoTarget.FULL -> ProfileLoader.preloadThese(*profilesSided("SCALE"))
-        }
+        //This is done using the selected mode
+        ProfileLoader.preloadThese(target.firstProfiles.map { "/home/lvuser/profiles/${it}_C.csv" })
     }
 
     private fun checkSensors(): Boolean {
@@ -66,75 +48,131 @@ object PowerUpAuto: RobotAuto() {
     override fun assembleAuto(add: StepAdder) {
         add(DelayStep(baseDelay)) //Wait for the base delay
         if (checkSensors() && target != AutoTarget.NOTHING) {
-            Routines.setup() //Run common setup tasks (stow intake, elevator to high gear, lock elevator in place)
-
-            when (target) {
-                AutoTarget.BASELINE_ONLY -> {
-                    if (robotPos != RobotPosition.DS_CENTER) {
-                        Routines.drive(robotPos, FieldElements.baseline(!switchSide), SubSequence(*Commands.HighLockDeployAndWait))
-                        add(Commands.HomeElevator)
-                    }
-                   //AUTO END
-                }
-
-                AutoTarget.SWITCH_ONLY -> {
-                    Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
-                    Routines.score() //Score cube
+            Routines.setup() //Run common setup tasks (reset elevator home, reset heading, home intake)
+            when(target) {
+                //Two cube switch auto from center position
+                AutoTarget.CENTER_SWITCH -> {
+                    //Drive to switch while deploying
+                    Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                    //Score cube
+                    Routines.score()
+                    //Back up from switch while homing elevator
+                    Routines.drive(FieldElements.switch(switchSide), FieldElements.switch(switchSide, 1), Commands.HomeElevator())
+                    //Open intake
+                    Routines.intake()
+                    //Drive to second cube
+                    Routines.drive(FieldElements.switch(switchSide, 1), FieldElements.switch(switchSide, 2))
+                    //Wait for cube
+                    add(Commands.WaitForHasCube())
+                    //Back up from cube, raise elevator
+                    Routines.drive(FieldElements.switch(switchSide, 2), FieldElements.switch(switchSide, 3), Commands.ElevatorToSwitch())
+                    //Drive to switch
+                    Routines.drive(FieldElements.switch(switchSide, 3), FieldElements.switch(switchSide))
+                    //Score cube
+                    Routines.score()
+                    //Back up
                     Routines.drive("BACK_UP")
-                    add(Commands.HomeElevator)
-                    //AUTO END
                 }
 
-                AutoTarget.SCALE_ONLY -> {
-                    if (robotPos.alignedWith(scaleSide)) {
-                        Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
+                //One cube near switch auto or baseline from left or right position
+                AutoTarget.SWITCH_LEFT, AutoTarget.SWITCH_RIGHT -> {
+                    if (robotPos alignedWith switchSide) {
+                        //Drive to switch while deploying
+                        Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                        //Score cube
                         Routines.score()
+                        //Back up
+                        Routines.drive("BACK_UP")
+                        //Home elevator
+                        add(Commands.HomeElevator())
+                    } else {
+                        //Drive to baseline while deploying
+                        Routines.drive(FieldElements.baseline(), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                        //Home elevator
+                        add(Commands.HomeElevator())
+                    }
+                }
+
+                //Two cube scale auto near or one cube scale auto far from left or right position
+                AutoTarget.FULL_SCALE_LEFT, AutoTarget.FULL_SCALE_RIGHT -> {
+                    //Drive to scale while deploying and move elevator up
+                    Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
+                    //Score cube
+                    Routines.score()
+                    //Check side
+                    if (robotPos alignedWith scaleSide) {
+                        //Back up and turn from scale while homing elevator
+                        Routines.drive(FieldElements.scale(scaleSide), FieldElements.scale(scaleSide, 1), SequentialSteps(DelayStep(0.2), Commands.HomeElevator()))
+                        //Open intake
+                        Routines.intake()
+                        //Drive to cube
+                        Routines.drive(FieldElements.scale(scaleSide, 1), FieldElements.scale(scaleSide, 2))
+                        //Wait for cube
+                        add(Commands.WaitForHasCube())
+                        //Drive back to scale while bringing elevator up
+                        Routines.drive(FieldElements.scale(scaleSide, 2), FieldElements.scale(scaleSide, 3), Commands.ElevatorToScale())
+                        //Turn to scale
+                        Routines.drive(FieldElements.scale(scaleSide, 3), FieldElements.scale(scaleSide))
+                        //Score cube
+                        Routines.score()
+                        //Back up
                         Routines.drive("BACK_UP")
                     } else {
-                        Routines.drive(robotPos, FieldElements.baseline(scaleSide), SubSequence(*Commands.HighLockDeployAndWait))
+                        //Back up
+                        Routines.drive("BACK_UP")
+                        //Home elevator
+                        add(Commands.HomeElevator())
                     }
-                    add(Commands.HomeElevator)
-                    //AUTO END
                 }
 
-                AutoTarget.FULL -> {
-                    when (robotPos) {
-                        //Center switch
-                        RobotPosition.DS_CENTER -> {
-                            Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait)) //Drive and deploy
-                            Routines.score() //Score cube
+                //Two cube scale auto near or one cube switch auto near or baseline from left or right position
+                AutoTarget.STAY_NEAR_LEFT, AutoTarget.STAY_NEAR_RIGHT -> {
+                    //Check target
+                    when {
+                        //Go to scale
+                        robotPos alignedWith scaleSide -> {
+                            //Drive to scale while deploying and move elevator up
+                            Routines.drive(robotPos, FieldElements.scale(scaleSide), SequentialSteps(*Commands.HighLockDeployAndWait(), Commands.ScaleAfterUnfold()))
+                            //Score cube
+                            Routines.score()
+                            //Back up and turn from scale while homing elevator
+                            Routines.drive(FieldElements.scale(scaleSide), FieldElements.scale(scaleSide, 1), SequentialSteps(DelayStep(0.2), Commands.HomeElevator()))
+                            //Open intake
+                            Routines.intake()
+                            //Drive to cube
+                            Routines.drive(FieldElements.scale(scaleSide, 1), FieldElements.scale(scaleSide, 2))
+                            //Wait for cube
+                            add(Commands.WaitForHasCube())
+                            //Drive back to scale while bringing elevator up
+                            Routines.drive(FieldElements.scale(scaleSide, 2), FieldElements.scale(scaleSide, 3), Commands.ElevatorToScale())
+                            //Turn to scale
+                            Routines.drive(FieldElements.scale(scaleSide, 3), FieldElements.scale(scaleSide))
+                            //Score cube
+                            Routines.score()
+                            //Back up
                             Routines.drive("BACK_UP")
-                            add(Commands.HomeElevator)
                         }
-                        //Attepmt two cube
-                        RobotPosition.DS_LEFT, RobotPosition.DS_RIGHT -> {
-                            if (robotPos.alignedWith(scaleSide)) {
-                                //Do same side two cube auto
-                                Routines.drive(robotPos, FieldElements.scale(scaleSide), SubSequence(*Commands.HighLockDeployAndWait, Commands.ScaleAfterUnfold))
-                                Routines.score()
-                                Routines.drive("BACK_UP")
-                                add(Commands.HomeElevator)
-                            } else if (robotPos == RobotPosition.DS_CENTER || robotPos.alignedWith(switchSide)) {
-                                //Do side switch only
-                                Routines.drive(robotPos, FieldElements.switch(switchSide), SubSequence(*Commands.HighLockDeployAndWait))
-                                Routines.score()
-                                Routines.drive("BACK_UP")
-                                add(Commands.HomeElevator)
-                            } else {
-                                //Baseline only
-                                Routines.drive(robotPos, FieldElements.baseline(switchSide), SubSequence(*Commands.HighLockDeployAndWait))
-                                add(Commands.HomeElevator)
-                            }
+                        //Go to switch
+                        robotPos alignedWith switchSide -> {
+                            //Drive to switch while deploying
+                            Routines.drive(robotPos, FieldElements.switch(switchSide), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                            //Score cube
+                            Routines.score()
+                            //Back up
+                            Routines.drive("BACK_UP")
+                            //Home elevator
+                            add(Commands.HomeElevator())
+                        }
+                        //Go to baseline
+                        else -> {
+                            //Drive to baseline while deploying elevator
+                            Routines.drive(FieldElements.baseline(), SequentialSteps(*Commands.HighLockDeployAndWait()))
+                            //Home elevator
+                            add(Commands.HomeElevator())
                         }
                     }
-                    //AUTO END
-                }
-
-                else -> {
-                    //AUTO END
                 }
             }
         }
-        //AUTO END
     }
 }

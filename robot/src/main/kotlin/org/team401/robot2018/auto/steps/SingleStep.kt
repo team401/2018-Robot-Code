@@ -13,6 +13,6 @@ package org.team401.robot2018.auto.steps
  * @version 1/23/18
  */
 abstract class SingleStep: AutoStep(true) {
-    override fun action() {}
-    override fun exit() {}
+    override fun action(currentTime: Double, lastTime: Double) {}
+    override fun exit(currentTime: Double) {}
 }

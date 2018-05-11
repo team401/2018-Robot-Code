@@ -3,7 +3,6 @@ package org.team401.robot2018.auto
 import org.snakeskin.dsl.machine
 import org.team401.robot2018.auto.steps.*
 import org.team401.robot2018.etc.LED
-import org.team401.robot2018.etc.RobotMath
 import org.team401.robot2018.subsystems.*
 
 /*
@@ -20,54 +19,62 @@ import org.team401.robot2018.subsystems.*
  */
 
 object Commands {
-    val DeployElevator = StateStep(ElevatorSubsystem, ELEVATOR_DEPLOY_MACHINE, ElevatorDeployStates.DEPLOY)
-    val HomeElevator = object : AutoStep() {
-        override fun entry() {
+    fun DeployElevator() = StateStep(ElevatorSubsystem, ELEVATOR_DEPLOY_MACHINE, ElevatorDeployStates.DEPLOY)
+    fun HomeElevator() = object : AutoStep() {
+        override fun entry(currentTime: Double) {
             ElevatorSubsystem.machine(ELEVATOR_MACHINE).setState(ElevatorStates.HOMING)
         }
 
-        override fun action() {
+        override fun action(currentTime: Double, lastTime: Double) {
             done = Elevator.homed
         }
 
-        override fun exit() {}
+        override fun exit(currentTime: Double) {
+            println("Auto: Elevator Homed")
+        }
     }
 
-    val WaitForDeploy = WaitForStep {
+    fun WaitForDeploy() = WaitForStep {
         ElevatorSubsystem.machine(ELEVATOR_DEPLOY_MACHINE).getState() == ElevatorDeployStates.DEPLOYED
     }
 
-    val WaitForHasCube = WaitForStep {
+    fun WaitForHasCube() = WaitForStep {
         ElevatorSubsystem.machine(ELEVATOR_MACHINE).getState() == ElevatorStates.POS_DRIVE
     }
 
 
-    val WaitForAtSwitch = WaitForStep(Elevator::atSwitch)
+    fun WaitForAtSwitch() = WaitForStep { Elevator.atSwitch() }
 
-    val HoldElevator = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
-    val ScaleAfterUnfold = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
+    fun HoldElevator() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.HOLD_POS_UNKNOWN)
+    fun ScaleAfterUnfold() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.SCALE_POS_UNKNOWN)
 
-    val ElevatorToDrive = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_DRIVE)
-    val ElevatorToGround = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
-    val ElevatorToSwitch = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
-    val ElevatorToScale = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SCALE_HIGH)
-    val ElevatorKickerScore = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.KICK)
-    val ElevatorKickerRetract = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.STOW)
-    val ElevatorHolderClamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)
-    val ElevatorHolderUnclamp = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.UNCLAMPED)
+    fun ElevatorToDrive() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_DRIVE)
+    fun ElevatorToGround() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_COLLECTION)
+    fun ElevatorToSwitch() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SWITCH)
+    fun ElevatorToScale() = StateStep(ElevatorSubsystem, ELEVATOR_MACHINE, ElevatorStates.POS_SCALE_HIGH)
+    fun ElevatorKickerScore() = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.KICK)
+    fun ElevatorKickerRetract() = StateStep(ElevatorSubsystem, ELEVATOR_KICKER_MACHINE, ElevatorKickerStates.STOW)
+    fun ElevatorHolderClamp() = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.CLAMPED)
+    fun ElevatorHolderUnclamp() = StateStep(ElevatorSubsystem, ELEVATOR_CLAMP_MACHINE, ElevatorClampStates.UNCLAMPED)
 
-    val ElevatorHigh = StateStep(ElevatorSubsystem, ELEVATOR_SHIFTER_MACHINE, ElevatorShifterStates.HIGH)
+    fun ElevatorHigh() = StateStep(ElevatorSubsystem, ELEVATOR_SHIFTER_MACHINE, ElevatorShifterStates.HIGH)
 
-    val IntakeToStow = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.STOWED)
-    val IntakeToGrab = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GRAB)
-    val IntakeToIntake = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GO_TO_INTAKE)
+    fun IntakeToStow() = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.HOMING)
+    fun IntakeToGrab() = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GRAB)
+    fun IntakeToIntake() = StateStep(IntakeSubsystem, INTAKE_FOLDING_MACHINE, IntakeFoldingStates.GO_TO_INTAKE)
 
-    val IntakeWheelsIdle = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
-    val IntakeWheelsRun = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
+    fun IntakeWheelsIdle() = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.IDLE)
+    fun IntakeWheelsRun() = StateStep(IntakeSubsystem, INTAKE_WHEELS_MACHINE, IntakeWheelsStates.INTAKE)
 
-    val HighLockDeployAndWait = arrayOf(BackgroundDelayStep(500), ElevatorHigh, HoldElevator, DeployElevator, WaitForDeploy)
+    fun HighLockDeployAndWait() = arrayOf(DelayStep(.5), ElevatorHigh(), HoldElevator(), DeployElevator(), WaitForDeploy())
+    fun UnhomeElevator() = LambdaStep { Elevator.homed = false }
 
-    val Score = arrayOf(ElevatorHolderUnclamp, ElevatorKickerScore, LambdaStep { LED.signalScoreCube() }, DelayStep(AutoDelays.SCORE_DELAY), ElevatorKickerRetract)
+    fun Score() = arrayOf(ElevatorHolderUnclamp(), ElevatorKickerScore(), LambdaStep { LED.signalScoreCube() }, DelayStep(AutoDelays.SCORE_DELAY), ElevatorKickerRetract())
 
-    val ZeroIMU = LambdaStep { Drivetrain.imu.setYaw(RobotMath.UnitConversions.degreesToCTREDumbUnit(90.0), 0); Thread.sleep(500) }
+    fun ResetHeading() = LambdaStep { HeadingTracker.reset() }
+    fun PrintTime(name: String) = object : SingleStep() {
+        override fun entry(currentTime: Double) {
+            println("$name: $currentTime")
+        }
+    }
 }

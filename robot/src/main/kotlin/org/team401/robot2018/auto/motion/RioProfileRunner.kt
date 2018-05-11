@@ -25,23 +25,11 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
                        val gains: DriveGains,
                        val headingMagnitude: Double = 1.0,
                        val driveMagnitude: Double = 1.0,
-                       val completion: CompletionTask? = null,
                        val rate: Long = 20): TankMotionStep() {
     override val leftController = drivetrain.left.master
     override val rightController = drivetrain.right.master
     val imu = drivetrain.imu
 
-    class CompletionTask(val velocity: Double, val task: AutoStep) {
-        fun tick(pointIdx: Int, numPoints: Int, leftVel: Double, rightVel: Double) {
-            if (pointIdx > numPoints / 2) {
-                if (Math.abs((leftVel + rightVel) / 2) < velocity) {
-                    task.tick()
-                }
-            }
-        }
-
-        fun done() = task.done
-    }
 
     /**
      * Represents one side of the drivetrain.
@@ -130,7 +118,7 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
     private val imuValue = DoubleArray(3)
     private val headingController = HeadingController(gains, headingMagnitude)
 
-    override fun entry() {
+    override fun entry(currentTime_: Double) {
         done = false
         left.reset()
         right.reset()
@@ -152,9 +140,8 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
         right.awaitLoading()
     }
 
-    override fun action() {
+    override fun action(currentTime_: Double, lastTime_: Double) {
         currentTime = System.currentTimeMillis()
-        completion?.tick(pointIdx, left.numPoints(), left.activeVelocity(), right.activeVelocity())
 
         if (pointIdx < Math.min(left.numPoints(), right.numPoints())) {
             left.calculate(pointIdx)
@@ -176,7 +163,7 @@ class RioProfileRunner(drivetrain: TankDrivetrain,
         }
     }
 
-    override fun exit() {
+    override fun exit(currentTime_: Double) {
         left.controller.set(ControlMode.PercentOutput, 0.0)
         right.controller.set(ControlMode.PercentOutput, 0.0)
     }
